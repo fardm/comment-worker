@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'">
     <title>Comment System Admin - Post Reactions</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="assets/admin.css">
     <style>
         /* Page-specific: reactions table, page-url links, dropdown, ip/emoji cells */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -41,7 +41,7 @@
     </style>
 </head>
 <body data-page="post-reactions">
-    <script src="admin-layout.js"></script>
+    <script src="assets/admin-layout.js"></script>
     <div id="admin-section">
         <div class="container">
             <div class="stats" id="stats">
@@ -83,7 +83,7 @@
         </div>
     </div>
 
-    <script src="admin-common.js"></script>
+    <script src="assets/admin-common.js"></script>
     <script>
         const EMOJI_BY_TYPE = { thumbsup:'👍', lightbulb:'👎', pray:'🙏', ok:'👌', fire:'🔥', heart:'❤️', frown:'☹️', rage:'😡', funny:'😄', neutral:'😐' };
         const REACTION_TYPES = ['thumbsup','lightbulb','pray','ok','fire','heart','frown','rage','funny','neutral'];
@@ -238,6 +238,6 @@
             container.innerHTML = `<table class="latest-reactions-table"><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
         }
     </script>
-    <script src="light-dark-mode-panel.js"></script>
+    <script src="../light-dark-mode-panel.js"></script>
 </body>
 </html>

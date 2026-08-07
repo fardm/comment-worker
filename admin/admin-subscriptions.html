@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'">
     <title>Comment System Admin - Subscriptions</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="assets/admin.css">
     <style>
         /* Page-specific: subscription list items */
         textarea { min-height: 100px; font-family: inherit; }
@@ -36,7 +36,7 @@
     </style>
 </head>
 <body data-page="subscriptions">
-    <script src="admin-layout.js"></script>
+    <script src="assets/admin-layout.js"></script>
     <div id="admin-section">
         <div class="container">
             <div class="stats" id="stats">
@@ -52,7 +52,7 @@
         </div>
     </div>
 
-    <script src="admin-common.js"></script>
+    <script src="assets/admin-common.js"></script>
     <script>
         let allSubscriptions = [];
 
@@ -145,6 +145,6 @@
             } catch (e) { alert('Network error'); }
         }
     </script>
-    <script src="light-dark-mode-panel.js"></script>
+    <script src="../light-dark-mode-panel.js"></script>
 </body>
 </html>

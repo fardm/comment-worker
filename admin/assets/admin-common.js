@@ -12,7 +12,7 @@
  * Usage on each page:
  *
  *   // 1. Load this file before the page script:
- *   //    <script src="admin-common.js"></script>
+ *   //    <script src="assets/admin-common.js"></script>
  *
  *   // 2. Call AdminAuth.init() once the DOM is ready:
  *   AdminAuth.init({
@@ -29,7 +29,7 @@
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const API_URL = 'api.php';
+const API_URL = '../api.php';
 
 // ── AdminAuth ─────────────────────────────────────────────────────────────────
 

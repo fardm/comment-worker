@@ -44,7 +44,7 @@ if (!empty($token) && !$success) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unsubscribe from Comment Notifications</title>
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin/assets/admin.css">>
     <style>
 
         .info {

@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'">
     <title>Comment System Admin - Posts</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="assets/admin.css">
     <style>
         /* Page-specific: posts table, controls bar, spam visualization */
         .stat-card.clickable { cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; }
@@ -88,7 +88,7 @@
     </style>
 </head>
 <body data-page="posts">
-    <script src="admin-layout.js"></script>
+    <script src="assets/admin-layout.js"></script>
     <div id="admin-section">
         <div class="container">
             <div class="stats" id="stats">
@@ -166,7 +166,7 @@
         </div>
     </div>
 
-    <script src="admin-common.js"></script>
+    <script src="assets/admin-common.js"></script>
     <script>
         let allPosts      = [];
         let filteredPosts = [];
@@ -392,6 +392,6 @@
             return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
         }
     </script>
-    <script src="light-dark-mode-panel.js"></script>
+    <script src="../light-dark-mode-panel.js"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'">
     <title>Comment System Admin - Analytics</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="assets/admin.css">
     <style>
         /* Page-specific: analytics charts, dashboard layout, donut, tooltip */
         .dashboard { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
@@ -52,7 +52,7 @@
 <body data-page="analytics">
 <div id="chart-tooltip"></div>
 
-<script src="admin-layout.js"></script>
+<script src="assets/admin-layout.js"></script>
 <div id="admin-section">
     <div class="container">
         <div class="stats">
@@ -109,7 +109,7 @@
     </div>
 </div>
 
-<script src="admin-common.js"></script>
+<script src="assets/admin-common.js"></script>
 <script>
 let analyticsData        = null;
 let currentGranularity   = 'daily';
@@ -291,6 +291,6 @@ function fmtPeriod(period,gran){
 function truncUrl(url,max){const s=url.replace(/^https?:\/\//,'');return s.length>max?'…'+s.slice(-(max-1)):s;}
 function fmt(n){return Number(n).toLocaleString();}
 </script>
-<script src="light-dark-mode-panel.js"></script>
+<script src="../light-dark-mode-panel.js"></script>
 </body>
 </html>

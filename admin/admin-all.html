@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'">
     <title>Comment System Admin - All Comments</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="assets/admin.css">
     <style>
         /* Page-specific: filter bar */
         .filters {
@@ -34,7 +34,7 @@
     </style>
 </head>
 <body data-page="all">
-    <script src="admin-layout.js"></script>
+    <script src="assets/admin-layout.js"></script>
     <div id="admin-section">
         <div class="container">
             <div class="stats" id="stats">
@@ -81,7 +81,7 @@
         </div>
     </div>
 
-    <script src="admin-common.js"></script>
+    <script src="assets/admin-common.js"></script>
     <script>
         let currentPage = 1;
         let currentTotal = 0;
@@ -290,7 +290,7 @@
             document.querySelector('.comments-section').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
-    <script src="admin-comment-edit.js"></script>
-    <script src="light-dark-mode-panel.js"></script>
+    <script src="assets/admin-comment-edit.js"></script>
+    <script src="../light-dark-mode-panel.js"></script>
 </body>
 </html>

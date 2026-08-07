@@ -4,7 +4,7 @@
  *
  * Usage:
  *   1. Add data-page="<key>" to <body>  (see NAV_ITEMS below for valid keys)
- *   2. Place <script src="admin-layout.js"></script> as the FIRST script in <body>,
+ *   2. Place <script src="assets/admin-layout.js"></script> as the FIRST script in <body>,
  *      before admin-common.js and the page script.
  *   3. Remove the hand-written #login-section and <header> blocks from the page.
  *

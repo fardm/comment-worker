@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'">
     <title>Comment System Admin - Utilities</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="assets/admin.css">
     <style>
         /* Page-specific: utilities grid, util-cards, settings toggles, db stats,
            import/export, modal, file drop */
@@ -78,7 +78,7 @@
     </style>
 </head>
 <body data-page="utilities">
-    <script src="admin-layout.js"></script>
+    <script src="assets/admin-layout.js"></script>
     <div id="admin-section" style="display:none;">
         <div class="container">
             <div class="utilities-grid">
@@ -195,7 +195,7 @@
                                 <strong>Comments Export XML</strong>
                                 <span>Full backup: all comments (every status), reactions, subscriptions, IP addresses, and metadata</span>
                             </div>
-                            <a href="api.php?action=export_comments" class="btn btn-primary btn-sm" id="btn-export-comments">Download</a>
+                            <a href="../api.php?action=export_comments" class="btn btn-primary btn-sm" id="btn-export-comments">Download</a>
                         </div>
                         <div style="margin-top:1rem;"><div id="export-message"></div></div>
                     </div>
@@ -236,7 +236,7 @@
         </div>
     </div><!-- /#admin-section -->
 
-    <script src="admin-common.js"></script>
+    <script src="assets/admin-common.js"></script>
     <script>
         let importFileContent  = null;
         let importPreviewDone  = false;
@@ -568,6 +568,6 @@
             } catch(e){ msgEl.innerHTML='<div class="message error">Network error</div>'; }
         }
     </script>
-    <script src="light-dark-mode-panel.js"></script>
+    <script src="../light-dark-mode-panel.js"></script>
 </body>
 </html>

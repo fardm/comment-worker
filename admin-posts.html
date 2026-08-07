@@ -87,40 +87,9 @@
         }
     </style>
 </head>
-<body>
-    <div id="login-section">
-        <h2 style="margin-bottom: 1.5rem;">Admin Login</h2>
-        <div id="login-message"></div>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
-        </form>
-    </div>
-
+<body data-page="posts">
+    <script src="admin-layout.js"></script>
     <div id="admin-section">
-        <header>
-            <h1>Comment System Admin</h1>
-            <div class="nav">
-                <a href="admin.html">Pending</a>
-                <a href="admin-all.html">All Comments</a>
-                <a href="admin-subscriptions.html">Subscriptions</a>
-                <a href="admin-post-reactions.html">Post Reactions</a>
-                <a href="admin-posts.html" class="active">Posts</a>
-                <a href="admin-analytics.html">Analytics</a>
-                <a href="admin-utilities.html">Utilities</a>
-                <a href="#" onclick="AdminAuth.logout(); return false;" class="logout-btn">Logout</a>
-            </div>
-            <div class="section-icons">
-                <label class="theme-switch">
-                    <input type="checkbox" id="toggle-switch">
-                    <div id="toggle-icon" class="header-icon"></div>
-                </label>
-            </div>
-        </header>
-
         <div class="container">
             <div class="stats" id="stats">
                 <div class="stat-card">

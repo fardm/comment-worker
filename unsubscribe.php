@@ -123,6 +123,6 @@ if (!empty($token) && !$success) {
             </p>
         <?php endif; ?>
     </div>
-    <script src="light-dark-mode-panel.js"></script>
+    <script src="admin/assets/light-dark-mode-panel.js"></script>
 </body>
 </html>

@@ -95,7 +95,7 @@ class EmailService
         // Notify admin
         $adminEmail = $this->settingsRepo->get('admin_email');
         if (!empty($adminEmail)) {
-            $adminPanelUrl = defined('APP_URL') ? APP_URL . '/admin.html' : '/admin.html';
+            $adminPanelUrl = defined('APP_URL') ? APP_URL . '/admin/index.html' : '/admin/index.html';
             $subject = 'New comment on your site';
             $message = "New comment from {$safeAuthorName} on {$safePageUrl}:\n\n";
             $message .= "{$safeContent}\n\n";
@@ -148,7 +148,7 @@ class EmailService
 
         $reactionLabel = ReactionHelper::getReactionEmailLabel($reactionType);
         $safePageUrl = SecurityHelper::sanitizeEmailContent(UrlHelper::resolvePageUrl($pageUrl));
-        $reactionsUrl = defined('APP_URL') ? APP_URL . '/admin-post-reactions.html' : '/admin-post-reactions.html';
+        $reactionsUrl = defined('APP_URL') ? APP_URL . '/admin/index.html#post-reactions' : '/admin/index.html#post-reactions';
 
         $subject = 'New post reaction on your site';
         $message = "Someone left a {$reactionLabel} reaction on {$safePageUrl}.\n\n";

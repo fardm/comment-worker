@@ -133,16 +133,16 @@ output("", $isCLI);
 output("=== Setup Complete ===", $isCLI);
 output("", $isCLI);
 output("Next steps:", $isCLI);
-output("1. Change admin password at: admin.html", $isCLI);
+output("1. Change admin password at: admin/index.html", $isCLI);
 output("2. Update ALLOWED_ORIGINS in config.php", $isCLI);
 output("3. Add the Hugo shortcode to your site", $isCLI);
 output("4. Test by visiting a page with comments enabled", $isCLI);
 output("", $isCLI);
-output("Admin panel: admin.html", $isCLI);
+output("Admin panel: admin/index.html", $isCLI);
 output("API endpoint: api.php", $isCLI);
 
 if (!$isCLI) {
     echo '</pre>';
-    echo '<p><a href="admin.html">Go to Admin Panel</a></p>';
+    echo '<p><a href="admin/index.html">Go to Admin Panel</a></p>';
     echo '</body></html>';
 }

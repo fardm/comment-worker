@@ -8,12 +8,10 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        /* Page-specific: posts table, controls bar, spam visualization */
         .stat-card.clickable { cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; }
         .stat-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        .stat-number { font-size: 2rem; font-weight: bold; color: #4a90e2; }
-        .stat-number.danger  { color: #dc3545; }
-        .stat-number.warning { color: #e6a817; }
+
         .controls {
             background: var(--on-background); padding: 1.25rem 1.5rem; border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem;
@@ -23,6 +21,7 @@
         .control-group label { font-size: 0.85rem; color: #555; margin-bottom: 0; }
         .control-group input, .control-group select { padding: 0.6rem 0.75rem; font-size: 0.95rem; }
         .search-wrapper { position: relative; flex: 2; min-width: 250px; }
+
         .posts-section { background: var(--on-background); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
         .posts-section-header {
             padding: 1.25rem 1.5rem; border-bottom: 1px solid #eee;
@@ -30,6 +29,7 @@
         }
         .posts-section-header h2 { margin: 0; font-size: 1.1rem; }
         .result-count { color: #666; font-size: 0.9rem; }
+
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         thead th {
             background: var(--light); padding: 0.75rem 1rem; text-align: left;
@@ -46,14 +46,14 @@
         tbody tr.spam-magnet { background: #fff8f8; }
         tbody tr.spam-magnet:hover { background: #fff0f0; }
         td { color: var(--body-text); padding: 0.85rem 1rem; vertical-align: middle; }
+
         .url-cell { max-width: 320px; }
         .url-text { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333; font-size: 0.88rem; }
         .url-text a { color: #4a90e2; text-decoration: none; }
         .url-text a:hover { text-decoration: underline; }
         .count-breakdown { display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center; }
-        .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
-        .badge-spam    { background: #f8d7da; color: #721c24; }
         .badge-deleted { background: #e2e3e5; color: #383d41; }
+
         .spam-pct { display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 600; font-size: 0.88rem; }
         .spam-pct.low    { color: #28a745; }
         .spam-pct.medium { color: #e6a817; }
@@ -63,25 +63,15 @@
         .spam-bar.low    { background: #28a745; }
         .spam-bar.medium { background: #ffc107; }
         .spam-bar.high   { background: #dc3545; }
-        .num-cell  { text-align: right; font-variant-numeric: tabular-nums; color: var(--body-text); }
-        .date-cell { white-space: nowrap; font-size: 0.82rem; color: var(--body-text); }
-        .actions-cell { white-space: nowrap; }
-        .empty-state { padding: 3rem; text-align: center; color: #999; }
-        .pagination {
-            display: flex; justify-content: center; align-items: center;
-            gap: 0.4rem; padding: 1.25rem; border-top: 1px solid #eee; flex-wrap: wrap;
-        }
-        .pagination button {
-            padding: 0.5rem 0.9rem; border: 1px solid #ddd; background: white;
-            border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: all 0.15s; color: #555;
-        }
-        .pagination button:hover:not(:disabled) { border-color: #4a90e2; color: #4a90e2; }
-        .pagination button:disabled { opacity: 0.4; cursor: default; }
+
+        /* Posts pagination overrides (tighter style than admin-all) */
+        .pagination { padding: 1.25rem; border-top: 1px solid #eee; margin-top: 0; }
+        .pagination button { color: #555; }
+        .pagination button:hover:not(:disabled) { border-color: #4a90e2; color: #4a90e2; background: white; }
         .pagination button.active { background: #4a90e2; border-color: #4a90e2; color: white; }
-        .pagination .page-info { color: #666; font-size: 0.9rem; }
-        .loading { padding: 2rem; text-align: center; color: #999; }
+        .pagination button:disabled { opacity: 0.4; cursor: default; }
+
         @media (max-width: 900px) {
-            .container { padding: 1rem; }
             header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
             h1 { font-size: 1.4rem; }
             .nav { width: 100%; flex-wrap: wrap; }
@@ -94,10 +84,6 @@
             td, thead th { padding: 0.65rem 0.6rem; }
             .url-cell { max-width: 180px; }
             .pagination button { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
-        }
-        @media (max-width: 480px) {
-            .stats { grid-template-columns: 1fr; }
-            .stat-number { font-size: 1.5rem; }
         }
     </style>
 </head>

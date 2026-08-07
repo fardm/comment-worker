@@ -8,34 +8,30 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
+        /* Page-specific: subscription list items */
         textarea { min-height: 100px; font-family: inherit; }
         .btn-small { padding: 0.5rem 1rem; font-size: 0.9rem; }
-        .section-card { background: var(--on-background); padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem; }
-        .section-card h2 { margin-bottom: 1.5rem; color: #4a90e2; }
-        .subscription-item { border-bottom: 1px solid #e0e0e0; padding: 1rem 0; display: flex; justify-content: space-between; align-items: center; }
+
+        .section-card h2 { color: #4a90e2; }
+
+        .subscription-item {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .subscription-item:last-child { border-bottom: none; }
-        .subscription-info { flex: 1; }
-        .subscription-email { font-weight: 600; color: var(--body-text); }
-        .subscription-page  { color: var(--darkgray); font-size: 0.9rem; }
-        .subscription-date  { color: var(--darkgray); font-size: 0.85rem; }
+        .subscription-info   { flex: 1; }
+        .subscription-email  { font-weight: 600; color: var(--body-text); }
+        .subscription-page   { color: var(--darkgray); font-size: 0.9rem; }
+        .subscription-date   { color: var(--darkgray); font-size: 0.85rem; }
         .subscription-actions { display: flex; gap: 0.5rem; }
-        .no-data { text-align: center; padding: 2rem; color: #888; }
+
         @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
-            h1 { font-size: 1.5rem; }
-            .nav { width: 100%; flex-wrap: wrap; }
-            .nav a { flex: 1; min-width: 100px; text-align: center; }
-            .stats { grid-template-columns: 1fr 1fr; }
             .subscription-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
             .subscription-actions { width: 100%; flex-direction: column; }
             .subscription-actions button { width: 100%; }
-            #login-section { margin: 20px auto; padding: 1.5rem; }
-        }
-        @media (max-width: 480px) {
-            .stats { grid-template-columns: 1fr; }
-            .stat-number { font-size: 1.5rem; }
-            .btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
         }
     </style>
 </head>

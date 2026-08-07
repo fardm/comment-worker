@@ -8,6 +8,8 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
+        /* Page-specific: utilities grid, util-cards, settings toggles, db stats,
+           import/export, modal, file drop */
         .utilities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
         .util-card { background: var(--on-background); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
         .util-card.full-width { grid-column: 1 / -1; }
@@ -16,6 +18,7 @@
         .util-card-header .icon { font-size: 1.2rem; }
         .util-card-body { padding: 1.5rem; }
         .util-card-body p { color: var(--body-text, #666); opacity: 0.8; font-size: 0.9rem; margin-bottom: 1rem; }
+
         .setting-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid var(--gray, #f0f0f0); }
         .setting-row:last-of-type { border-bottom: none; }
         .setting-label { flex: 1 1 200px; }
@@ -29,39 +32,49 @@
         .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; }
         input:checked + .toggle-slider { background-color: #4a90e2; }
         input:checked + .toggle-slider:before { transform: translateX(20px); }
+
         .db-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.25rem; }
         .db-stat-item { background: var(--light); border: solid 1px var(--gray); border-radius: 6px; padding: 0.75rem 1rem; text-align: center; }
         .db-stat-item .num { font-size: 1.4rem; font-weight: 700; color: #4a90e2; }
         .db-stat-item .lbl { font-size: 0.78rem; color: #888; text-transform: uppercase; letter-spacing: 0.03em; }
         .db-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
         .file-drop { border: 2px dashed var(--gray, #d0d7de); border-radius: 6px; padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-bottom: 1rem; position: relative; }
         .file-drop:hover, .file-drop.drag-over { border-color: #4a90e2; background: #f0f7ff; }
         .file-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
-        .file-drop .drop-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-        .file-drop .drop-label { font-size: 0.9rem; color: var(--body-text); }
+        .file-drop .drop-icon   { font-size: 2rem; margin-bottom: 0.5rem; }
+        .file-drop .drop-label  { font-size: 0.9rem; color: var(--body-text); }
         .file-drop .file-selected { font-size: 0.88rem; color: #28a745; font-weight: 600; margin-top: 0.4rem; }
         .preview-box { background: var(--on-background); border: 1px solid var(--gray, #dee2e6); border-radius: 6px; padding: 1rem; margin: 0.75rem 0; font-size: 0.88rem; }
         .preview-box table { width: 100%; border-collapse: collapse; }
         .preview-box td { padding: 0.3rem 0.5rem; }
         .preview-box td:first-child { color: var(--body-text); width: 55%; }
-        .preview-box td:last-child { font-weight: 600; }
+        .preview-box td:last-child  { font-weight: 600; }
         .import-actions { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 9999; }
         .modal { width: 100%; max-width: 560px; background: var(--on-background, #fff); color: var(--body-text, #333); border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); overflow: hidden; }
         .modal-header, .modal-footer { padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; border-bottom: 1px solid var(--gray, #eee); }
         .modal-footer { border-top: 1px solid var(--gray, #eee); border-bottom: none; justify-content: flex-end; }
-        .modal-body { padding: 1rem; }
+        .modal-body  { padding: 1rem; }
         .modal-close { border: none; background: transparent; font-size: 1.35rem; line-height: 1; cursor: pointer; color: var(--body-text, #666); opacity: 0.6; }
         .modal-close:hover { opacity: 1; }
         .muted { opacity: 0.7; font-size: 0.9rem; }
+
         .export-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--gray, #f0f0f0); }
         .export-row:last-child { border-bottom: none; }
         .export-row .export-info strong { display: block; color: var(--body-text); }
-        .export-row .export-info span { font-size: 0.82rem; color: var(--body-text); opacity: 0.8; }
+        .export-row .export-info span   { font-size: 0.82rem; color: var(--body-text); opacity: 0.8; }
         .email-test-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
         .email-test-row input { flex: 1 1 200px; }
-        @media (max-width: 900px) { .utilities-grid { grid-template-columns: 1fr; } .util-card.full-width { grid-column: 1; } }
-        @media (max-width: 768px) { .container { padding: 1rem; } header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; } h1 { font-size: 1.5rem; } .db-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        @media (max-width: 900px) {
+            .utilities-grid { grid-template-columns: 1fr; }
+            .util-card.full-width { grid-column: 1; }
+        }
+        @media (max-width: 768px) {
+            .db-stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>

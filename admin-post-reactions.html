@@ -8,39 +8,33 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
-        .section-card { background: var(--on-background); padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem; }
-        .section-card h2 { margin-bottom: 1.5rem; }
+        /* Page-specific: reactions table, page-url links, dropdown, ip/emoji cells */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
         table { width: 100%; border-collapse: collapse; }
         #reactions-table table { min-width: 800px; }
         th, td { color: var(--body-text); text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e0e0e0; }
         th { font-weight: 600; font-size: 0.9rem; background: var(--light); white-space: nowrap; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: var(--light); }
+
         .page-url a { color: #4a90e2; text-decoration: none; word-break: break-all; }
         .page-url a:hover { text-decoration: underline; }
         .reaction-cell { text-align: center; white-space: nowrap; }
         .total-cell    { font-weight: 600; color: #4a90e2; text-align: center; }
-        .actions-cell  { text-align: right; white-space: nowrap; }
-        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
-        .no-data { text-align: center; padding: 2rem; color: #888; font-style: italic; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-        .section-header h2 { margin: 0; }
+
         .dropdown-group { display: flex; align-items: center; gap: 0.5rem; }
         .dropdown-group label { font-size: 0.9rem; font-weight: 500; }
-        .dropdown-group select { padding: 0.5rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; background-color: var(--on-background); color: var(--body-text); font-size: 0.9rem; cursor: pointer; }
+        .dropdown-group select {
+            padding: 0.5rem 0.75rem; border: 1px solid #ccc; border-radius: 4px;
+            background-color: var(--on-background); color: var(--body-text); font-size: 0.9rem; cursor: pointer;
+        }
+
         .latest-reactions-table { font-size: 0.95rem; min-width: 650px; }
-        .reaction-emoji-cell { font-size: 1.2rem; }
-        .date-cell { color: var(--body-text); font-size: 0.85rem; white-space: nowrap; }
-        .ip-cell   { color: var(--body-text); font-size: 0.85rem; font-family: monospace; word-break: break-all; }
+        .reaction-emoji-cell    { font-size: 1.2rem; }
+        .ip-cell { color: var(--body-text); font-size: 0.85rem; font-family: monospace; word-break: break-all; }
+
         @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
-            h1 { font-size: 1.5rem; }
-            .nav { width: 100%; flex-wrap: wrap; }
-            .nav a { flex: 1; min-width: 100px; text-align: center; }
-            .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-            #login-section { margin: 20px auto; padding: 1.5rem; }
             table { font-size: 0.85rem; }
             th, td { padding: 0.5rem; }
         }

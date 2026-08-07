@@ -8,77 +8,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
-        .comments-section {
-            background: var(--on-background);
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .comment-item {
-            border-bottom: 1px solid #e0e0e0;
-            padding: 1.5rem 0;
-        }
-
-        .comment-item:last-child {
-            border-bottom: none;
-        }
-
-        .comment-meta {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .comment-author {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .comment-content {
-            margin: 1rem 0;
-            padding: 1rem;
-            background: var(--light);
-            color: var(--body-text);
-            border-left: 3px solid #4a90e2;
-            unicode-bidi: plaintext;
-        }
-
-        .comment-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .comment-actions button {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-        }
-
-        .no-comments {
-            text-align: center;
-            padding: 2rem;
-            color: #888;
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
-            h1 { font-size: 1.5rem; }
-            .nav { width: 100%; flex-wrap: wrap; }
-            .nav a { flex: 1; min-width: 100px; text-align: center; }
-            .stats { grid-template-columns: 1fr; }
-            .comment-meta { flex-direction: column; gap: 0.5rem; }
-            .comment-actions { flex-direction: column; }
-            .comment-actions button { width: 100%; }
-            #login-section { margin: 20px auto; padding: 1.5rem; }
-        }
-
-        @media (max-width: 480px) {
-            .stat-number { font-size: 1.5rem; }
-            .btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
-        }
+        /* No page-specific styles — all rules live in admin.css */
     </style>
 </head>
 <body>

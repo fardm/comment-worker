@@ -8,19 +8,16 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .stat-number { font-size: 1.9rem; font-weight: bold; color: #4a90e2; }
-        .stat-number.green  { color: #28a745; }
-        .stat-number.yellow { color: #e6a817; }
-        .stat-number.red    { color: #dc3545; }
-        .stat-number.gray   { color: #6c757d; }
+        /* Page-specific: analytics charts, dashboard layout, donut, tooltip */
         .dashboard { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
         .row-3-1   { display: grid; grid-template-columns: 1fr 220px; gap: 1.5rem; }
         .row-2col  { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
         .chart-card { background: var(--on-background); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1.25rem 1.5rem; }
         .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
         .chart-title   { font-size: 0.92rem; font-weight: 600; color: #555; }
         .chart-subtitle { font-size: 0.75rem; font-weight: 400; color: #aaa; margin-left: 0.4rem; }
+
         .toggle-group { display: flex; gap: 0.2rem; }
         .toggle-group button {
             padding: 0.22rem 0.7rem; border: 1px solid #ddd; background: white;
@@ -28,35 +25,28 @@
         }
         .toggle-group button.active { background: #4a90e2; border-color: #4a90e2; color: white; }
         .toggle-group button:hover:not(.active) { border-color: #4a90e2; color: #4a90e2; }
-        .chart-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.6rem; font-size: 0.8rem; }
-        .legend-item  { display: flex; align-items: center; gap: 0.3rem; color: #666; }
+
+        .chart-legend  { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.6rem; font-size: 0.8rem; }
+        .legend-item   { display: flex; align-items: center; gap: 0.3rem; color: #666; }
         .legend-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
         .chart-empty   { padding: 2rem; text-align: center; color: #ccc; font-size: 0.9rem; }
         .chart-loading { padding: 2rem; text-align: center; color: #bbb; font-size: 0.9rem; }
+
         .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
         .donut-legend { width: 100%; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; }
         .donut-legend-row { display: flex; align-items: center; gap: 0.4rem; }
         .donut-legend-row .dl-count { margin-left: auto; font-weight: 600; color: #333; }
         .donut-legend-row .dl-pct   { color: #aaa; font-size: 0.75rem; min-width: 32px; text-align: right; }
+
         #chart-tooltip {
             position: fixed; background: rgba(25,25,25,0.92); color: #fff;
             padding: 0.45rem 0.7rem; border-radius: 5px; font-size: 0.8rem;
             pointer-events: none; z-index: 9999; display: none;
             line-height: 1.7; max-width: 220px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
+
         @media (max-width: 1000px) { .row-3-1, .row-2col { grid-template-columns: 1fr; } }
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
-            h1 { font-size: 1.4rem; }
-            .nav { width: 100%; flex-wrap: wrap; }
-            .nav a { flex: 1; min-width: 80px; text-align: center; font-size: 0.85rem; }
-            .stats { grid-template-columns: 1fr 1fr 1fr; }
-        }
-        @media (max-width: 480px) {
-            .stats { grid-template-columns: 1fr 1fr; }
-            .stat-number { font-size: 1.5rem; }
-        }
+        @media (max-width: 768px)  { .nav a { min-width: 80px; font-size: 0.85rem; } }
     </style>
 </head>
 <body>

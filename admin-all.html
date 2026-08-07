@@ -8,6 +8,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
+        /* Page-specific: filter bar */
         .filters {
             background: var(--on-background);
             padding: 1rem 1.5rem;
@@ -26,76 +27,9 @@
             font-size: 0.95rem;
         }
         .filters select { background: white; flex-shrink: 0; }
-        .comments-section {
-            background: var(--on-background);
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .comment-item { border-bottom: 1px solid #e0e0e0; padding: 1.5rem 0; }
-        .comment-item:last-child { border-bottom: none; }
-        .comment-meta {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: #666;
-            flex-wrap: wrap;
-        }
-        .comment-author { font-weight: 600; color: #333; }
-        .comment-content {
-            background: var(--light);
-            color: var(--body-text);
-            margin: 1rem 0;
-            padding: 1rem;
-            border-left: 3px solid #4a90e2;
-            unicode-bidi: plaintext;
-        }
-        .comment-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .comment-actions button { padding: 0.5rem 1rem; font-size: 0.9rem; }
-        .no-comments { text-align: center; padding: 2rem; color: #888; }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-        .pagination button {
-            padding: 0.5rem 1rem;
-            border: 1px solid #ddd;
-            background: white;
-            color: #4a90e2;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .pagination button:hover:not(:disabled) { background: #4a90e2; color: white; }
-        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .pagination button.active { background: #4a90e2; color: white; }
-        .pagination .page-info { color: #666; font-size: 0.9rem; }
+
         @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
-            h1 { font-size: 1.5rem; }
-            .nav { width: 100%; flex-wrap: wrap; }
-            .nav a { flex: 1; min-width: 100px; text-align: center; }
-            .stats { grid-template-columns: 1fr 1fr; }
             .filters { flex-direction: column; align-items: stretch; }
-            .comment-meta { flex-direction: column; gap: 0.5rem; }
-            .comment-actions { flex-direction: column; }
-            .comment-actions button { width: 100%; }
-            .pagination { gap: 0.25rem; }
-            .pagination button { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
-            #login-section { margin: 20px auto; padding: 1.5rem; }
-        }
-        @media (max-width: 480px) {
-            .stats { grid-template-columns: 1fr; }
-            .stat-number { font-size: 1.5rem; }
-            .btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
-            .pagination button { padding: 0.35rem 0.6rem; font-size: 0.8rem; }
-            .pagination .page-info { width: 100%; text-align: center; margin-top: 0.5rem; }
         }
     </style>
 </head>

@@ -1,5 +1,5 @@
 /**
- * Admin inline comment content editor (requires API_URL, csrfToken, ensureCSRFToken).
+ * Admin inline comment content editor (requires API_URL and AdminAuth from admin-common.js).
  */
 
 function startCommentEdit(commentId) {
@@ -76,12 +76,12 @@ async function saveCommentEdit(commentId) {
     }
 
     try {
-        await ensureCSRFToken();
+        await AdminAuth.ensureCsrfToken();
         const response = await fetch(`${API_URL}?action=edit_content&id=${commentId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
             credentials: 'include',
-            body: JSON.stringify({ content, csrf_token: csrfToken }),
+            body: JSON.stringify({ content, csrf_token: AdminAuth.getCsrfToken() }),
         });
 
         const result = await response.json();

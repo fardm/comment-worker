@@ -46,7 +46,7 @@ This project adds a commenting system to [Quartz](https://quartz.jzhao.xyz/). Th
 7. Open the admin panel:
 
    ```
-   https://comments.yourdomain.com/admin.html
+   https://comments.yourdomain.com/admin/index.html
    ```
 
 8. Enter the password you selected and log in.
@@ -68,6 +68,7 @@ Once installed, open the `quartz.config.yaml` file and configure the plugin. Set
   enabled: true
   options:
     backendUrl: https://comments.yourdomain.com
+    type: full
   layout:
     position: afterBody
     priority: 100
@@ -154,7 +155,4 @@ To reduce spam and abuse, the system includes several protection layers:
 <br>
 
 ## Future Improvements
-
-- [ ] Refactor `api.php` into smaller modules (comments, reactions, subscriptions, settings, import/export) to improve maintainability.
-- [ ] Create a shared admin layout/navigation component to remove duplicated HTML across admin pages.
-- [ ] Reorganize `utils/` into structured subfolders (imports, migrations, maintenance) for better clarity.
+- [-] Reorganize `utils/` into structured subfolders (imports, migrations, maintenance) for better clarity.

@@ -8,395 +8,96 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-
-        .stat-card.clickable {
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-
-        .stat-card.clickable:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #4a90e2;
-        }
-
-        .stat-number.danger {
-            color: #dc3545;
-        }
-
-        .stat-number.warning {
-            color: #e6a817;
-        }
-
-
-        /* Controls bar */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card.clickable { cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; }
+        .stat-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #4a90e2; }
+        .stat-number.danger  { color: #dc3545; }
+        .stat-number.warning { color: #e6a817; }
         .controls {
-            background: var(--on-background);
-            padding: 1.25rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
-            display: flex;
-            gap: 1rem;
-            align-items: flex-end;
-            flex-wrap: wrap;
+            background: var(--on-background); padding: 1.25rem 1.5rem; border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem;
+            display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;
         }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .control-group label {
-            font-size: 0.85rem;
-            color: #555;
-            margin-bottom: 0;
-        }
-
-        .control-group input,
-        .control-group select {
-            padding: 0.6rem 0.75rem;
-            font-size: 0.95rem;
-        }
-
-        .search-wrapper {
-            position: relative;
-            flex: 2;
-            min-width: 250px;
-        }
-
-
-
-        /* Posts table */
-        .posts-section {
-            background: var(--on-background);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
+        .control-group { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; min-width: 180px; }
+        .control-group label { font-size: 0.85rem; color: #555; margin-bottom: 0; }
+        .control-group input, .control-group select { padding: 0.6rem 0.75rem; font-size: 0.95rem; }
+        .search-wrapper { position: relative; flex: 2; min-width: 250px; }
+        .posts-section { background: var(--on-background); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
         .posts-section-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
         }
-
-        .posts-section-header h2 {
-            margin: 0;
-            font-size: 1.1rem;
-        }
-
-        .result-count {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
+        .posts-section-header h2 { margin: 0; font-size: 1.1rem; }
+        .result-count { color: #666; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         thead th {
-            background: var(--light);
-            padding: 0.75rem 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--body-text);
-            border-bottom: 2px solid #e9ecef;
-            white-space: nowrap;
+            background: var(--light); padding: 0.75rem 1rem; text-align: left;
+            font-weight: 600; color: var(--body-text); border-bottom: 2px solid #e9ecef; white-space: nowrap;
         }
-
-        thead th.sortable {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        thead th.sortable:hover {
-            background: var(--lightgray);
-            color: #4a90e2;
-        }
-
-        thead th.sort-active {
-            color: #4a90e2;
-        }
-
-        thead th .sort-arrow {
-            display: inline-block;
-            margin-left: 0.3rem;
-            opacity: 0.4;
-            font-size: 0.75rem;
-        }
-
-        thead th.sort-active .sort-arrow {
-            opacity: 1;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.1s;
-        }
-
-        tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        tbody tr:hover {
-            background: var(--light);
-        }
-
-        tbody tr.spam-magnet {
-            background: #fff8f8;
-        }
-
-        tbody tr.spam-magnet:hover {
-            background: #fff0f0;
-        }
-
-        td {
-            color: var(--body-text);
-            padding: 0.85rem 1rem;
-            vertical-align: middle;
-        }
-
-        .url-cell {
-            max-width: 320px;
-        }
-
-        .url-text {
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #333;
-            font-size: 0.88rem;
-        }
-
-        .url-text a {
-            color: #4a90e2;
-            text-decoration: none;
-        }
-
-        .url-text a:hover {
-            text-decoration: underline;
-        }
-
-        .count-breakdown {
-            display: flex;
-            gap: 0.3rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            border-radius: 3px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .badge-spam {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .badge-deleted {
-            background: #e2e3e5;
-            color: #383d41;
-        }
-
-        .spam-pct {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            font-weight: 600;
-            font-size: 0.88rem;
-        }
-
+        thead th.sortable { cursor: pointer; user-select: none; }
+        thead th.sortable:hover { background: var(--lightgray); color: #4a90e2; }
+        thead th.sort-active { color: #4a90e2; }
+        thead th .sort-arrow { display: inline-block; margin-left: 0.3rem; opacity: 0.4; font-size: 0.75rem; }
+        thead th.sort-active .sort-arrow { opacity: 1; }
+        tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--light); }
+        tbody tr.spam-magnet { background: #fff8f8; }
+        tbody tr.spam-magnet:hover { background: #fff0f0; }
+        td { color: var(--body-text); padding: 0.85rem 1rem; vertical-align: middle; }
+        .url-cell { max-width: 320px; }
+        .url-text { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333; font-size: 0.88rem; }
+        .url-text a { color: #4a90e2; text-decoration: none; }
+        .url-text a:hover { text-decoration: underline; }
+        .count-breakdown { display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center; }
+        .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+        .badge-spam    { background: #f8d7da; color: #721c24; }
+        .badge-deleted { background: #e2e3e5; color: #383d41; }
+        .spam-pct { display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 600; font-size: 0.88rem; }
         .spam-pct.low    { color: #28a745; }
         .spam-pct.medium { color: #e6a817; }
         .spam-pct.high   { color: #dc3545; }
-
-        .spam-bar-wrap {
-            width: 52px;
-            height: 5px;
-            background: #eee;
-            border-radius: 3px;
-            overflow: hidden;
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        .spam-bar {
-            height: 100%;
-            border-radius: 3px;
-        }
-
+        .spam-bar-wrap { width: 52px; height: 5px; background: #eee; border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; }
+        .spam-bar { height: 100%; border-radius: 3px; }
         .spam-bar.low    { background: #28a745; }
         .spam-bar.medium { background: #ffc107; }
         .spam-bar.high   { background: #dc3545; }
-
-        .num-cell {
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-            color: var(--body-text);
-        }
-
-        .date-cell {
-            white-space: nowrap;
-            font-size: 0.82rem;
-            color: var(--body-text);
-        }
-
-        .actions-cell {
-            white-space: nowrap;
-        }
-
-        .empty-state {
-            padding: 3rem;
-            text-align: center;
-            color: #999;
-        }
-
-        /* Pagination */
+        .num-cell  { text-align: right; font-variant-numeric: tabular-nums; color: var(--body-text); }
+        .date-cell { white-space: nowrap; font-size: 0.82rem; color: var(--body-text); }
+        .actions-cell { white-space: nowrap; }
+        .empty-state { padding: 3rem; text-align: center; color: #999; }
         .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 1.25rem;
-            border-top: 1px solid #eee;
-            flex-wrap: wrap;
+            display: flex; justify-content: center; align-items: center;
+            gap: 0.4rem; padding: 1.25rem; border-top: 1px solid #eee; flex-wrap: wrap;
         }
-
         .pagination button {
-            padding: 0.5rem 0.9rem;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.15s;
-            color: #555;
+            padding: 0.5rem 0.9rem; border: 1px solid #ddd; background: white;
+            border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: all 0.15s; color: #555;
         }
-
-        .pagination button:hover:not(:disabled) {
-            border-color: #4a90e2;
-            color: #4a90e2;
-        }
-
-        .pagination button:disabled {
-            opacity: 0.4;
-            cursor: default;
-        }
-
-        .pagination button.active {
-            background: #4a90e2;
-            border-color: #4a90e2;
-            color: white;
-        }
-
-        .pagination .page-info {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        /* Loading */
-        .loading {
-            padding: 2rem;
-            text-align: center;
-            color: #999;
-        }
-
-        /* Mobile */
+        .pagination button:hover:not(:disabled) { border-color: #4a90e2; color: #4a90e2; }
+        .pagination button:disabled { opacity: 0.4; cursor: default; }
+        .pagination button.active { background: #4a90e2; border-color: #4a90e2; color: white; }
+        .pagination .page-info { color: #666; font-size: 0.9rem; }
+        .loading { padding: 2rem; text-align: center; color: #999; }
         @media (max-width: 900px) {
-            .container {
-                padding: 1rem;
-            }
-
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.4rem;
-            }
-
-            .nav {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-
-            .nav a {
-                flex: 1;
-                min-width: 90px;
-                text-align: center;
-                font-size: 0.9rem;
-            }
-
-            .stats {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .controls {
-                flex-direction: column;
-            }
-
-            .control-group {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .search-wrapper {
-                min-width: unset;
-            }
-
+            .container { padding: 1rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
+            h1 { font-size: 1.4rem; }
+            .nav { width: 100%; flex-wrap: wrap; }
+            .nav a { flex: 1; min-width: 90px; text-align: center; font-size: 0.9rem; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .controls { flex-direction: column; }
+            .control-group { width: 100%; min-width: unset; }
+            .search-wrapper { min-width: unset; }
             table { font-size: 0.82rem; }
-
-            td, thead th {
-                padding: 0.65rem 0.6rem;
-            }
-
+            td, thead th { padding: 0.65rem 0.6rem; }
             .url-cell { max-width: 180px; }
-
-            .pagination button {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.85rem;
-            }
+            .pagination button { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
         }
-
         @media (max-width: 480px) {
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
-            }
+            .stats { grid-template-columns: 1fr; }
+            .stat-number { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -424,7 +125,7 @@
                 <a href="admin-posts.html" class="active">Posts</a>
                 <a href="admin-analytics.html">Analytics</a>
                 <a href="admin-utilities.html">Utilities</a>
-                <a href="#" onclick="logout(); return false;" class="logout-btn">Logout</a>
+                <a href="#" onclick="AdminAuth.logout(); return false;" class="logout-btn">Logout</a>
             </div>
             <div class="section-icons">
                 <label class="theme-switch">
@@ -494,7 +195,8 @@
                 </div>
                 <div class="control-group" style="max-width: 80px; flex: 0;">
                     <label>&nbsp;</label>
-                    <button class="btn btn-warning" onclick="clearControls()" style="padding: 0.6rem 1rem; font-size: 0.9rem; white-space: nowrap;">Clear</button>
+                    <button class="btn btn-warning" onclick="clearControls()"
+                            style="padding: 0.6rem 1rem; font-size: 0.9rem; white-space: nowrap;">Clear</button>
                 </div>
             </div>
 
@@ -503,98 +205,32 @@
                     <h2>Posts with Comments</h2>
                     <span class="result-count" id="result-count"></span>
                 </div>
-                <div id="posts-table-wrap">
-                    <div class="loading">Loading…</div>
-                </div>
+                <div id="posts-table-wrap"><div class="loading">Loading…</div></div>
                 <div class="pagination" id="pagination" style="display:none;"></div>
             </div>
         </div>
     </div>
 
+    <script src="admin-common.js"></script>
     <script>
-        const API_URL = 'api.php';
-        let csrfToken = null;
-
-        let allPosts = [];
+        let allPosts      = [];
         let filteredPosts = [];
-        let currentPage = 1;
-        const PAGE_SIZE = 25;
+        let currentPage   = 1;
+        const PAGE_SIZE   = 25;
 
-        // ── Auth helpers ─────────────────────────────────────────────────────
-
-        function getCSRFToken() {
-            const name = 'csrf_token=';
-            const ca = decodeURIComponent(document.cookie).split(';');
-            for (let c of ca) {
-                c = c.trim();
-                if (c.startsWith(name)) return c.substring(name.length);
-            }
-            return null;
-        }
-
-        async function ensureCSRFToken() {
-            if (!csrfToken) csrfToken = getCSRFToken();
-            if (!csrfToken) {
-                try {
-                    const r = await fetch(`${API_URL}?action=csrf_token`, { credentials: 'include' });
-                    csrfToken = (await r.json()).token;
-                } catch (e) {}
-            }
-            return csrfToken;
-        }
-
-        async function checkAuth() {
-            try {
-                const r = await fetch(`${API_URL}?action=posts_summary`, { credentials: 'include' });
-                if (r.ok) {
-                    await ensureCSRFToken();
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-section').style.display = 'block';
-                    loadPosts();
-                }
-            } catch (e) {}
-        }
-
-        checkAuth();
-
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const password = document.getElementById('password').value;
-            const msgEl = document.getElementById('login-message');
-            try {
-                const r = await fetch(`${API_URL}?action=login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ password })
-                });
-                const result = await r.json();
-                if (r.ok) {
-                    csrfToken = result.csrf_token || getCSRFToken();
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-section').style.display = 'block';
-                    loadPosts();
-                } else {
-                    msgEl.innerHTML = `<div class="message error">${escapeHtml(result.error)}</div>`;
-                }
-            } catch (e) {
-                msgEl.innerHTML = '<div class="message error">Network error</div>';
-            }
+        AdminAuth.init({
+            authProbeUrl: `${API_URL}?action=posts_summary`,
+            onSuccess: loadPosts,
         });
-
-        // ── Data loading ──────────────────────────────────────────────────────
 
         async function loadPosts() {
             document.getElementById('posts-table-wrap').innerHTML = '<div class="loading">Loading…</div>';
             try {
-                const ts = Date.now();
-                const r = await fetch(`${API_URL}?action=posts_summary&_=${ts}`, {
-                    credentials: 'include',
-                    cache: 'no-store'
+                const r = await fetch(`${API_URL}?action=posts_summary&_=${Date.now()}`, {
+                    credentials: 'include', cache: 'no-store',
                 });
                 const data = await r.json();
                 if (!r.ok) throw new Error(data.error || 'Failed to load');
-
                 allPosts = data.posts || [];
                 updateSummaryStats(data.summary || {});
                 applySortAndRender();
@@ -605,21 +241,15 @@
         }
 
         function updateSummaryStats(summary) {
-            document.getElementById('stat-posts').textContent    = fmt(summary.total_posts    ?? allPosts.length);
-            document.getElementById('stat-comments').textContent = fmt(summary.total_comments ?? 0);
-            document.getElementById('stat-spam').textContent     = fmt(summary.total_spam     ?? 0);
-            document.getElementById('stat-pending').textContent  = fmt(summary.total_pending  ?? 0);
-
-            const posts    = summary.total_posts ?? allPosts.length;
+            const posts    = summary.total_posts    ?? allPosts.length;
             const comments = summary.total_comments ?? 0;
-            const avg = posts > 0 ? (comments / posts).toFixed(1) : '0';
-            document.getElementById('stat-avg').textContent = avg;
-
-            const magnets = allPosts.filter(p => spamPct(p) > 50).length;
-            document.getElementById('stat-magnets').textContent = fmt(magnets);
+            document.getElementById('stat-posts').textContent    = fmt(posts);
+            document.getElementById('stat-comments').textContent = fmt(comments);
+            document.getElementById('stat-spam').textContent     = fmt(summary.total_spam    ?? 0);
+            document.getElementById('stat-pending').textContent  = fmt(summary.total_pending ?? 0);
+            document.getElementById('stat-avg').textContent      = posts > 0 ? (comments / posts).toFixed(1) : '0';
+            document.getElementById('stat-magnets').textContent  = fmt(allPosts.filter(p => spamPct(p) > 50).length);
         }
-
-        // ── Filter + Sort + Render ────────────────────────────────────────────
 
         let searchTimer = null;
         function onSearchInput() {
@@ -628,36 +258,32 @@
         }
 
         function applySortAndRender() {
-            const query   = document.getElementById('search-input').value.trim().toLowerCase();
-            const sortKey = document.getElementById('sort-select').value;
+            const query      = document.getElementById('search-input').value.trim().toLowerCase();
+            const sortKey    = document.getElementById('sort-select').value;
             const spamFilter = document.getElementById('filter-spam').value;
 
-            // 1. Filter
             filteredPosts = allPosts.filter(p => {
                 if (query && !p.page_url.toLowerCase().includes(query)) return false;
-                if (spamFilter === 'magnets'    && spamPct(p) <= 50) return false;
-                if (spamFilter === 'clean'      && spamPct(p) >= 10) return false;
+                if (spamFilter === 'magnets'     && spamPct(p) <= 50) return false;
+                if (spamFilter === 'clean'       && spamPct(p) >= 10) return false;
                 if (spamFilter === 'has_pending' && p.pending_count === 0) return false;
                 if (spamFilter === 'has_spam'    && p.spam_count === 0) return false;
                 return true;
             });
 
-            // 2. Sort
-            const [field, dir] = sortKey.split(/_(?=[^_]+$)/); // split on last underscore
+            const [field, dir] = sortKey.split(/_(?=[^_]+$)/);
             filteredPosts.sort((a, b) => {
-                let av, bv;
                 if (field === 'spam_pct') {
-                    av = spamPct(a); bv = spamPct(b);
-                } else if (field === 'last_comment_at' || field === 'first_comment_at') {
-                    av = a[field] || ''; bv = b[field] || '';
-                    return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
-                } else {
-                    av = a[field] ?? 0; bv = b[field] ?? 0;
+                    return dir === 'asc' ? spamPct(a) - spamPct(b) : spamPct(b) - spamPct(a);
                 }
+                if (field === 'last_comment_at' || field === 'first_comment_at') {
+                    const av = a[field] || '', bv = b[field] || '';
+                    return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+                }
+                const av = a[field] ?? 0, bv = b[field] ?? 0;
                 return dir === 'asc' ? av - bv : bv - av;
             });
 
-            // 3. Render
             currentPage = 1;
             document.getElementById('result-count').textContent =
                 `${fmt(filteredPosts.length)} post${filteredPosts.length !== 1 ? 's' : ''}`;
@@ -665,24 +291,14 @@
             renderPagination();
         }
 
-        function sortBy(key) {
-            document.getElementById('sort-select').value = key + '_desc';
-            applySortAndRender();
-        }
-
-        function filterSpamMagnets() {
-            document.getElementById('filter-spam').value = 'magnets';
-            applySortAndRender();
-        }
-
+        function sortBy(key) { document.getElementById('sort-select').value = key + '_desc'; applySortAndRender(); }
+        function filterSpamMagnets() { document.getElementById('filter-spam').value = 'magnets'; applySortAndRender(); }
         function clearControls() {
-            document.getElementById('search-input').value = '';
-            document.getElementById('sort-select').value = 'last_comment_at_desc';
-            document.getElementById('filter-spam').value = 'all';
+            document.getElementById('search-input').value  = '';
+            document.getElementById('sort-select').value   = 'last_comment_at_desc';
+            document.getElementById('filter-spam').value   = 'all';
             applySortAndRender();
         }
-
-        // ── Table rendering ───────────────────────────────────────────────────
 
         function renderTable() {
             const wrap = document.getElementById('posts-table-wrap');
@@ -690,19 +306,15 @@
                 wrap.innerHTML = '<div class="empty-state">No posts match your filters.</div>';
                 return;
             }
-
             const start = (currentPage - 1) * PAGE_SIZE;
             const page  = filteredPosts.slice(start, start + PAGE_SIZE);
 
             const rows = page.map(p => {
-                const pct    = spamPct(p);
-                const pctCls = pct >= 50 ? 'high' : pct >= 20 ? 'medium' : 'low';
+                const pct      = spamPct(p);
+                const pctCls   = pct >= 50 ? 'high' : pct >= 20 ? 'medium' : 'low';
                 const isMagnet = pct > 50;
-                const lastDate  = p.last_comment_at  ? formatDate(p.last_comment_at)  : '—';
-                const firstDate = p.first_comment_at ? formatDate(p.first_comment_at) : '—';
                 const pageHref = p.page_url_href || p.page_url;
-                const urlShort  = pageHref.replace(/^https?:\/\//, '');
-
+                const urlShort = pageHref.replace(/^https?:\/\//, '');
                 return `<tr${isMagnet ? ' class="spam-magnet"' : ''}>
                     <td class="url-cell">
                         <span class="url-text" title="${escapeHtml(pageHref)}">
@@ -712,10 +324,10 @@
                     <td>
                         <div class="count-breakdown">
                             <span class="badge badge-total">${p.total_comments}</span>
-                            ${p.approved_count > 0 ? `<span class="badge badge-approved">${p.approved_count} ok</span>` : ''}
-                            ${p.pending_count  > 0 ? `<span class="badge badge-pending">${p.pending_count} pend</span>` : ''}
-                            ${p.spam_count     > 0 ? `<span class="badge badge-spam">${p.spam_count} spam</span>` : ''}
-                            ${p.deleted_count  > 0 ? `<span class="badge badge-deleted">${p.deleted_count} del</span>` : ''}
+                            ${p.approved_count > 0 ? `<span class="badge badge-approved">${p.approved_count} ok</span>`   : ''}
+                            ${p.pending_count  > 0 ? `<span class="badge badge-pending">${p.pending_count} pend</span>`   : ''}
+                            ${p.spam_count     > 0 ? `<span class="badge badge-spam">${p.spam_count} spam</span>`         : ''}
+                            ${p.deleted_count  > 0 ? `<span class="badge badge-deleted">${p.deleted_count} del</span>`    : ''}
                         </div>
                     </td>
                     <td>
@@ -728,8 +340,8 @@
                     <td class="num-cell">${p.unique_ips}</td>
                     <td class="num-cell">${p.avg_length > 0 ? p.avg_length : '—'}</td>
                     <td class="num-cell">${p.total_reactions > 0 ? p.total_reactions : '—'}</td>
-                    <td class="date-cell">${lastDate}</td>
-                    <td class="date-cell">${firstDate}</td>
+                    <td class="date-cell">${formatDateRelative(p.last_comment_at)}</td>
+                    <td class="date-cell">${formatDateRelative(p.first_comment_at)}</td>
                     <td class="actions-cell">
                         <a href="admin-all.html?url=${encodeURIComponent(p.page_url)}" class="btn btn-primary btn-sm">Comments</a>
                     </td>
@@ -737,25 +349,22 @@
             }).join('');
 
             wrap.innerHTML = `<table>
-                <thead>
-                    <tr>
-                        <th class="sortable" onclick="cycleSortCol('last_comment_at')">Post URL <span class="sort-arrow">↕</span></th>
-                        <th>Counts</th>
-                        <th class="sortable" onclick="cycleSortCol('spam_pct')">Spam % <span class="sort-arrow">↕</span></th>
-                        <th class="sortable num-cell" onclick="cycleSortCol('unique_authors')">Authors <span class="sort-arrow">↕</span></th>
-                        <th class="sortable num-cell" onclick="cycleSortCol('unique_ips')">IPs <span class="sort-arrow">↕</span></th>
-                        <th class="num-cell" title="Average comment length in characters">Avg Len</th>
-                        <th class="num-cell" title="Post-level reactions">React.</th>
-                        <th class="sortable date-cell" onclick="cycleSortCol('last_comment_at')">Last Comment <span class="sort-arrow">↕</span></th>
-                        <th class="sortable date-cell" onclick="cycleSortCol('first_comment_at')">First Comment <span class="sort-arrow">↕</span></th>
-                        <th></th>
-                    </tr>
-                </thead>
+                <thead><tr>
+                    <th class="sortable" onclick="cycleSortCol('last_comment_at')">Post URL <span class="sort-arrow">↕</span></th>
+                    <th>Counts</th>
+                    <th class="sortable" onclick="cycleSortCol('spam_pct')">Spam % <span class="sort-arrow">↕</span></th>
+                    <th class="sortable num-cell" onclick="cycleSortCol('unique_authors')">Authors <span class="sort-arrow">↕</span></th>
+                    <th class="sortable num-cell" onclick="cycleSortCol('unique_ips')">IPs <span class="sort-arrow">↕</span></th>
+                    <th class="num-cell" title="Average comment length in characters">Avg Len</th>
+                    <th class="num-cell" title="Post-level reactions">React.</th>
+                    <th class="sortable date-cell" onclick="cycleSortCol('last_comment_at')">Last Comment <span class="sort-arrow">↕</span></th>
+                    <th class="sortable date-cell" onclick="cycleSortCol('first_comment_at')">First Comment <span class="sort-arrow">↕</span></th>
+                    <th></th>
+                </tr></thead>
                 <tbody>${rows}</tbody>
             </table>`;
 
-            // Mark active sort column header
-            const sortKey = document.getElementById('sort-select').value;
+            const sortKey    = document.getElementById('sort-select').value;
             const [activeField] = sortKey.split(/_(?=[^_]+$)/);
             wrap.querySelectorAll('thead th.sortable').forEach(th => {
                 const col = th.getAttribute('onclick').match(/'([^']+)'/)?.[1];
@@ -769,32 +378,19 @@
 
         function cycleSortCol(field) {
             const select = document.getElementById('sort-select');
-            const current = select.value;
-            const [curField, curDir] = current.split(/_(?=[^_]+$)/);
-            if (curField === field) {
-                select.value = field + (curDir === 'desc' ? '_asc' : '_desc');
-            } else {
-                select.value = field + '_desc';
-            }
+            const [curField, curDir] = select.value.split(/_(?=[^_]+$)/);
+            select.value = field + (curField === field && curDir === 'desc' ? '_asc' : '_desc');
             applySortAndRender();
         }
-
-        // ── Pagination ────────────────────────────────────────────────────────
 
         function renderPagination() {
             const total = filteredPosts.length;
             const pages = Math.ceil(total / PAGE_SIZE);
             const pgEl  = document.getElementById('pagination');
-
-            if (pages <= 1) {
-                pgEl.style.display = 'none';
-                return;
-            }
+            if (pages <= 1) { pgEl.style.display = 'none'; return; }
             pgEl.style.display = 'flex';
-
             const btns = [];
             btns.push(`<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹ Prev</button>`);
-
             const range = pageRange(currentPage, pages);
             let prev = null;
             for (const p of range) {
@@ -802,10 +398,8 @@
                 btns.push(`<button onclick="changePage(${p})" class="${p === currentPage ? 'active' : ''}">${p}</button>`);
                 prev = p;
             }
-
             btns.push(`<button onclick="changePage(${currentPage + 1})" ${currentPage === pages ? 'disabled' : ''}>Next ›</button>`);
             btns.push(`<span class="page-info">${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, total)} of ${fmt(total)}</span>`);
-
             pgEl.innerHTML = btns.join('');
         }
 
@@ -819,48 +413,28 @@
         }
 
         function pageRange(cur, total) {
-            const delta = 2;
-            const left  = cur - delta;
-            const right = cur + delta;
-            const pages = [];
+            const delta = 2, pages = [];
             for (let i = 1; i <= total; i++) {
-                if (i === 1 || i === total || (i >= left && i <= right)) pages.push(i);
+                if (i === 1 || i === total || (i >= cur - delta && i <= cur + delta)) pages.push(i);
             }
             return pages;
         }
 
-        // ── Utilities ─────────────────────────────────────────────────────────
-
         function spamPct(p) {
-            if (!p.total_comments) return 0;
-            return Math.round((p.spam_count / p.total_comments) * 100);
+            return p.total_comments ? Math.round((p.spam_count / p.total_comments) * 100) : 0;
         }
 
-        function fmt(n) {
-            return Number(n).toLocaleString();
-        }
+        function fmt(n) { return Number(n).toLocaleString(); }
 
-        function formatDate(dt) {
+        function formatDateRelative(dt) {
             if (!dt) return '—';
-            const d = new Date(dt.replace(' ', 'T') + 'Z');
-            const now = new Date();
-            const diff = (now - d) / 1000;
-            if (diff < 60)    return 'just now';
-            if (diff < 3600)  return Math.floor(diff / 60) + 'm ago';
-            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            const d    = new Date(dt.replace(' ', 'T') + 'Z');
+            const diff = (Date.now() - d) / 1000;
+            if (diff < 60)     return 'just now';
+            if (diff < 3600)   return Math.floor(diff / 60)    + 'm ago';
+            if (diff < 86400)  return Math.floor(diff / 3600)  + 'h ago';
             if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
             return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-        }
-
-        function escapeHtml(text) {
-            const d = document.createElement('div');
-            d.textContent = String(text ?? '');
-            return d.innerHTML;
-        }
-
-        async function logout() {
-            await fetch(`${API_URL}?action=logout`, { method: 'POST', credentials: 'include' });
-            location.reload();
         }
     </script>
     <script src="light-dark-mode-panel.js"></script>

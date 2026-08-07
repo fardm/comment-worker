@@ -19,39 +19,21 @@
             align-items: center;
             flex-wrap: wrap;
         }
-
-        .filters select {
-            padding: 0.6rem 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            background: white;
-            flex-shrink: 0;
-        }
-
-        .filters input[type="text"] {
+        .filters select, .filters input[type="text"] {
             padding: 0.6rem 0.75rem;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 0.95rem;
         }
-
+        .filters select { background: white; flex-shrink: 0; }
         .comments-section {
             background: var(--on-background);
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        .comment-item {
-            border-bottom: 1px solid #e0e0e0;
-            padding: 1.5rem 0;
-        }
-
-        .comment-item:last-child {
-            border-bottom: none;
-        }
-
+        .comment-item { border-bottom: 1px solid #e0e0e0; padding: 1.5rem 0; }
+        .comment-item:last-child { border-bottom: none; }
         .comment-meta {
             display: flex;
             gap: 1rem;
@@ -60,12 +42,7 @@
             color: #666;
             flex-wrap: wrap;
         }
-
-        .comment-author {
-            font-weight: 600;
-            color: #333;
-        }
-
+        .comment-author { font-weight: 600; color: #333; }
         .comment-content {
             background: var(--light);
             color: var(--body-text);
@@ -74,25 +51,9 @@
             border-left: 3px solid #4a90e2;
             unicode-bidi: plaintext;
         }
-
-        .comment-actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .comment-actions button {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-        }
-
-
-        .no-comments {
-            text-align: center;
-            padding: 2rem;
-            color: #888;
-        }
-
+        .comment-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .comment-actions button { padding: 0.5rem 1rem; font-size: 0.9rem; }
+        .no-comments { text-align: center; padding: 2rem; color: #888; }
         .pagination {
             display: flex;
             justify-content: center;
@@ -101,7 +62,6 @@
             margin-top: 2rem;
             flex-wrap: wrap;
         }
-
         .pagination button {
             padding: 0.5rem 1rem;
             border: 1px solid #ddd;
@@ -111,116 +71,31 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
-        .pagination button:hover:not(:disabled) {
-            background: #4a90e2;
-            color: white;
-        }
-
-        .pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .pagination button.active {
-            background: #4a90e2;
-            color: white;
-        }
-
-        .pagination .page-info {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        /* Mobile Responsive Styles */
+        .pagination button:hover:not(:disabled) { background: #4a90e2; color: white; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination button.active { background: #4a90e2; color: white; }
+        .pagination .page-info { color: #666; font-size: 0.9rem; }
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            .nav {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-
-            .nav a {
-                flex: 1;
-                min-width: 100px;
-                text-align: center;
-            }
-
-            .stats {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .comment-meta {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .comment-actions {
-                flex-direction: column;
-            }
-
-            .comment-actions button {
-                width: 100%;
-            }
-
-            .pagination {
-                gap: 0.25rem;
-            }
-
-            .pagination button {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.85rem;
-            }
-
-            #login-section {
-                margin: 20px auto;
-                padding: 1.5rem;
-            }
+            .container { padding: 1rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .nav { width: 100%; flex-wrap: wrap; }
+            .nav a { flex: 1; min-width: 100px; text-align: center; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .filters { flex-direction: column; align-items: stretch; }
+            .comment-meta { flex-direction: column; gap: 0.5rem; }
+            .comment-actions { flex-direction: column; }
+            .comment-actions button { width: 100%; }
+            .pagination { gap: 0.25rem; }
+            .pagination button { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
+            #login-section { margin: 20px auto; padding: 1.5rem; }
         }
-
         @media (max-width: 480px) {
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
-            }
-
-            .btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            .pagination button {
-                padding: 0.35rem 0.6rem;
-                font-size: 0.8rem;
-            }
-
-            .pagination .page-info {
-                width: 100%;
-                text-align: center;
-                margin-top: 0.5rem;
-            }
+            .stats { grid-template-columns: 1fr; }
+            .stat-number { font-size: 1.5rem; }
+            .btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+            .pagination button { padding: 0.35rem 0.6rem; font-size: 0.8rem; }
+            .pagination .page-info { width: 100%; text-align: center; margin-top: 0.5rem; }
         }
     </style>
 </head>
@@ -248,7 +123,7 @@
                 <a href="admin-posts.html">Posts</a>
                 <a href="admin-analytics.html">Analytics</a>
                 <a href="admin-utilities.html">Utilities</a>
-                <a href="#" onclick="logout(); return false;" class="logout-btn">Logout</a>
+                <a href="#" onclick="AdminAuth.logout(); return false;" class="logout-btn">Logout</a>
             </div>
             <div class="section-icons">
                 <label class="theme-switch">
@@ -289,92 +164,43 @@
                     <option value="pending">Pending</option>
                     <option value="spam">Spam</option>
                 </select>
-                <input type="text" id="filter-search" placeholder="Search by name, email, URL, or content…" style="flex:1; min-width:200px;" onkeydown="if(event.key==='Enter') applyFilters();">
+                <input type="text" id="filter-search" placeholder="Search by name, email, URL, or content…"
+                       style="flex:1; min-width:200px;" onkeydown="if(event.key==='Enter') applyFilters();">
                 <button class="btn btn-primary" onclick="applyFilters()">Search</button>
                 <button class="btn btn-warning" onclick="clearFilters()">Clear</button>
             </div>
 
             <div class="comments-section">
                 <h2 style="margin-bottom: 1.5rem;">All Comments</h2>
-                <div id="all-comments">
-                    <p class="no-comments">Loading...</p>
-                </div>
+                <div id="all-comments"><p class="no-comments">Loading...</p></div>
                 <div class="pagination" id="pagination"></div>
             </div>
         </div>
     </div>
 
+    <script src="admin-common.js"></script>
     <script>
-        const API_URL = 'api.php';
         let currentPage = 1;
         let currentTotal = 0;
         const commentsPerPage = 50;
-        let csrfToken = null;
 
-        function getCSRFToken() {
-            const name = 'csrf_token=';
-            for (let c of decodeURIComponent(document.cookie).split(';')) {
-                c = c.trim();
-                if (c.startsWith(name)) return c.substring(name.length);
-            }
-            return null;
-        }
+        const reactionDefs = [
+            { type: 'thumbsup',  emoji: '👍' }, { type: 'lightbulb', emoji: '👎' },
+            { type: 'pray',      emoji: '🙏' }, { type: 'ok',        emoji: '👌' },
+            { type: 'fire',      emoji: '🔥' }, { type: 'heart',     emoji: '❤️' },
+            { type: 'frown',     emoji: '☹️' }, { type: 'rage',      emoji: '😡' },
+            { type: 'funny',     emoji: '😄' }, { type: 'neutral',   emoji: '😐' },
+        ];
 
-        async function ensureCSRFToken() {
-            if (!csrfToken) csrfToken = getCSRFToken();
-            if (!csrfToken) {
-                try {
-                    const r = await fetch(`${API_URL}?action=csrf_token`, { credentials: 'include' });
-                    csrfToken = (await r.json()).token;
-                } catch (e) {}
-            }
-            return csrfToken;
-        }
-
-        async function checkAuth() {
-            try {
-                // Use a lightweight endpoint just to check auth
-                const r = await fetch(`${API_URL}?action=pending&limit=1`, { credentials: 'include' });
-                if (r.ok) {
-                    await ensureCSRFToken();
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-section').style.display = 'block';
-                    loadDashboard();
-                }
-            } catch (e) {}
-        }
-        checkAuth();
-
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const password = document.getElementById('password').value;
-            const messageEl = document.getElementById('login-message');
-            try {
-                const r = await fetch(`${API_URL}?action=login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ password })
-                });
-                const result = await r.json();
-                if (r.ok) {
-                    csrfToken = result.csrf_token || getCSRFToken();
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-section').style.display = 'block';
-                    loadDashboard();
-                } else {
-                    messageEl.innerHTML = `<div class="message error">${result.error}</div>`;
-                }
-            } catch (e) {
-                messageEl.innerHTML = '<div class="message error">Network error</div>';
-            }
+        AdminAuth.init({
+            authProbeUrl: `${API_URL}?action=pending&limit=1`,
+            onSuccess: loadDashboard,
         });
 
         async function loadDashboard() {
-            // Apply URL params before first load
             const params = new URLSearchParams(window.location.search);
             const statusParam = params.get('status');
-            const urlParam = params.get('url');
+            const urlParam    = params.get('url');
             if (statusParam && ['approved', 'pending', 'spam'].includes(statusParam)) {
                 document.getElementById('filter-status').value = statusParam;
             }
@@ -394,7 +220,6 @@
             } catch (e) {}
         }
 
-        // Core load function: fetches one page from the server with current filters
         async function loadPage(page) {
             currentPage = page;
             const container = document.getElementById('all-comments');
@@ -402,12 +227,7 @@
 
             const status = document.getElementById('filter-status').value;
             const search = document.getElementById('filter-search').value.trim();
-
-            const qs = new URLSearchParams({
-                action: 'all',
-                limit:  commentsPerPage,
-                offset: (page - 1) * commentsPerPage,
-            });
+            const qs = new URLSearchParams({ action: 'all', limit: commentsPerPage, offset: (page - 1) * commentsPerPage });
             if (status !== 'all') qs.set('status', status);
             if (search) qs.set('search', search);
 
@@ -427,15 +247,13 @@
             }
         }
 
-        function applyFilters() { loadPage(1); }
-
+        function applyFilters()                  { loadPage(1); }
         function applyStatusFilter(status) {
             document.getElementById('filter-status').value = status;
             document.getElementById('filter-search').value = '';
             loadPage(1);
             document.querySelector('.filters').scrollIntoView({ behavior: 'smooth' });
         }
-
         function clearFilters() {
             document.getElementById('filter-status').value = 'all';
             document.getElementById('filter-search').value = '';
@@ -449,7 +267,15 @@
                 document.getElementById('pagination').innerHTML = '';
                 return;
             }
-            container.innerHTML = comments.map(comment => `
+            container.innerHTML = comments.map(comment => {
+                const votes = comment.votes_by_reaction_type || {
+                    heart: comment.votes_heart || 0, thumbsup: comment.votes_thumbsup || 0,
+                    lightbulb: comment.votes_lightbulb || 0, funny: comment.votes_funny || 0,
+                };
+                const reactionSummary = reactionDefs
+                    .filter(x => (votes[x.type] || 0) > 0)
+                    .map(x => `${x.emoji} ${votes[x.type]}`).join('&nbsp;&nbsp;');
+                return `
                 <div class="comment-item" id="comment-${comment.id}">
                     <div class="comment-meta">
                         <span class="comment-author">${escapeHtml(comment.author_name)}</span>
@@ -458,43 +284,19 @@
                         <span>${new Date(comment.created_at).toLocaleString()}</span>
                         <span class="badge badge-${comment.status}">${comment.status}</span>
                     </div>
-                    <div class="body-text"><strong>Page:</strong> <a href="${escapeHtml(comment.page_url_href || comment.page_url)}" target="_blank" style="color: #4a90e2; text-decoration: none;">${escapeHtml(comment.page_url_href || comment.page_url)}</a></div>
+                    <div class="body-text"><strong>Page:</strong> <a href="${escapeHtml(comment.page_url_href || comment.page_url)}" target="_blank" style="color:#4a90e2;text-decoration:none;">${escapeHtml(comment.page_url_href || comment.page_url)}</a></div>
                     <div class="body-text"><strong>IP:</strong> ${escapeHtml(comment.ip_address || 'N/A')}</div>
                     ${comment.parent_id ? `<div class="body-text"><strong>Reply to:</strong> Comment #${comment.parent_id}</div>` : ''}
                     <div class="comment-content" dir="auto" id="comment-content-${comment.id}">${escapeHtml(comment.content)}</div>
-                    ${(() => {
-                        const votes = comment.votes_by_reaction_type || {
-                            heart: comment.votes_heart || 0,
-                            thumbsup: comment.votes_thumbsup || 0,
-                            lightbulb: comment.votes_lightbulb || 0,
-                            funny: comment.votes_funny || 0,
-                        };
-                        const reactionDefs = [
-                            { type: 'thumbsup',  emoji: '👍' },
-                            { type: 'lightbulb', emoji: '👎' },
-                            { type: 'pray',      emoji: '🙏' },
-                            { type: 'ok',        emoji: '👌' },
-                            { type: 'fire',      emoji: '🔥' },
-                            { type: 'heart',     emoji: '❤️' },
-                            { type: 'frown',     emoji: '☹️' },
-                            { type: 'rage',      emoji: '😡' },
-                            { type: 'funny',     emoji: '😄' },
-                            { type: 'neutral',   emoji: '😐' },
-                        ];
-                        const r = reactionDefs
-                            .filter(x => (votes[x.type] || 0) > 0)
-                            .map(x => `${x.emoji} ${votes[x.type]}`)
-                            .join('&nbsp;&nbsp;');
-                        return r ? `<div class="body-text"><strong>Reactions:</strong> ${r}</div>` : '';
-                    })()}
+                    ${reactionSummary ? `<div class="body-text"><strong>Reactions:</strong> ${reactionSummary}</div>` : ''}
                     <div class="comment-actions">
                         <button class="btn btn-secondary" onclick="startCommentEdit(${comment.id})">Edit</button>
                         ${comment.status !== 'approved' ? `<button class="btn btn-success" onclick="moderateComment(${comment.id}, 'approved')">Approve</button>` : ''}
                         ${comment.status !== 'spam'     ? `<button class="btn btn-warning" onclick="moderateComment(${comment.id}, 'spam')">Mark as Spam</button>` : ''}
                         <button class="btn btn-danger" onclick="deleteComment(${comment.id})">Delete</button>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         function updateStats(agg) {
@@ -510,14 +312,14 @@
             if (!commentEl) return;
             const originalHTML = commentEl.innerHTML;
             try {
-                await ensureCSRFToken();
+                await AdminAuth.ensureCsrfToken();
                 commentEl.style.opacity = '0.5';
                 commentEl.innerHTML = `<p style="text-align:center;padding:2rem;">Processing...</p>`;
                 const r = await fetch(`${API_URL}?action=moderate&id=${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
                     credentials: 'include',
-                    body: JSON.stringify({ status, csrf_token: csrfToken })
+                    body: JSON.stringify({ status, csrf_token: AdminAuth.getCsrfToken() }),
                 });
                 const result = await r.json();
                 if (r.ok) {
@@ -536,9 +338,9 @@
         async function deleteComment(id) {
             if (!confirm('Are you sure you want to delete this comment?')) return;
             try {
-                await ensureCSRFToken();
-                const r = await fetch(`${API_URL}?action=delete&id=${id}&csrf_token=${encodeURIComponent(csrfToken)}`, {
-                    method: 'DELETE', credentials: 'include'
+                await AdminAuth.ensureCsrfToken();
+                const r = await fetch(`${API_URL}?action=delete&id=${id}&csrf_token=${encodeURIComponent(AdminAuth.getCsrfToken())}`, {
+                    method: 'DELETE', credentials: 'include',
                 });
                 if (r.ok) {
                     loadPage(currentPage);
@@ -556,12 +358,10 @@
             if (totalPages <= 1) { paginationEl.innerHTML = ''; return; }
 
             let html = `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
-
             const maxVisible = 5;
             let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
             let endPage   = Math.min(totalPages, startPage + maxVisible - 1);
             if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
-
             if (startPage > 1) {
                 html += `<button onclick="changePage(1)">1</button>`;
                 if (startPage > 2) html += `<span class="page-info">...</span>`;
@@ -574,11 +374,9 @@
                 html += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
             }
             html += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
-
             const startIdx = (currentPage - 1) * commentsPerPage + 1;
             const endIdx   = Math.min(currentPage * commentsPerPage, total);
             html += `<span class="page-info">Showing ${startIdx}–${endIdx} of ${total.toLocaleString()}</span>`;
-
             paginationEl.innerHTML = html;
         }
 
@@ -588,21 +386,8 @@
             loadPage(page);
             document.querySelector('.comments-section').scrollIntoView({ behavior: 'smooth' });
         }
-
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        async function logout() {
-            await fetch(`${API_URL}?action=logout`, { method: 'POST', credentials: 'include' });
-            location.reload();
-        }
     </script>
     <script src="admin-comment-edit.js"></script>
     <script src="light-dark-mode-panel.js"></script>
-
 </body>
 </html>

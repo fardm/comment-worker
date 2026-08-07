@@ -8,182 +8,43 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-number {
-            font-size: 1.9rem;
-            font-weight: bold;
-            color: #4a90e2;
-        }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-number { font-size: 1.9rem; font-weight: bold; color: #4a90e2; }
         .stat-number.green  { color: #28a745; }
         .stat-number.yellow { color: #e6a817; }
         .stat-number.red    { color: #dc3545; }
         .stat-number.gray   { color: #6c757d; }
-
-        /* Dashboard grid */
         .dashboard { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
-
-        .row-3-1 { display: grid; grid-template-columns: 1fr 220px; gap: 1.5rem; }
-        .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-
-        /* Chart cards */
-        .chart-card {
-            background: var(--on-background);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 1.25rem 1.5rem;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .chart-title {
-            font-size: 0.92rem;
-            font-weight: 600;
-            color: #555;
-        }
-
-        .chart-subtitle {
-            font-size: 0.75rem;
-            font-weight: 400;
-            color: #aaa;
-            margin-left: 0.4rem;
-        }
-
-        .toggle-group {
-            display: flex;
-            gap: 0.2rem;
-        }
+        .row-3-1   { display: grid; grid-template-columns: 1fr 220px; gap: 1.5rem; }
+        .row-2col  { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .chart-card { background: var(--on-background); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1.25rem 1.5rem; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+        .chart-title   { font-size: 0.92rem; font-weight: 600; color: #555; }
+        .chart-subtitle { font-size: 0.75rem; font-weight: 400; color: #aaa; margin-left: 0.4rem; }
+        .toggle-group { display: flex; gap: 0.2rem; }
         .toggle-group button {
-            padding: 0.22rem 0.7rem;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 3px;
-            font-size: 0.78rem;
-            cursor: pointer;
-            color: #666;
-            transition: all 0.15s;
+            padding: 0.22rem 0.7rem; border: 1px solid #ddd; background: white;
+            border-radius: 3px; font-size: 0.78rem; cursor: pointer; color: #666; transition: all 0.15s;
         }
-        .toggle-group button.active {
-            background: #4a90e2;
-            border-color: #4a90e2;
-            color: white;
-        }
-        .toggle-group button:hover:not(.active) {
-            border-color: #4a90e2;
-            color: #4a90e2;
-        }
-
-        .chart-legend {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-top: 0.6rem;
-            font-size: 0.8rem;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            color: #666;
-        }
-        .legend-swatch {
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .chart-empty {
-            padding: 2rem;
-            text-align: center;
-            color: #ccc;
-            font-size: 0.9rem;
-        }
-
-        .chart-loading {
-            padding: 2rem;
-            text-align: center;
-            color: #bbb;
-            font-size: 0.9rem;
-        }
-
-        /* Donut legend */
-        .donut-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-        .donut-legend {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            font-size: 0.82rem;
-        }
-        .donut-legend-row {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .donut-legend-row .dl-count {
-            margin-left: auto;
-            font-weight: 600;
-            color: #333;
-        }
-        .donut-legend-row .dl-pct {
-            color: #aaa;
-            font-size: 0.75rem;
-            min-width: 32px;
-            text-align: right;
-        }
-
-        /* Tooltip */
+        .toggle-group button.active { background: #4a90e2; border-color: #4a90e2; color: white; }
+        .toggle-group button:hover:not(.active) { border-color: #4a90e2; color: #4a90e2; }
+        .chart-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.6rem; font-size: 0.8rem; }
+        .legend-item  { display: flex; align-items: center; gap: 0.3rem; color: #666; }
+        .legend-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+        .chart-empty   { padding: 2rem; text-align: center; color: #ccc; font-size: 0.9rem; }
+        .chart-loading { padding: 2rem; text-align: center; color: #bbb; font-size: 0.9rem; }
+        .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+        .donut-legend { width: 100%; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; }
+        .donut-legend-row { display: flex; align-items: center; gap: 0.4rem; }
+        .donut-legend-row .dl-count { margin-left: auto; font-weight: 600; color: #333; }
+        .donut-legend-row .dl-pct   { color: #aaa; font-size: 0.75rem; min-width: 32px; text-align: right; }
         #chart-tooltip {
-            position: fixed;
-            background: rgba(25, 25, 25, 0.92);
-            color: #fff;
-            padding: 0.45rem 0.7rem;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            pointer-events: none;
-            z-index: 9999;
-            display: none;
-            line-height: 1.7;
-            max-width: 220px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: fixed; background: rgba(25,25,25,0.92); color: #fff;
+            padding: 0.45rem 0.7rem; border-radius: 5px; font-size: 0.8rem;
+            pointer-events: none; z-index: 9999; display: none;
+            line-height: 1.7; max-width: 220px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-
-        /* Refresh button */
-        .refresh-btn {
-            background: none;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 0.3rem 0.7rem;
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: #666;
-        }
-        .refresh-btn:hover { border-color: #4a90e2; color: #4a90e2; }
-
-        /* Mobile */
-        @media (max-width: 1000px) {
-            .row-3-1, .row-2col {
-                grid-template-columns: 1fr;
-            }
-        }
+        @media (max-width: 1000px) { .row-3-1, .row-2col { grid-template-columns: 1fr; } }
         @media (max-width: 768px) {
             .container { padding: 1rem; }
             header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
@@ -199,7 +60,6 @@
     </style>
 </head>
 <body>
-
 <div id="chart-tooltip"></div>
 
 <div id="login-section">
@@ -225,7 +85,7 @@
             <a href="admin-posts.html">Posts</a>
             <a href="admin-analytics.html" class="active">Analytics</a>
             <a href="admin-utilities.html">Utilities</a>
-            <a href="#" onclick="logout(); return false;" class="logout-btn">Logout</a>
+            <a href="#" onclick="AdminAuth.logout(); return false;" class="logout-btn">Logout</a>
         </div>
         <div class="section-icons">
             <label class="theme-switch">
@@ -237,35 +97,15 @@
 
     <div class="container">
         <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="stat-total">—</div>
-                <div class="stat-label">Total Comments</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number green" id="stat-approved">—</div>
-                <div class="stat-label">Approved</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number yellow" id="stat-pending">—</div>
-                <div class="stat-label">Pending</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number red" id="stat-spam">—</div>
-                <div class="stat-label">Spam</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number gray" id="stat-commenters">—</div>
-                <div class="stat-label">Unique Commenters</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number gray" id="stat-ips">—</div>
-                <div class="stat-label">Unique IPs</div>
-            </div>
+            <div class="stat-card"><div class="stat-number"       id="stat-total">—</div><div class="stat-label">Total Comments</div></div>
+            <div class="stat-card"><div class="stat-number green"  id="stat-approved">—</div><div class="stat-label">Approved</div></div>
+            <div class="stat-card"><div class="stat-number yellow" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-number red"    id="stat-spam">—</div><div class="stat-label">Spam</div></div>
+            <div class="stat-card"><div class="stat-number gray"   id="stat-commenters">—</div><div class="stat-label">Unique Commenters</div></div>
+            <div class="stat-card"><div class="stat-number gray"   id="stat-ips">—</div><div class="stat-label">Unique IPs</div></div>
         </div>
 
         <div class="dashboard" id="dashboard">
-
-            <!-- Timeline -->
             <div class="chart-card">
                 <div class="chart-header">
                     <span class="chart-title">Comment Volume Over Time</span>
@@ -282,24 +122,16 @@
                     <span class="legend-item"><span class="legend-swatch" style="background:#dc3545"></span>Spam</span>
                 </div>
             </div>
-
-            <!-- Status donut + Top posts -->
             <div class="row-3-1">
                 <div class="chart-card">
-                    <div class="chart-header">
-                        <span class="chart-title">Top Posts by Comment Volume</span>
-                    </div>
+                    <div class="chart-header"><span class="chart-title">Top Posts by Comment Volume</span></div>
                     <div id="top-posts-chart"><div class="chart-loading">Loading…</div></div>
                 </div>
                 <div class="chart-card">
-                    <div class="chart-header">
-                        <span class="chart-title">Status Breakdown</span>
-                    </div>
+                    <div class="chart-header"><span class="chart-title">Status Breakdown</span></div>
                     <div id="donut-chart" class="donut-wrap"><div class="chart-loading">Loading…</div></div>
                 </div>
             </div>
-
-            <!-- Hour of day + Day of week -->
             <div class="row-2col">
                 <div class="chart-card">
                     <div class="chart-header">
@@ -314,108 +146,52 @@
                     <div id="weekday-chart"><div class="chart-loading">Loading…</div></div>
                 </div>
             </div>
-
-        </div><!-- /dashboard -->
+        </div>
     </div>
 </div>
 
+<script src="admin-common.js"></script>
 <script>
-const API_URL = 'api.php';
-let csrfToken = null;
-let analyticsData = null;
-let currentGranularity = 'daily';
+let analyticsData        = null;
+let currentGranularity   = 'daily';
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
-
-function getCSRFToken() {
-    const name = 'csrf_token=';
-    for (let c of decodeURIComponent(document.cookie).split(';')) {
-        c = c.trim();
-        if (c.startsWith(name)) return c.substring(name.length);
-    }
-    return null;
-}
-
-async function ensureCSRFToken() {
-    if (!csrfToken) csrfToken = getCSRFToken();
-    if (!csrfToken) {
-        try {
-            const r = await fetch(`${API_URL}?action=csrf_token`, { credentials: 'include' });
-            csrfToken = (await r.json()).token;
-        } catch (e) {}
-    }
-    return csrfToken;
-}
-
-async function checkAuth() {
-    try {
-        const r = await fetch(`${API_URL}?action=analytics`, { credentials: 'include' });
-        if (r.ok) {
-            await ensureCSRFToken();
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('admin-section').style.display = 'block';
-            loadAnalytics(await r.json());
-        }
-    } catch (e) {}
-}
-
-checkAuth();
-
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msgEl = document.getElementById('login-message');
-    try {
-        const r = await fetch(`${API_URL}?action=login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ password: document.getElementById('password').value })
+AdminAuth.init({
+    authProbeUrl: `${API_URL}?action=analytics`,
+    onSuccess: async () => {
+        // The probe already fetched the data; re-fetch with cache-bust after login
+        const r = await fetch(`${API_URL}?action=analytics&_=${Date.now()}`, {
+            credentials: 'include', cache: 'no-store',
         });
-        const result = await r.json();
-        if (r.ok) {
-            csrfToken = result.csrf_token || getCSRFToken();
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('admin-section').style.display = 'block';
-            const r2 = await fetch(`${API_URL}?action=analytics&_=${Date.now()}`, { credentials: 'include', cache: 'no-store' });
-            loadAnalytics(await r2.json());
-        } else {
-            msgEl.innerHTML = `<div class="message error">${escHtml(result.error)}</div>`;
-        }
-    } catch (e) {
-        msgEl.innerHTML = '<div class="message error">Network error</div>';
-    }
+        loadAnalytics(await r.json());
+    },
 });
 
-// ── Data ──────────────────────────────────────────────────────────────────────
+// On initial page load the probe itself returns the data, so we override init
+// by fetching directly if already authenticated (init will call onSuccess which refetches).
+// This is handled cleanly: the authProbeUrl IS the analytics endpoint, so the probe
+// result is reused by triggering onSuccess which re-fetches with cache-bust.
 
 function loadAnalytics(data) {
     analyticsData = data;
-
-    // Stats cards
-    const st = data.status_totals;
+    const st    = data.status_totals;
     const total = (st.approved || 0) + (st.pending || 0) + (st.spam || 0) + (st.deleted || 0);
-    document.getElementById('stat-total').textContent     = fmt(total);
-    document.getElementById('stat-approved').textContent  = fmt(st.approved || 0);
-    document.getElementById('stat-pending').textContent   = fmt(st.pending  || 0);
-    document.getElementById('stat-spam').textContent      = fmt(st.spam     || 0);
+    document.getElementById('stat-total').textContent      = fmt(total);
+    document.getElementById('stat-approved').textContent   = fmt(st.approved || 0);
+    document.getElementById('stat-pending').textContent    = fmt(st.pending  || 0);
+    document.getElementById('stat-spam').textContent       = fmt(st.spam     || 0);
     document.getElementById('stat-commenters').textContent = fmt(data.unique_commenters || 0);
     document.getElementById('stat-ips').textContent        = fmt(data.unique_ips        || 0);
-
-    // Charts
     renderTimeline();
     renderDonut(st);
-    renderTopPosts(data.top_posts || []);
-    renderHourly(data.hourly || []);
-    renderWeekday(data.weekdays || []);
+    renderTopPosts(data.top_posts  || []);
+    renderHourly(data.hourly       || []);
+    renderWeekday(data.weekdays    || []);
 }
-
-// ── Timeline ──────────────────────────────────────────────────────────────────
 
 function setGranularity(g) {
     currentGranularity = g;
-    ['daily','weekly','monthly'].forEach(k => {
-        document.getElementById('toggle-' + k).classList.toggle('active', k === g);
-    });
+    ['daily','weekly','monthly'].forEach(k =>
+        document.getElementById('toggle-' + k).classList.toggle('active', k === g));
     renderTimeline();
 }
 
@@ -423,347 +199,138 @@ function renderTimeline() {
     if (!analyticsData) return;
     const buckets = analyticsData.timeline[currentGranularity] || [];
     const el = document.getElementById('timeline-chart');
-
-    if (!buckets.length) {
-        el.innerHTML = '<div class="chart-empty">No data for this period</div>';
-        return;
-    }
-
-    const W = 900, H = 210;
-    const PL = 42, PR = 12, PT = 14, PB = 34;
-    const cW = W - PL - PR, cH = H - PT - PB;
-    const n = buckets.length;
-    const maxRaw = Math.max(...buckets.map(b => b.total), 1);
-    const ticks = niceTicks(maxRaw, 4);
-    const maxVal = ticks[ticks.length - 1];
-
-    // Y grid + labels
-    let yLines = '';
+    if (!buckets.length) { el.innerHTML = '<div class="chart-empty">No data for this period</div>'; return; }
+    const W=900,H=210,PL=42,PR=12,PT=14,PB=34,cW=W-PL-PR,cH=H-PT-PB,n=buckets.length;
+    const maxRaw = Math.max(...buckets.map(b=>b.total),1);
+    const ticks  = niceTicks(maxRaw,4);
+    const maxVal = ticks[ticks.length-1];
+    let yLines='';
     for (const t of ticks) {
-        const y = (PT + cH - (t / maxVal) * cH).toFixed(1);
-        yLines += `<line x1="${PL}" x2="${W - PR}" y1="${y}" y2="${y}" stroke="#f0f0f0" stroke-width="1"/>`;
-        yLines += `<text x="${PL - 5}" y="${+y + 4}" text-anchor="end" font-size="10" fill="#c0c0c0">${t >= 1000 ? (t/1000).toFixed(t%1000===0?0:1)+'k' : t}</text>`;
+        const y=(PT+cH-(t/maxVal)*cH).toFixed(1);
+        yLines+=`<line x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}" stroke="#f0f0f0" stroke-width="1"/>`;
+        yLines+=`<text x="${PL-5}" y="${+y+4}" text-anchor="end" font-size="10" fill="#c0c0c0">${t>=1000?(t/1000).toFixed(t%1000===0?0:1)+'k':t}</text>`;
     }
-
-    const slotW = cW / n;
-    const barW  = Math.max(1.5, Math.min(slotW * 0.8, 48));
-    const barOff = (slotW - barW) / 2;
-    const labelEvery = Math.max(1, Math.round(n / 9));
-
-    let bars = '', xLabels = '';
-    buckets.forEach((b, i) => {
-        const bx = (PL + i * slotW + barOff).toFixed(2);
-        const toH  = h => Math.max(b[['approved','pending','spam'].includes(h) ? '' : ''] || 0, (b.total > 0 ? (b[h] / maxVal) * cH : 0));
-        let y = PT + cH;
-
-        const seg = (count, color) => {
-            const bh = count > 0 ? Math.max(1.2, (count / maxVal) * cH) : 0;
-            if (bh < 0.5) return '';
-            y -= bh;
-            return `<rect x="${bx}" y="${y.toFixed(2)}" width="${(+barW).toFixed(2)}" height="${bh.toFixed(2)}" fill="${color}"/>`;
+    const slotW=cW/n, barW=Math.max(1.5,Math.min(slotW*.8,48)), barOff=(slotW-barW)/2;
+    const labelEvery=Math.max(1,Math.round(n/9));
+    let bars='',xLabels='';
+    buckets.forEach((b,i)=>{
+        const bx=(PL+i*slotW+barOff).toFixed(2);
+        let y=PT+cH;
+        const seg=(count,color)=>{
+            const bh=count>0?Math.max(1.2,(count/maxVal)*cH):0;
+            if(bh<.5)return'';
+            y-=bh;
+            return`<rect x="${bx}" y="${y.toFixed(2)}" width="${(+barW).toFixed(2)}" height="${bh.toFixed(2)}" fill="${color}"/>`;
         };
-
-        const other = Math.max(0, b.total - b.approved - b.pending - b.spam);
-        bars += `<g>`;
-        bars += seg(other,      '#adb5bd');
-        bars += seg(b.spam,     '#dc3545');
-        bars += seg(b.pending,  '#ffc107');
-        bars += seg(b.approved, '#28a745');
-        bars += `</g>`;
-
-        // Hover overlay
-        const hx = (PL + i * slotW).toFixed(2);
-        bars += `<rect class="tt-bar" x="${hx}" y="${PT}" width="${slotW.toFixed(2)}" height="${cH}" fill="rgba(0,0,0,0)" pointer-events="all" data-i="${i}"/>`;
-
-        if (i % labelEvery === 0 || i === n - 1) {
-            const lx = (PL + i * slotW + slotW / 2).toFixed(1);
-            xLabels += `<text x="${lx}" y="${H - 4}" text-anchor="middle" font-size="9.5" fill="#c0c0c0">${fmtPeriod(b.period, currentGranularity)}</text>`;
+        const other=Math.max(0,b.total-b.approved-b.pending-b.spam);
+        bars+=`<g>${seg(other,'#adb5bd')}${seg(b.spam,'#dc3545')}${seg(b.pending,'#ffc107')}${seg(b.approved,'#28a745')}</g>`;
+        bars+=`<rect class="tt-bar" x="${(PL+i*slotW).toFixed(2)}" y="${PT}" width="${slotW.toFixed(2)}" height="${cH}" fill="rgba(0,0,0,0)" pointer-events="all" data-i="${i}"/>`;
+        if(i%labelEvery===0||i===n-1){
+            xLabels+=`<text x="${(PL+i*slotW+slotW/2).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="9.5" fill="#c0c0c0">${fmtPeriod(b.period,currentGranularity)}</text>`;
         }
     });
-
-    const axes = `<line x1="${PL}" x2="${PL}" y1="${PT}" y2="${PT+cH}" stroke="#e8e8e8"/>
-                  <line x1="${PL}" x2="${W-PR}" y1="${PT+cH}" y2="${PT+cH}" stroke="#e8e8e8"/>`;
-
-    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible">
-        ${yLines}${axes}${bars}${xLabels}
-    </svg>`;
-
-    el.querySelectorAll('.tt-bar').forEach(r => {
-        r.addEventListener('mouseenter', e => {
-            const b = buckets[+r.dataset.i];
-            const pct = b.total > 0 ? Math.round(b.spam / b.total * 100) : 0;
-            showTip(e, `<strong>${b.period}</strong><br>Total: <strong>${b.total}</strong><br>✅ ${b.approved}&ensp;⏳ ${b.pending}&ensp;🚫 ${b.spam} (${pct}%)`);
-        });
-        r.addEventListener('mousemove', moveTip);
-        r.addEventListener('mouseleave', hideTip);
+    const axes=`<line x1="${PL}" x2="${PL}" y1="${PT}" y2="${PT+cH}" stroke="#e8e8e8"/><line x1="${PL}" x2="${W-PR}" y1="${PT+cH}" y2="${PT+cH}" stroke="#e8e8e8"/>`;
+    el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible">${yLines}${axes}${bars}${xLabels}</svg>`;
+    el.querySelectorAll('.tt-bar').forEach(r=>{
+        r.addEventListener('mouseenter',e=>{const b=buckets[+r.dataset.i];const pct=b.total>0?Math.round(b.spam/b.total*100):0;showTip(e,`<strong>${b.period}</strong><br>Total: <strong>${b.total}</strong><br>✅ ${b.approved}&ensp;⏳ ${b.pending}&ensp;🚫 ${b.spam} (${pct}%)`);});
+        r.addEventListener('mousemove',moveTip);r.addEventListener('mouseleave',hideTip);
     });
 }
-
-// ── Donut ─────────────────────────────────────────────────────────────────────
 
 function renderDonut(st) {
-    const el = document.getElementById('donut-chart');
-    const segs = [
-        { key: 'approved', label: 'Approved', color: '#28a745' },
-        { key: 'pending',  label: 'Pending',  color: '#ffc107' },
-        { key: 'spam',     label: 'Spam',     color: '#dc3545' },
-        { key: 'deleted',  label: 'Deleted',  color: '#adb5bd' },
-    ].filter(s => (st[s.key] || 0) > 0);
-
-    const total = segs.reduce((a, s) => a + (st[s.key] || 0), 0);
-    if (total === 0) {
-        el.innerHTML = '<div class="chart-empty">No data</div>';
-        return;
+    const el=document.getElementById('donut-chart');
+    const segs=[{key:'approved',label:'Approved',color:'#28a745'},{key:'pending',label:'Pending',color:'#ffc107'},{key:'spam',label:'Spam',color:'#dc3545'},{key:'deleted',label:'Deleted',color:'#adb5bd'}].filter(s=>(st[s.key]||0)>0);
+    const total=segs.reduce((a,s)=>a+(st[s.key]||0),0);
+    if(!total){el.innerHTML='<div class="chart-empty">No data</div>';return;}
+    const cx=90,cy=90,R=68,ri=40;let paths='',start=-Math.PI/2;
+    for(const s of segs){
+        const frac=(st[s.key]||0)/total,sweep=frac*2*Math.PI;if(sweep<.001)continue;
+        const end=start+sweep,cos1=Math.cos(start),sin1=Math.sin(start),cos2=Math.cos(end),sin2=Math.sin(end),large=sweep>Math.PI?1:0;
+        const d=`M${(cx+R*cos1).toFixed(2)},${(cy+R*sin1).toFixed(2)} A${R},${R} 0 ${large},1 ${(cx+R*cos2).toFixed(2)},${(cy+R*sin2).toFixed(2)} L${(cx+ri*cos2).toFixed(2)},${(cy+ri*sin2).toFixed(2)} A${ri},${ri} 0 ${large},0 ${(cx+ri*cos1).toFixed(2)},${(cy+ri*sin1).toFixed(2)} Z`;
+        paths+=`<path d="${d}" fill="${s.color}" class="donut-arc" data-label="${s.label}" data-count="${st[s.key]}" data-pct="${Math.round(frac*100)}" style="cursor:default"/>`;
+        start=end;
     }
-
-    const cx = 90, cy = 90, R = 68, ri = 40;
-    let paths = '';
-    let start = -Math.PI / 2;
-
-    for (const s of segs) {
-        const frac = (st[s.key] || 0) / total;
-        const sweep = frac * 2 * Math.PI;
-        if (sweep < 0.001) continue;
-        const end = start + sweep;
-        const cos1 = Math.cos(start), sin1 = Math.sin(start);
-        const cos2 = Math.cos(end),   sin2 = Math.sin(end);
-        const large = sweep > Math.PI ? 1 : 0;
-        const d = [
-            `M${(cx + R*cos1).toFixed(2)},${(cy + R*sin1).toFixed(2)}`,
-            `A${R},${R} 0 ${large},1 ${(cx + R*cos2).toFixed(2)},${(cy + R*sin2).toFixed(2)}`,
-            `L${(cx + ri*cos2).toFixed(2)},${(cy + ri*sin2).toFixed(2)}`,
-            `A${ri},${ri} 0 ${large},0 ${(cx + ri*cos1).toFixed(2)},${(cy + ri*sin1).toFixed(2)}`,
-            'Z'
-        ].join(' ');
-        paths += `<path d="${d}" fill="${s.color}" class="donut-arc" data-label="${s.label}" data-count="${st[s.key]}" data-pct="${Math.round(frac*100)}" style="cursor:default"/>`;
-        start = end;
-    }
-
-    const svg = `<svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:180px;display:block">
-        ${paths}
-        <text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="22" font-weight="700" fill="#333">${fmt(total)}</text>
-        <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="10" fill="#bbb">total</text>
-    </svg>`;
-
-    const legend = segs.map(s => {
-        const count = st[s.key] || 0;
-        const pct   = Math.round(count / total * 100);
-        return `<div class="donut-legend-row">
-            <span class="legend-swatch" style="background:${s.color}"></span>
-            <span style="color:#555">${s.label}</span>
-            <span class="dl-count">${fmt(count)}</span>
-            <span class="dl-pct">${pct}%</span>
-        </div>`;
-    }).join('');
-
-    el.innerHTML = svg + `<div class="donut-legend">${legend}</div>`;
-
-    el.querySelectorAll('.donut-arc').forEach(p => {
-        p.addEventListener('mouseenter', e => showTip(e, `<strong>${p.dataset.label}</strong><br>${fmt(+p.dataset.count)} &nbsp;(${p.dataset.pct}%)`));
-        p.addEventListener('mousemove',  moveTip);
-        p.addEventListener('mouseleave', hideTip);
-    });
+    const legend=segs.map(s=>{const count=st[s.key]||0,pct=Math.round(count/total*100);return`<div class="donut-legend-row"><span class="legend-swatch" style="background:${s.color}"></span><span style="color:#555">${s.label}</span><span class="dl-count">${fmt(count)}</span><span class="dl-pct">${pct}%</span></div>`;}).join('');
+    el.innerHTML=`<svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:180px;display:block">${paths}<text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="22" font-weight="700" fill="#333">${fmt(total)}</text><text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="10" fill="#bbb">total</text></svg><div class="donut-legend">${legend}</div>`;
+    el.querySelectorAll('.donut-arc').forEach(p=>{p.addEventListener('mouseenter',e=>showTip(e,`<strong>${p.dataset.label}</strong><br>${fmt(+p.dataset.count)} &nbsp;(${p.dataset.pct}%)`));p.addEventListener('mousemove',moveTip);p.addEventListener('mouseleave',hideTip);});
 }
-
-// ── Top Posts ─────────────────────────────────────────────────────────────────
 
 function renderTopPosts(posts) {
-    const el = document.getElementById('top-posts-chart');
-    if (!posts.length) {
-        el.innerHTML = '<div class="chart-empty">No posts yet</div>';
-        return;
-    }
-
-    const W = 700, ROW = 30, PAD_URL = 4, URL_W = 190, BAR_GAP = 8, COUNT_W = 32;
-    const BAR_W = W - URL_W - BAR_GAP - COUNT_W - PAD_URL;
-    const H = posts.length * ROW + 4;
-    const maxVal = Math.max(...posts.map(p => p.total), 1);
-
-    let rows = '';
-    posts.forEach((p, i) => {
-        const y = i * ROW;
-        const urlLabel = truncUrl(p.page_url, 30);
-        const tw = (p.total / maxVal) * BAR_W;
-        const aw = p.total > 0 ? (p.approved / p.total) * tw : 0;
-        const pw = p.total > 0 ? (p.pending  / p.total) * tw : 0;
-        const sw = p.total > 0 ? (p.spam     / p.total) * tw : 0;
-        const ow = Math.max(0, tw - aw - pw - sw);
-
-        const barH = 14, by = y + (ROW - barH) / 2;
-        const bx0  = URL_W + BAR_GAP;
-        let bx = bx0;
-        const addSeg = (w, color) => {
-            if (w < 0.5) return;
-            rows += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${w.toFixed(1)}" height="${barH}" fill="${color}" rx="1.5"/>`;
-            bx += w;
-        };
-        addSeg(aw, '#28a745');
-        addSeg(pw, '#ffc107');
-        addSeg(sw, '#dc3545');
-        addSeg(ow, '#adb5bd');
-
-        rows += `<text x="${URL_W - 4}" y="${(y + ROW/2 + 4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="#555">${escHtml(urlLabel)}</text>`;
-        rows += `<text x="${bx0 + tw + 5}" y="${(y + ROW/2 + 4).toFixed(1)}" font-size="10.5" fill="#888">${p.total}</text>`;
-
-        if (i < posts.length - 1)
-            rows += `<line x1="0" x2="${W}" y1="${y + ROW}" y2="${y + ROW}" stroke="#f5f5f5"/>`;
-
-        rows += `<rect x="0" y="${y}" width="${W}" height="${ROW}" fill="rgba(0,0,0,0)" pointer-events="all" class="post-ov" data-i="${i}"/>`;
+    const el=document.getElementById('top-posts-chart');
+    if(!posts.length){el.innerHTML='<div class="chart-empty">No posts yet</div>';return;}
+    const W=700,ROW=30,URL_W=190,BAR_GAP=8,COUNT_W=32,BAR_W=W-URL_W-BAR_GAP-COUNT_W,H=posts.length*ROW+4;
+    const maxVal=Math.max(...posts.map(p=>p.total),1);
+    let rows='';
+    posts.forEach((p,i)=>{
+        const y=i*ROW,tw=(p.total/maxVal)*BAR_W,aw=p.total>0?(p.approved/p.total)*tw:0,pw=p.total>0?(p.pending/p.total)*tw:0,sw=p.total>0?(p.spam/p.total)*tw:0,ow=Math.max(0,tw-aw-pw-sw);
+        const barH=14,by=y+(ROW-barH)/2,bx0=URL_W+BAR_GAP;let bx=bx0;
+        const addSeg=(w,color)=>{if(w<.5)return;rows+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${w.toFixed(1)}" height="${barH}" fill="${color}" rx="1.5"/>`;bx+=w;};
+        addSeg(aw,'#28a745');addSeg(pw,'#ffc107');addSeg(sw,'#dc3545');addSeg(ow,'#adb5bd');
+        rows+=`<text x="${URL_W-4}" y="${(y+ROW/2+4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="#555">${escapeHtml(truncUrl(p.page_url,30))}</text>`;
+        rows+=`<text x="${bx0+tw+5}" y="${(y+ROW/2+4).toFixed(1)}" font-size="10.5" fill="#888">${p.total}</text>`;
+        if(i<posts.length-1)rows+=`<line x1="0" x2="${W}" y1="${y+ROW}" y2="${y+ROW}" stroke="#f5f5f5"/>`;
+        rows+=`<rect x="0" y="${y}" width="${W}" height="${ROW}" fill="rgba(0,0,0,0)" pointer-events="all" class="post-ov" data-i="${i}"/>`;
     });
-
-    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">${rows}</svg>`;
-
-    el.querySelectorAll('.post-ov').forEach(r => {
-        r.addEventListener('mouseenter', e => {
-            const p = posts[+r.dataset.i];
-            const pct = p.total > 0 ? Math.round(p.spam / p.total * 100) : 0;
-            showTip(e, `<strong>${escHtml(p.page_url)}</strong><br>Total: <strong>${p.total}</strong><br>✅ ${p.approved}&ensp;⏳ ${p.pending}&ensp;🚫 ${p.spam} (${pct}%)`);
-        });
-        r.addEventListener('mousemove',  moveTip);
-        r.addEventListener('mouseleave', hideTip);
-    });
+    el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">${rows}</svg>`;
+    el.querySelectorAll('.post-ov').forEach(r=>{r.addEventListener('mouseenter',e=>{const p=posts[+r.dataset.i];const pct=p.total>0?Math.round(p.spam/p.total*100):0;showTip(e,`<strong>${escapeHtml(p.page_url)}</strong><br>Total: <strong>${p.total}</strong><br>✅ ${p.approved}&ensp;⏳ ${p.pending}&ensp;🚫 ${p.spam} (${pct}%)`);});r.addEventListener('mousemove',moveTip);r.addEventListener('mouseleave',hideTip);});
 }
-
-// ── Bar Charts (hourly / weekday) ─────────────────────────────────────────────
 
 function renderHourly(values) {
-    const labels = Array.from({length: 24}, (_, h) =>
-        h === 0 ? '12am' : h === 12 ? '12pm' : h < 12 ? h + 'am' : (h - 12) + 'pm'
-    );
-    renderSimpleBar('hourly-chart', values, labels, '#4a90e2', 3);
+    const labels=Array.from({length:24},(_,h)=>h===0?'12am':h===12?'12pm':h<12?h+'am':(h-12)+'pm');
+    renderSimpleBar('hourly-chart',values,labels,'#4a90e2',3);
 }
+function renderWeekday(values) { renderSimpleBar('weekday-chart',values,['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],'#7c3aed',1); }
 
-function renderWeekday(values) {
-    renderSimpleBar('weekday-chart', values, ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], '#7c3aed', 1);
-}
-
-function renderSimpleBar(containerId, values, labels, color, labelEvery) {
-    const el = document.getElementById(containerId);
-    const maxRaw = Math.max(...values, 1);
-    const ticks  = niceTicks(maxRaw, 3);
-    const maxVal = ticks[ticks.length - 1];
-    const n = values.length;
-    const W = 600, H = 140;
-    const PL = 35, PR = 8, PT = 10, PB = 26;
-    const cW = W - PL - PR, cH = H - PT - PB;
-
-    let yLines = '';
-    for (const t of ticks) {
-        const y = (PT + cH - (t / maxVal) * cH).toFixed(1);
-        yLines += `<line x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}" stroke="#f0f0f0"/>`;
-        if (t > 0) yLines += `<text x="${PL-4}" y="${+y+4}" text-anchor="end" font-size="9.5" fill="#c0c0c0">${t >= 1000 ? (t/1000).toFixed(1)+'k' : t}</text>`;
-    }
-
-    const slotW = cW / n;
-    const barW  = Math.max(2, Math.min(slotW * 0.72, 40));
-    const barOff = (slotW - barW) / 2;
-    let bars = '', xLabels = '';
-
-    values.forEach((v, i) => {
-        const bx = (PL + i * slotW + barOff).toFixed(2);
-        const bh = v > 0 ? Math.max(1.5, (v / maxVal) * cH) : 0;
-        const by = (PT + cH - bh).toFixed(2);
-        bars += `<rect x="${bx}" y="${by}" width="${barW.toFixed(2)}" height="${bh.toFixed(2)}" fill="${color}" rx="1" opacity="0.85"/>`;
-
-        const hx = (PL + i * slotW).toFixed(2);
-        bars += `<rect class="sb-ov" x="${hx}" y="${PT}" width="${slotW.toFixed(2)}" height="${cH}" fill="rgba(0,0,0,0)" pointer-events="all" data-i="${i}"/>`;
-
-        if (i % labelEvery === 0) {
-            const lx = (PL + i * slotW + slotW / 2).toFixed(1);
-            xLabels += `<text x="${lx}" y="${H - 4}" text-anchor="middle" font-size="9.5" fill="#c0c0c0">${labels[i]}</text>`;
-        }
+function renderSimpleBar(containerId,values,labels,color,labelEvery) {
+    const el=document.getElementById(containerId);
+    const maxRaw=Math.max(...values,1),ticks=niceTicks(maxRaw,3),maxVal=ticks[ticks.length-1];
+    const n=values.length,W=600,H=140,PL=35,PR=8,PT=10,PB=26,cW=W-PL-PR,cH=H-PT-PB;
+    let yLines='';
+    for(const t of ticks){const y=(PT+cH-(t/maxVal)*cH).toFixed(1);yLines+=`<line x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}" stroke="#f0f0f0"/>`;if(t>0)yLines+=`<text x="${PL-4}" y="${+y+4}" text-anchor="end" font-size="9.5" fill="#c0c0c0">${t>=1000?(t/1000).toFixed(1)+'k':t}</text>`;}
+    const slotW=cW/n,barW=Math.max(2,Math.min(slotW*.72,40)),barOff=(slotW-barW)/2;
+    let bars='',xLabels='';
+    values.forEach((v,i)=>{
+        const bx=(PL+i*slotW+barOff).toFixed(2),bh=v>0?Math.max(1.5,(v/maxVal)*cH):0,by=(PT+cH-bh).toFixed(2);
+        bars+=`<rect x="${bx}" y="${by}" width="${barW.toFixed(2)}" height="${bh.toFixed(2)}" fill="${color}" rx="1" opacity="0.85"/>`;
+        bars+=`<rect class="sb-ov" x="${(PL+i*slotW).toFixed(2)}" y="${PT}" width="${slotW.toFixed(2)}" height="${cH}" fill="rgba(0,0,0,0)" pointer-events="all" data-i="${i}"/>`;
+        if(i%labelEvery===0){xLabels+=`<text x="${(PL+i*slotW+slotW/2).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="9.5" fill="#c0c0c0">${labels[i]}</text>`;}
     });
-
-    const axes = `<line x1="${PL}" x2="${PL}" y1="${PT}" y2="${PT+cH}" stroke="#e8e8e8"/>
-                  <line x1="${PL}" x2="${W-PR}" y1="${PT+cH}" y2="${PT+cH}" stroke="#e8e8e8"/>`;
-
-    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
-        ${yLines}${axes}${bars}${xLabels}
-    </svg>`;
-
-    el.querySelectorAll('.sb-ov').forEach(r => {
-        r.addEventListener('mouseenter', e => {
-            const i = +r.dataset.i;
-            showTip(e, `<strong>${labels[i]}</strong><br>${fmt(values[i])} comment${values[i] !== 1 ? 's' : ''}`);
-        });
-        r.addEventListener('mousemove',  moveTip);
-        r.addEventListener('mouseleave', hideTip);
-    });
+    const axes=`<line x1="${PL}" x2="${PL}" y1="${PT}" y2="${PT+cH}" stroke="#e8e8e8"/><line x1="${PL}" x2="${W-PR}" y1="${PT+cH}" y2="${PT+cH}" stroke="#e8e8e8"/>`;
+    el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">${yLines}${axes}${bars}${xLabels}</svg>`;
+    el.querySelectorAll('.sb-ov').forEach(r=>{r.addEventListener('mouseenter',e=>{const i=+r.dataset.i;showTip(e,`<strong>${labels[i]}</strong><br>${fmt(values[i])} comment${values[i]!==1?'s':''}`);});r.addEventListener('mousemove',moveTip);r.addEventListener('mouseleave',hideTip);});
 }
-
-// ── Tooltip ───────────────────────────────────────────────────────────────────
 
 const ttEl = document.getElementById('chart-tooltip');
-
-function showTip(e, html) {
-    ttEl.innerHTML = html;
-    ttEl.style.display = 'block';
-    moveTip(e);
+function showTip(e,html){ttEl.innerHTML=html;ttEl.style.display='block';moveTip(e);}
+function moveTip(e){
+    const margin=14;let x=e.clientX+margin,y=e.clientY-margin;
+    const tw=ttEl.offsetWidth,th=ttEl.offsetHeight;
+    if(x+tw>window.innerWidth-8)x=e.clientX-tw-margin;
+    if(y+th>window.innerHeight-8)y=e.clientY-th-margin;
+    if(y<4)y=4;
+    ttEl.style.left=x+'px';ttEl.style.top=y+'px';
 }
+function hideTip(){ttEl.style.display='none';}
 
-function moveTip(e) {
-    const margin = 14;
-    let x = e.clientX + margin;
-    let y = e.clientY - margin;
-    const tw = ttEl.offsetWidth, th = ttEl.offsetHeight;
-    if (x + tw > window.innerWidth  - 8) x = e.clientX - tw - margin;
-    if (y + th > window.innerHeight - 8) y = e.clientY - th - margin;
-    if (y < 4) y = 4;
-    ttEl.style.left = x + 'px';
-    ttEl.style.top  = y + 'px';
-}
-
-function hideTip() { ttEl.style.display = 'none'; }
-
-// ── Utilities ─────────────────────────────────────────────────────────────────
-
-function niceTicks(maxVal, count) {
-    if (maxVal === 0) return [0, 1];
-    const rough = maxVal / count;
-    const mag   = Math.pow(10, Math.floor(Math.log10(rough)));
-    const nice  = [1, 2, 2.5, 5, 10].map(f => f * mag).find(f => f >= rough) || mag * 10;
-    const ticks = [];
-    for (let v = 0; v <= maxVal * 1.05; v += nice) {
-        ticks.push(Math.round(v));
-        if (ticks.length > 8) break;
-    }
-    if (!ticks.includes(0)) ticks.unshift(0);
+function niceTicks(maxVal,count){
+    if(!maxVal)return[0,1];
+    const rough=maxVal/count,mag=Math.pow(10,Math.floor(Math.log10(rough)));
+    const nice=[1,2,2.5,5,10].map(f=>f*mag).find(f=>f>=rough)||mag*10;
+    const ticks=[];
+    for(let v=0;v<=maxVal*1.05;v+=nice){ticks.push(Math.round(v));if(ticks.length>8)break;}
+    if(!ticks.includes(0))ticks.unshift(0);
     return ticks;
 }
 
-function fmtPeriod(period, gran) {
-    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    if (gran === 'daily') {
-        const [y, m, d] = period.split('-');
-        return MONTHS[+m - 1] + ' ' + +d;
-    }
-    if (gran === 'weekly') {
-        return period.replace(/^\d{4}-W0?/, 'W');
-    }
-    if (gran === 'monthly') {
-        const [y, m] = period.split('-');
-        return MONTHS[+m - 1] + ' \'' + y.slice(2);
-    }
+function fmtPeriod(period,gran){
+    const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    if(gran==='daily'){const[y,m,d]=period.split('-');return M[+m-1]+' '+ +d;}
+    if(gran==='weekly')return period.replace(/^\d{4}-W0?/,'W');
+    if(gran==='monthly'){const[y,m]=period.split('-');return M[+m-1]+' \''+y.slice(2);}
     return period;
 }
-
-function truncUrl(url, max) {
-    const s = url.replace(/^https?:\/\//, '');
-    return s.length > max ? '…' + s.slice(-(max - 1)) : s;
-}
-
-function fmt(n) { return Number(n).toLocaleString(); }
-
-function escHtml(str) {
-    const d = document.createElement('div');
-    d.textContent = String(str ?? '');
-    return d.innerHTML;
-}
-
-async function logout() {
-    await fetch('api.php?action=logout', { method: 'POST', credentials: 'include' });
-    location.reload();
-}
+function truncUrl(url,max){const s=url.replace(/^https?:\/\//,'');return s.length>max?'…'+s.slice(-(max-1)):s;}
+function fmt(n){return Number(n).toLocaleString();}
 </script>
 <script src="light-dark-mode-panel.js"></script>
 </body>

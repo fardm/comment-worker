@@ -8,140 +8,34 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="admin.css">
     <style>
-
-        textarea {
-            min-height: 100px;
-            font-family: inherit;
-        }
-
-        .btn-small {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-        }
-
-        .section-card {
-            background: var(--on-background);
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .section-card h2 {
-            margin-bottom: 1.5rem;
-            color: #4a90e2;
-        }
-
-        .subscription-item {
-            border-bottom: 1px solid #e0e0e0;
-            padding: 1rem 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .subscription-item:last-child {
-            border-bottom: none;
-        }
-
-        .subscription-info {
-            flex: 1;
-        }
-
-        .subscription-email {
-            font-weight: 600;
-            color: var(--body-text);
-            
-        }
-
-        .subscription-page {
-            color: var(--darkgray);
-            font-size: 0.9rem;
-        }
-
-        .subscription-date {
-            color: var(--darkgray);
-            font-size: 0.85rem;
-        }
-
-        .subscription-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-
-        .no-data {
-            text-align: center;
-            padding: 2rem;
-            color: #888;
-        }
-
-        /* Mobile Responsive Styles */
+        textarea { min-height: 100px; font-family: inherit; }
+        .btn-small { padding: 0.5rem 1rem; font-size: 0.9rem; }
+        .section-card { background: var(--on-background); padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        .section-card h2 { margin-bottom: 1.5rem; color: #4a90e2; }
+        .subscription-item { border-bottom: 1px solid #e0e0e0; padding: 1rem 0; display: flex; justify-content: space-between; align-items: center; }
+        .subscription-item:last-child { border-bottom: none; }
+        .subscription-info { flex: 1; }
+        .subscription-email { font-weight: 600; color: var(--body-text); }
+        .subscription-page  { color: var(--darkgray); font-size: 0.9rem; }
+        .subscription-date  { color: var(--darkgray); font-size: 0.85rem; }
+        .subscription-actions { display: flex; gap: 0.5rem; }
+        .no-data { text-align: center; padding: 2rem; color: #888; }
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            .nav {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-
-            .nav a {
-                flex: 1;
-                min-width: 100px;
-                text-align: center;
-            }
-
-            .stats {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .subscription-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .subscription-actions {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .subscription-actions button {
-                width: 100%;
-            }
-
-            #login-section {
-                margin: 20px auto;
-                padding: 1.5rem;
-            }
+            .container { padding: 1rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .nav { width: 100%; flex-wrap: wrap; }
+            .nav a { flex: 1; min-width: 100px; text-align: center; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .subscription-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .subscription-actions { width: 100%; flex-direction: column; }
+            .subscription-actions button { width: 100%; }
+            #login-section { margin: 20px auto; padding: 1.5rem; }
         }
-
         @media (max-width: 480px) {
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
-            }
-
-            .btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
+            .stats { grid-template-columns: 1fr; }
+            .stat-number { font-size: 1.5rem; }
+            .btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -169,7 +63,7 @@
                 <a href="admin-posts.html">Posts</a>
                 <a href="admin-analytics.html">Analytics</a>
                 <a href="admin-utilities.html">Utilities</a>
-                <a href="#" onclick="logout(); return false;" class="logout-btn">Logout</a>
+                <a href="#" onclick="AdminAuth.logout(); return false;" class="logout-btn">Logout</a>
             </div>
             <div class="section-icons">
                 <label class="theme-switch">
@@ -181,161 +75,52 @@
 
         <div class="container">
             <div class="stats" id="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="stat-total-subs">0</div>
-                    <div class="stat-label">Total Subscriptions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="stat-active-subs">0</div>
-                    <div class="stat-label">Active</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="stat-inactive-subs">0</div>
-                    <div class="stat-label">Unsubscribed</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="stat-pages">0</div>
-                    <div class="stat-label">Pages with Subscribers</div>
-                </div>
+                <div class="stat-card"><div class="stat-number" id="stat-total-subs">0</div><div class="stat-label">Total Subscriptions</div></div>
+                <div class="stat-card"><div class="stat-number" id="stat-active-subs">0</div><div class="stat-label">Active</div></div>
+                <div class="stat-card"><div class="stat-number" id="stat-inactive-subs">0</div><div class="stat-label">Unsubscribed</div></div>
+                <div class="stat-card"><div class="stat-number" id="stat-pages">0</div><div class="stat-label">Pages with Subscribers</div></div>
             </div>
-
             <div class="section-card">
                 <h2>All Subscriptions</h2>
-                <div id="subscriptions-list">
-                    <p class="no-data">Loading...</p>
-                </div>
+                <div id="subscriptions-list"><p class="no-data">Loading...</p></div>
             </div>
         </div>
     </div>
 
+    <script src="admin-common.js"></script>
     <script>
-        const API_URL = 'api.php';
         let allSubscriptions = [];
-        let csrfToken = null;
 
-        // Get CSRF token from cookie
-        function getCSRFToken() {
-            const name = 'csrf_token=';
-            const decodedCookie = decodeURIComponent(document.cookie);
-            const ca = decodedCookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) === ' ') {
-                    c = c.substring(1);
-                }
-                if (c.indexOf(name) === 0) {
-                    return c.substring(name.length, c.length);
-                }
-            }
-            return null;
-        }
-
-        // Fetch CSRF token if not in cookie
-        async function ensureCSRFToken() {
-            if (!csrfToken) {
-                csrfToken = getCSRFToken();
-            }
-            if (!csrfToken) {
-                try {
-                    const response = await fetch(`${API_URL}?action=csrf_token`, {
-                        credentials: 'include'
-                    });
-                    const data = await response.json();
-                    csrfToken = data.token;
-                } catch (error) {
-                    console.error('Failed to fetch CSRF token:', error);
-                }
-            }
-            return csrfToken;
-        }
-
-        // Check if already logged in on page load
-        async function checkAuth() {
-            try {
-                const response = await fetch(`${API_URL}?action=subscriptions&limit=10000`, {
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    await ensureCSRFToken();
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-section').style.display = 'block';
-                    loadDashboard();
-                }
-            } catch (error) {
-                // Not authenticated, show login
-            }
-        }
-
-        checkAuth();
-
-        // Login handling
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const password = document.getElementById('password').value;
-            const messageEl = document.getElementById('login-message');
-
-            try {
-                const response = await fetch(`${API_URL}?action=login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ password })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    // Store CSRF token from login response
-                    csrfToken = result.csrf_token || getCSRFToken();
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-section').style.display = 'block';
-                    loadDashboard();
-                } else {
-                    messageEl.innerHTML = `<div class="message error">${result.error}</div>`;
-                }
-            } catch (error) {
-                messageEl.innerHTML = '<div class="message error">Network error</div>';
-            }
+        AdminAuth.init({
+            authProbeUrl: `${API_URL}?action=subscriptions&limit=1`,
+            onSuccess: loadSubscriptions,
         });
-
-        async function loadDashboard() {
-            await loadSubscriptions();
-        }
 
         async function loadSubscriptions() {
             const container = document.getElementById('subscriptions-list');
             try {
-                const timestamp = new Date().getTime();
-                const response = await fetch(`${API_URL}?action=subscriptions&limit=10000&_=${timestamp}`, {
-                    credentials: 'include',
-                    cache: 'no-store'
+                const r = await fetch(`${API_URL}?action=subscriptions&limit=10000&_=${Date.now()}`, {
+                    credentials: 'include', cache: 'no-store',
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
+                const data = await r.json();
+                if (r.ok) {
                     allSubscriptions = data.subscriptions || [];
                     displaySubscriptions(allSubscriptions);
                     updateStats(allSubscriptions);
                 } else {
-                    console.error('Failed to load subscriptions:', data.error);
                     container.innerHTML = `<div class="message error">Error: ${data.error}</div>`;
                 }
             } catch (error) {
-                console.error('Error loading subscriptions:', error);
                 container.innerHTML = `<div class="message error">Network error: ${error.message}</div>`;
             }
         }
 
         function displaySubscriptions(subscriptions) {
             const container = document.getElementById('subscriptions-list');
-
             if (subscriptions.length === 0) {
                 container.innerHTML = '<p class="no-data">No subscriptions yet</p>';
                 return;
             }
-
             container.innerHTML = subscriptions.map(sub => `
                 <div class="subscription-item">
                     <div class="subscription-info">
@@ -349,86 +134,50 @@
                         </div>
                     </div>
                     <div class="subscription-actions">
-                        ${sub.active ?
-                            `<button class="btn btn-warning btn-small" onclick="toggleSubscription('${sub.token}', 0)">Unsubscribe</button>` :
-                            `<button class="btn btn-success btn-small" onclick="toggleSubscription('${sub.token}', 1)">Reactivate</button>`
+                        ${sub.active
+                            ? `<button class="btn btn-warning btn-small" onclick="toggleSubscription('${sub.token}', 0)">Unsubscribe</button>`
+                            : `<button class="btn btn-success btn-small" onclick="toggleSubscription('${sub.token}', 1)">Reactivate</button>`
                         }
                         <button class="btn btn-danger btn-small" onclick="deleteSubscription('${sub.token}')">Delete</button>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
         function updateStats(subscriptions) {
-            const active = subscriptions.filter(s => s.active).length;
+            const active   = subscriptions.filter(s =>  s.active).length;
             const inactive = subscriptions.filter(s => !s.active).length;
-            const pages = new Set(subscriptions.map(s => s.page_url)).size;
-
-            document.getElementById('stat-total-subs').textContent = subscriptions.length;
-            document.getElementById('stat-active-subs').textContent = active;
+            const pages    = new Set(subscriptions.map(s => s.page_url)).size;
+            document.getElementById('stat-total-subs').textContent    = subscriptions.length;
+            document.getElementById('stat-active-subs').textContent   = active;
             document.getElementById('stat-inactive-subs').textContent = inactive;
-            document.getElementById('stat-pages').textContent = pages;
+            document.getElementById('stat-pages').textContent         = pages;
         }
 
         async function toggleSubscription(token, active) {
             try {
-                // Ensure we have CSRF token
-                await ensureCSRFToken();
-
-                const response = await fetch(`${API_URL}?action=toggle_subscription`, {
+                await AdminAuth.ensureCsrfToken();
+                const r = await fetch(`${API_URL}?action=toggle_subscription`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ token, active, csrf_token: csrfToken })
+                    body: JSON.stringify({ token, active, csrf_token: AdminAuth.getCsrfToken() }),
                 });
-
-                if (response.ok) {
-                    loadSubscriptions();
-                } else {
-                    const result = await response.json();
-                    alert(`Failed to update subscription: ${result.error || 'Unknown error'}`);
-                }
-            } catch (error) {
-                console.error('Error toggling subscription:', error);
-                alert('Network error');
-            }
+                if (r.ok) { loadSubscriptions(); }
+                else { alert(`Failed to update subscription: ${(await r.json()).error || 'Unknown error'}`); }
+            } catch (e) { alert('Network error'); }
         }
 
         async function deleteSubscription(token) {
-            if (!confirm('Are you sure you want to permanently delete this subscription?')) {
-                return;
-            }
-
+            if (!confirm('Are you sure you want to permanently delete this subscription?')) return;
             try {
-                // Ensure we have CSRF token
-                await ensureCSRFToken();
-
-                const response = await fetch(`${API_URL}?action=delete_subscription&token=${token}&csrf_token=${encodeURIComponent(csrfToken)}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    loadSubscriptions();
-                } else {
-                    const result = await response.json();
-                    alert(`Failed to delete subscription: ${result.error || 'Unknown error'}`);
-                }
-            } catch (error) {
-                console.error('Error deleting subscription:', error);
-                alert('Network error');
-            }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        async function logout() {
-            await fetch(`${API_URL}?action=logout`, { method: 'POST', credentials: 'include' });
-            location.reload();
+                await AdminAuth.ensureCsrfToken();
+                const r = await fetch(
+                    `${API_URL}?action=delete_subscription&token=${token}&csrf_token=${encodeURIComponent(AdminAuth.getCsrfToken())}`,
+                    { method: 'DELETE', credentials: 'include' }
+                );
+                if (r.ok) { loadSubscriptions(); }
+                else { alert(`Failed to delete: ${(await r.json()).error || 'Unknown error'}`); }
+            } catch (e) { alert('Network error'); }
         }
     </script>
     <script src="light-dark-mode-panel.js"></script>

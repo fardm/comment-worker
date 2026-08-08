@@ -1514,11 +1514,11 @@ VIEWS['utilities'] = {
                 <div class="util-card">
                     <div class="util-card-header"><span class="icon">📥</span><h2>Import Comments</h2></div>
                     <div class="util-card-body">
-                        <p>Import from a Comments Export XML file, a legacy project export, Disqus XML, or WordPress WXR. Native exports restore comments (all statuses), reactions, subscriptions, IP addresses, and metadata. Duplicate comments are skipped automatically.</p>
+                        <p>Import from a Comments Export file (XML or JSON), legacy project export, Disqus XML, or WordPress WXR. Native exports restore comments (all statuses), reactions, subscriptions, IP addresses, and metadata. Duplicate comments are skipped automatically.</p>
                         <div class="file-drop" id="file-drop" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-                            <input type="file" id="import-file" accept=".xml" onchange="handleFileSelect(event)">
+                            <input type="file" id="import-file" accept=".xml,.json" onchange="handleFileSelect(event)">
                             <div class="drop-icon">📂</div>
-                            <div class="drop-label">Drop XML file here or click to browse</div>
+                            <div class="drop-label">Drop XML or JSON file here or click to browse</div>
                             <div class="file-selected" id="file-selected-label" style="display:none;"></div>
                         </div>
                         <div id="import-preview" style="display:none;"></div>
@@ -1534,8 +1534,12 @@ VIEWS['utilities'] = {
                     <div class="util-card-header"><span class="icon">📤</span><h2>Export Comments</h2></div>
                     <div class="util-card-body">
                         <div class="export-row">
-                            <div class="export-info"><strong>Comments Export XML</strong><span>Full backup: all comments (every status), reactions, subscriptions, IP addresses, and metadata</span></div>
-                            <a href="../api.php?action=export_comments" class="btn btn-primary btn-sm">Download</a>
+                            <div class="export-info"><strong>Comments Export XML</strong><span>Disqus-compatible format: all comments, reactions, subscriptions, IP addresses, and metadata</span></div>
+                            <a href="../api.php?action=export_comments" class="btn btn-primary btn-sm">Download XML</a>
+                        </div>
+                        <div class="export-row" style="margin-top:1rem;">
+                            <div class="export-info"><strong>Comments Export JSON</strong><span>Native format: all comments, reactions, subscriptions, IP addresses, and metadata</span></div>
+                            <a href="../api.php?action=export_comments_json" class="btn btn-success btn-sm">Download JSON</a>
                         </div>
                         <div style="margin-top:1rem;"><div id="export-message"></div></div>
                     </div>

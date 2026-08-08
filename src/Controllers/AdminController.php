@@ -144,6 +144,20 @@ class AdminController
         return Response::json([]);
     }
 
+    // GET ?action=export_comments_json  (admin)
+    public function exportCommentsJson(Request $request): Response
+    {
+        if (!$this->authService->isAdmin()) {
+            return Response::unauthorized();
+        }
+
+        // Export outputs directly and exits — no Response object returned
+        $this->importExportService->exportCommentsJson();
+
+        // Unreachable; satisfies return type
+        return Response::json([]);
+    }
+
     // POST ?action=import_comments  (admin, legacy alias: import_disqus)
     public function importComments(Request $request): Response
     {

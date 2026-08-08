@@ -159,6 +159,9 @@ class Router
             $method === 'GET'  && in_array($action, ['export_comments', 'export_disqus'], true)
                 => $this->admin->exportComments($request),
 
+            $method === 'GET'  && $action === 'export_comments_json'
+                => $this->admin->exportCommentsJson($request),
+
             $method === 'POST' && in_array($action, ['import_comments', 'import_disqus'], true)
                 => $this->admin->importComments($request),
 

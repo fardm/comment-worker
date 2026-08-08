@@ -488,9 +488,33 @@ VIEWS['all'] = {
                     ${reactionSummary ? `<div class="body-text"><strong>Reactions:</strong> ${reactionSummary}</div>` : ''}
                     <div class="comment-actions">
                         <button class="btn btn-secondary" onclick="startCommentEdit(${comment.id})">Edit</button>
+                        <button class="btn btn-primary" onclick="showReplyForm(${comment.id}, '${escapeHtml(comment.page_url)}')">Reply</button>
                         ${comment.status !== 'approved' ? `<button class="btn btn-success" onclick="moderateComment(${comment.id}, 'approved')">Approve</button>` : ''}
                         ${comment.status !== 'spam' ? `<button class="btn btn-warning" onclick="moderateComment(${comment.id}, 'spam')">Mark as Spam</button>` : ''}
                         <button class="btn btn-danger" onclick="deleteComment(${comment.id})">Delete</button>
+                    </div>
+                    <div id="reply-form-${comment.id}" style="display:none;margin-top:1rem;padding:1rem;background:var(--light,#f8f9fa);border-radius:4px;">
+                        <div style="margin-bottom:0.5rem;"><strong>Reply to comment #${comment.id}</strong></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">
+                            <div>
+                                <label style="font-size:.85rem;color:#555;">Name</label>
+                                <input type="text" id="reply-name-${comment.id}" class="themed-control" style="width:100%;padding:0.5rem;" placeholder="Your name">
+                            </div>
+                            <div>
+                                <label style="font-size:.85rem;color:#555;">Email</label>
+                                <input type="email" id="reply-email-${comment.id}" class="themed-control" style="width:100%;padding:0.5rem;" placeholder="your@email.com">
+                            </div>
+                        </div>
+                        <div style="margin-bottom:0.5rem;">
+                            <label style="font-size:.85rem;color:#555;">Website (optional)</label>
+                            <input type="url" id="reply-url-${comment.id}" class="themed-control" style="width:100%;padding:0.5rem;" placeholder="https://yourwebsite.com">
+                        </div>
+                        <textarea id="reply-content-${comment.id}" class="themed-control" rows="3" style="width:100%;resize:vertical;padding:0.5rem;" placeholder="Write your reply..."></textarea>
+                        <div style="margin-top:0.5rem;display:flex;gap:0.5rem;">
+                            <button class="btn btn-success btn-sm" onclick="submitReply(${comment.id})">Submit Reply</button>
+                            <button class="btn btn-secondary btn-sm" onclick="hideReplyForm(${comment.id})">Cancel</button>
+                            <span id="reply-status-${comment.id}" style="font-size:.85rem;color:var(--body-text,#888);opacity:.8;"></span>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -579,7 +603,100 @@ VIEWS['all'] = {
             document.querySelector('.comments-section')?.scrollIntoView({ behavior: 'smooth' });
         }
 
-        hoistToWindow({ applyFilters, applyStatusFilter, clearFilters, moderateComment, deleteComment, changePage, startCommentEdit });
+        let replyingToId = null;
+        let replyingToPageUrl = null;
+
+        function showReplyForm(commentId, pageUrl) {
+            replyingToId = commentId;
+            replyingToPageUrl = pageUrl;
+            // Hide any other open reply forms
+            document.querySelectorAll('[id^="reply-form-"]').forEach(el => {
+                if (el.id !== `reply-form-${commentId}`) el.style.display = 'none';
+            });
+            document.getElementById(`reply-form-${commentId}`).style.display = 'block';
+            document.getElementById(`reply-content-${commentId}`).focus();
+        }
+
+        function hideReplyForm(commentId) {
+            document.getElementById(`reply-form-${commentId}`).style.display = 'none';
+            document.getElementById(`reply-content-${commentId}`).value = '';
+            document.getElementById(`reply-name-${commentId}`).value = '';
+            document.getElementById(`reply-email-${commentId}`).value = '';
+            document.getElementById(`reply-url-${commentId}`).value = '';
+            document.getElementById(`reply-status-${commentId}`).textContent = '';
+            replyingToId = null;
+            replyingToPageUrl = null;
+        }
+
+        async function submitReply(commentId) {
+            const name = document.getElementById(`reply-name-${commentId}`).value.trim();
+            const email = document.getElementById(`reply-email-${commentId}`).value.trim();
+            const url = document.getElementById(`reply-url-${commentId}`).value.trim();
+            const content = document.getElementById(`reply-content-${commentId}`).value.trim();
+            const statusEl = document.getElementById(`reply-status-${commentId}`);
+            
+            if (!name) {
+                statusEl.textContent = 'Please enter your name';
+                statusEl.style.color = 'red';
+                return;
+            }
+            if (!email) {
+                statusEl.textContent = 'Please enter your email';
+                statusEl.style.color = 'red';
+                return;
+            }
+            if (!content) {
+                statusEl.textContent = 'Please enter a reply';
+                statusEl.style.color = 'red';
+                return;
+            }
+
+            if (!replyingToPageUrl) {
+                statusEl.textContent = 'Error: missing page URL';
+                statusEl.style.color = 'red';
+                return;
+            }
+
+            try {
+                await AdminAuth.ensureCsrfToken();
+                statusEl.textContent = 'Submitting...';
+                statusEl.style.color = 'var(--body-text,#888)';
+
+                const response = await fetch(`${API_URL}?action=post`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        page_url: replyingToPageUrl,
+                        parent_id: commentId,
+                        author_name: name,
+                        author_email: email,
+                        author_url: url || null,
+                        content: content,
+                        csrf_token: AdminAuth.getCsrfToken()
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusEl.textContent = '✓ Reply posted successfully!';
+                    statusEl.style.color = 'green';
+                    setTimeout(() => {
+                        hideReplyForm(commentId);
+                        loadPage(currentPage);
+                    }, 1000);
+                } else {
+                    statusEl.textContent = 'Failed: ' + (result.error || 'Unknown error');
+                    statusEl.style.color = 'red';
+                }
+            } catch (e) {
+                statusEl.textContent = 'Network error';
+                statusEl.style.color = 'red';
+            }
+        }
+
+        hoistToWindow({ applyFilters, applyStatusFilter, clearFilters, moderateComment, deleteComment, changePage, startCommentEdit, showReplyForm, hideReplyForm, submitReply });
         loadDashboard();
     },
 };

@@ -127,7 +127,7 @@ function detectCurrentUrl() {
 // Main setup logic
 $message = '';
 $error = '';
-$step = isset($_POST['step']) ? (int)$_POST['step'] : 1;
+$step = isset($_POST['step']) ? (int)$_POST['step'] : (isset($_GET['step']) ? (int)$_GET['step'] : 1);
 $setupComplete = isSetupComplete();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -516,32 +516,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
             <p><a href="admin/" class="btn btn-primary" style="display: block; text-decoration: none; text-align: center;">Go to Admin Panel</a></p>
         <?php else: ?>
-            <?php if ($error): ?>
-                <div class="error">✗ <?php echo htmlspecialchars($error); ?></div>
-            <?php endif; ?>
-            
-            <?php if ($message): ?>
-                <div class="success">✓ <?php echo htmlspecialchars($message); ?></div>
-            <?php endif; ?>
-            
             <form method="post">
             <input type="hidden" name="step" value="<?php echo $step; ?>">
             
             <?php if ($step == 1): ?>
                 <div class="step-title">Application URL</div>
-                <label for="app_url">Base URL</label>
+                <?php if ($error): ?>
+                    <div class="error">✗ <?php echo htmlspecialchars($error); ?></div>
+                <?php endif; ?>
                 <p class="help-text">The URL where this comment system is installed (no trailing slash)</p>
                 <input type="text" name="app_url" id="app_url" value="<?php echo htmlspecialchars($_SESSION['setup_app_url'] ?? detectCurrentUrl()); ?>" required>
                 
             <?php elseif ($step == 2): ?>
                 <div class="step-title">Allowed Origins</div>
-                <label for="allowed_origins">Allowed Domains</label>
+                <?php if ($error): ?>
+                    <div class="error">✗ <?php echo htmlspecialchars($error); ?></div>
+                <?php endif; ?>
                 <p class="help-text">Comma-separated list of domains allowed to embed comments (CORS)</p>
                 <input type="text" name="allowed_origins" id="allowed_origins" placeholder="https://example.com" required>
                 
             <?php elseif ($step == 3): ?>
                 <div class="step-title">Timezone</div>
-                <label for="timezone">Select Timezone</label>
+                <?php if ($error): ?>
+                    <div class="error">✗ <?php echo htmlspecialchars($error); ?></div>
+                <?php endif; ?>
                 <p class="help-text">Choose the timezone for comment timestamps</p>
                 <select name="timezone" id="timezone" required>
                     <?php foreach (getTimezones() as $tz => $label): ?>
@@ -553,7 +551,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
             <?php elseif ($step == 4): ?>
                 <div class="step-title">Language</div>
-                <label for="app_language">Frontend Language</label>
+                <?php if ($error): ?>
+                    <div class="error">✗ <?php echo htmlspecialchars($error); ?></div>
+                <?php endif; ?>
                 <p class="help-text">Language for the comment widget interface</p>
                 <select name="app_language" id="app_language" required>
                     <option value="en" <?php echo (($_SESSION['setup_app_language'] ?? 'en') === 'en') ? 'selected' : ''; ?>>English</option>
@@ -562,14 +562,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
             <?php elseif ($step == 5): ?>
                 <div class="step-title">Admin Password</div>
-                <label for="password">Create Password</label>
+                <?php if ($error): ?>
+                    <div class="error">✗ <?php echo htmlspecialchars($error); ?></div>
+                <?php endif; ?>
                 <p class="help-text">Minimum 8 characters. This will be used to access the admin panel.</p>
                 <div class="password-wrapper">
                     <input type="password" name="password" id="password" required>
                     <button type="button" class="toggle-btn" onclick="togglePassword('password', this)">Show</button>
                 </div>
                 
-                <label for="confirm_password">Confirm Password</label>
+                <p class="help-text">Confirm your password</p>
                 <div class="password-wrapper">
                     <input type="password" name="confirm_password" id="confirm_password" required>
                     <button type="button" class="toggle-btn" onclick="togglePassword('confirm_password', this)">Show</button>
@@ -599,8 +601,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function goBack() {
             const form = document.querySelector('form');
             const stepInput = form.querySelector('input[name="step"]');
-            stepInput.value = parseInt(stepInput.value) - 1;
-            form.submit();
+            const currentStep = parseInt(stepInput.value);
+            const newStep = currentStep - 1;
+            window.location.href = window.location.pathname + '?step=' + newStep;
         }
     </script>
 </body>

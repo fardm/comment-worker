@@ -449,17 +449,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 14px;
             border-left: 4px solid #3c3;
         }
-        .step-number {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
+        .header {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: none;
+            border: none;
+            font-size: 28px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: color 0.3s;
+        }
+        .back-btn:hover {
+            color: #333;
+        }
+        .header h1 {
             text-align: center;
-            line-height: 28px;
-            font-size: 14px;
-            margin-right: 10px;
         }
         .step-title {
             font-size: 18px;
@@ -471,7 +482,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Setup Wizard</h1>
+        <div class="header">
+            <?php if ($step > 1 && !$setupComplete): ?>
+                <button type="button" class="back-btn" onclick="goBack()">←</button>
+            <?php endif; ?>
+            <h1>🚀 Setup Wizard</h1>
+        </div>
         <p class="subtitle">Configure your comment system in a few simple steps</p>
         
         <div class="progress">
@@ -504,19 +520,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="hidden" name="step" value="<?php echo $step; ?>">
             
             <?php if ($step == 1): ?>
-                <div class="step-title"><span class="step-number">1</span>Application URL</div>
+                <div class="step-title">Application URL</div>
                 <label for="app_url">Base URL</label>
                 <p class="help-text">The URL where this comment system is installed (no trailing slash)</p>
                 <input type="text" name="app_url" id="app_url" value="<?php echo htmlspecialchars($_SESSION['setup_app_url'] ?? detectCurrentUrl()); ?>" required>
                 
             <?php elseif ($step == 2): ?>
-                <div class="step-title"><span class="step-number">2</span>Allowed Origins</div>
+                <div class="step-title">Allowed Origins</div>
                 <label for="allowed_origins">Allowed Domains</label>
                 <p class="help-text">Comma-separated list of domains allowed to embed comments (CORS)</p>
-                <input type="text" name="allowed_origins" id="allowed_origins" value="<?php echo htmlspecialchars(implode(', ', $_SESSION['setup_allowed_origins'] ?? [detectCurrentUrl()])); ?>" required>
+                <input type="text" name="allowed_origins" id="allowed_origins" placeholder="https://example.com" required>
                 
             <?php elseif ($step == 3): ?>
-                <div class="step-title"><span class="step-number">3</span>Timezone</div>
+                <div class="step-title">Timezone</div>
                 <label for="timezone">Select Timezone</label>
                 <p class="help-text">Choose the timezone for comment timestamps</p>
                 <select name="timezone" id="timezone" required>
@@ -528,7 +544,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
                 
             <?php elseif ($step == 4): ?>
-                <div class="step-title"><span class="step-number">4</span>Language</div>
+                <div class="step-title">Language</div>
                 <label for="app_language">Frontend Language</label>
                 <p class="help-text">Language for the comment widget interface</p>
                 <select name="app_language" id="app_language" required>
@@ -537,7 +553,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
                 
             <?php elseif ($step == 5): ?>
-                <div class="step-title"><span class="step-number">5</span>Admin Password</div>
+                <div class="step-title">Admin Password</div>
                 <label for="password">Create Password</label>
                 <p class="help-text">Minimum 8 characters. This will be used to access the admin panel.</p>
                 <div class="password-wrapper">
@@ -556,10 +572,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn btn-primary">
                 <?php echo $step == 5 ? 'Complete Setup' : 'Continue'; ?>
             </button>
-            
-            <?php if ($step > 1): ?>
-                <button type="button" class="btn btn-secondary" onclick="goBack()">Back</button>
-            <?php endif; ?>
         </form>
         <?php endif; ?>
     </div>

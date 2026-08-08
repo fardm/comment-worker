@@ -15,14 +15,14 @@ RedirectMatch 403 /comments/db/.*
     Require all denied
 </FilesMatch>
 
-# Block access to 'utils' directory and all contents
+# Block access to 'scripts' directory and all contents
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^utils/ - [F,L]
+    RewriteRule ^scripts/ - [F,L]
 </IfModule>
 
-# Alternative method for blocking utils directory
-RedirectMatch 403 /comments/utils/.*
+# Alternative method for blocking scripts directory
+RedirectMatch 403 /comments/scripts/.*
 
 # Block access to 'backups' directory and all contents
 <IfModule mod_rewrite.c>
@@ -58,7 +58,7 @@ RedirectMatch 403 /comments/logs/.*
 </FilesMatch>
 
 # Block access to all utility PHP files
-<FilesMatch "^(import-|setup|test-|backup-|migrate-|enable-).*\.php$">
+<FilesMatch "^(import-|setup|test-|backup-|migrate-|enable-|fix-).*\.php$">
     Require all denied
 </FilesMatch>
 

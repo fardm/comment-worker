@@ -117,7 +117,7 @@ npx quartz sync
 1. یک کرون جاب جدید در پنل هاست خود ایجاد کنید.
 2. دستور زیر را جای‌گذاری (Paste) کنید:
 ```
-/usr/local/bin/php /home/username/domains/comments.example.com/public_html/utils/process-email-queue.php
+/usr/local/bin/php /home/username/domains/comments.example.com/public_html/scripts/process-email-queue.php
 ```
 3. به بخش **Utilities** بروید و **Email Notifications** (اعلان‌های ایمیلی) را فعال کنید.
 4. آدرس ایمیل خود را در فیلد **Admin Email** وارد کرده و تنظیمات را ذخیره کنید.
@@ -151,9 +151,3 @@ npx quartz sync
 - مسدودسازی خودکار IP پس از چندین تلاش ناموفق برای ورود به پنل مدیریت
 
 <br>
-
-## بهبودهای آینده
-
-- [ ] بازنویسی `api.php` به ماژول‌های کوچکتر (نظرات، واکنش‌ها، اشتراک‌ها، تنظیمات، درون‌ریزی/برون‌بری) برای بهبود قابلیت نگهداری.
-- [ ] ایجاد یک کامپوننت مشترک برای طرح‌بندی/ناوبری ادمین به منظور حذف HTML تکراری در صفحات مدیریت.
-- [ ] سازماندهی مجدد پوشه `utils/` به زیرپوشه‌های ساختاریافته (درون‌ریزی‌ها، مایگریشن‌ها، نگهداری) برای وضوح بیشتر.

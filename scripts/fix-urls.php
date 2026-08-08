@@ -6,8 +6,8 @@
  * Usage: php fix-urls.php
  */
 
-require_once 'config.php';
-require_once 'database.php';
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../database.php';
 
 if (php_sapi_name() !== 'cli') {
     die('This script must be run from command line');

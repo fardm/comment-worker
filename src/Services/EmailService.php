@@ -179,4 +179,59 @@ class EmailService
         
         return defined('APP_URL') ? APP_URL . '/unsubscribe.php?token=' . $sub['token'] : '';
     }
+
+    /**
+     * Process pending emails from the queue
+     * Returns number of emails processed
+     */
+    public function processQueue(int $batchSize = 10, int $maxAttempts = 3, int $retryDelay = 300): int
+    {
+        $pendingEmails = $this->emailQueueRepo->getPending($batchSize, $maxAttempts, $retryDelay);
+        
+        if (empty($pendingEmails)) {
+            return 0;
+        }
+
+        $processed = 0;
+        $succeeded = 0;
+        $failed = 0;
+
+        foreach ($pendingEmails as $email) {
+            $processed++;
+
+            $headers = "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "\r\n";
+            $headers .= "Reply-To: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "\r\n";
+            $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+
+            $success = @mail($email['recipient_email'], $email['subject'], $email['body'], $headers);
+
+            if ($success) {
+                $this->emailQueueRepo->markAsSent($email['id']);
+                $succeeded++;
+                error_log("Email sent to {$email['recipient_email']} (type: {$email['email_type']})");
+            } else {
+                $newAttempts = $email['attempts'] + 1;
+                $status = $newAttempts >= $maxAttempts ? 'failed' : 'pending';
+                $this->emailQueueRepo->markAsFailed($email['id'], $newAttempts, $status, "Failed to send email (attempt $newAttempts)");
+                $failed++;
+                error_log("Email failed to {$email['recipient_email']} (attempt $newAttempts/$maxAttempts)");
+            }
+        }
+
+        if ($processed > 0) {
+            error_log("Email queue: Processed $processed emails ($succeeded sent, $failed failed)");
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Clean up old sent and failed emails
+     */
+    public function cleanupOldEmails(int $sentDays = 30, int $failedDays = 7): void
+    {
+        $this->emailQueueRepo->deleteOldSent($sentDays);
+        $this->emailQueueRepo->deleteOldFailed($failedDays);
+    }
 }

@@ -67,7 +67,7 @@ function initDatabase() {
     if (!$db) return false;
 
     // Check if schema.sql exists, otherwise use inline schema
-    $schemaFile = __DIR__ . '/utils/schema.sql';
+    $schemaFile = __DIR__ . '/src/Database/schema.sql';
     if (file_exists($schemaFile)) {
         $schema = file_get_contents($schemaFile);
     } else {

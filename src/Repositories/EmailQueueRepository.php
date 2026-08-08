@@ -57,6 +57,14 @@ class EmailQueueRepository extends BaseRepository
     }
 
     /**
+     * Mark email as sent (alias for consistency)
+     */
+    public function markAsSent(int $id): bool
+    {
+        return $this->markSent($id);
+    }
+
+    /**
      * Mark email as failed
      */
     public function markFailed(int $id, string $error, int $maxAttempts = 3): bool
@@ -74,6 +82,20 @@ class EmailQueueRepository extends BaseRepository
         $newAttempts = ((int)$result['attempts']) + 1;
         $status = $newAttempts >= $maxAttempts ? 'failed' : 'pending';
         
+        $stmt = $this->prepare("
+            UPDATE email_queue
+            SET attempts = ?, status = ?, last_error = ?
+            WHERE id = ?
+        ");
+        $stmt->execute([$newAttempts, $status, $error, $id]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Mark email as failed with explicit status
+     */
+    public function markAsFailed(int $id, int $newAttempts, string $status, string $error): bool
+    {
         $stmt = $this->prepare("
             UPDATE email_queue
             SET attempts = ?, status = ?, last_error = ?
@@ -107,6 +129,32 @@ class EmailQueueRepository extends BaseRepository
         $count += $stmt->rowCount();
         
         return $count;
+    }
+
+    /**
+     * Delete old sent emails
+     */
+    public function deleteOldSent(int $days = 30): int
+    {
+        $stmt = $this->prepare("
+            DELETE FROM email_queue
+            WHERE status = 'sent' AND sent_at < datetime('now', '-' || ? || ' days')
+        ");
+        $stmt->execute([$days]);
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Delete old failed emails
+     */
+    public function deleteOldFailed(int $days = 7): int
+    {
+        $stmt = $this->prepare("
+            DELETE FROM email_queue
+            WHERE status = 'failed' AND created_at < datetime('now', '-' || ? || ' days')
+        ");
+        $stmt->execute([$days]);
+        return $stmt->rowCount();
     }
 
     /**

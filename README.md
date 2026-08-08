@@ -119,7 +119,7 @@ Email notifications require a cron job. If you installed the system on a subdoma
 1. Create a new Cron Job in your hosting panel  
 2. Paste the following command:
 ```
-/usr/local/bin/php /home/username/domains/comments.example.com/public_html/utils/process-email-queue.php
+/usr/local/bin/php /home/username/domains/comments.example.com/public_html/scripts/process-email-queue.php
 ```
 3. Go to **Utilities** and enable **Email Notifications**  
 4. Enter your email address in the **Admin Email** field and save the settings  
@@ -153,6 +153,3 @@ To reduce spam and abuse, the system includes several protection layers:
 - Automatic IP blocking after multiple failed login attempts in the admin panel
 
 <br>
-
-## Future Improvements
-- [-] Reorganize `utils/` into structured subfolders (imports, migrations, maintenance) for better clarity.

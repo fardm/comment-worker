@@ -19,6 +19,7 @@ use Services\CommentService;
 use Services\ReactionService;
 use Services\SubscriptionService;
 use Services\SettingsService;
+use Services\ConfigService;
 use Services\AnalyticsService;
 use Services\ImportExportService;
 use Services\DatabaseService;
@@ -169,6 +170,12 @@ class Container
             ??= new SettingsService(
                 $this->settingsRepository()
             );
+    }
+
+    public function configService(): ConfigService
+    {
+        return $this->instances[ConfigService::class]
+            ??= new ConfigService();
     }
 
     public function analyticsService(): AnalyticsService

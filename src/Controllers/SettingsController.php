@@ -6,6 +6,7 @@ use Core\Request;
 use Core\Response;
 use Services\SettingsService;
 use Services\AuthService;
+use Services\ConfigService;
 
 /**
  * Settings Controller
@@ -16,11 +17,13 @@ class SettingsController
 {
     private SettingsService $settingsService;
     private AuthService     $authService;
+    private ConfigService   $configService;
 
-    public function __construct(SettingsService $settingsService, AuthService $authService)
+    public function __construct(SettingsService $settingsService, AuthService $authService, ConfigService $configService)
     {
         $this->settingsService = $settingsService;
         $this->authService     = $authService;
+        $this->configService   = $configService;
     }
 
     // GET ?action=widget_config  (public)
@@ -53,6 +56,41 @@ class SettingsController
 
         if (isset($result['error'])) {
             return Response::error($result['error'], $result['code'] ?? 400);
+        }
+
+        return Response::success();
+    }
+
+    // GET ?action=get_config  (admin)
+    public function getConfig(Request $request): Response
+    {
+        if (!$this->authService->isAdmin()) {
+            return Response::unauthorized();
+        }
+
+        $config = $this->configService->readConfig();
+
+        if (isset($config['error'])) {
+            return Response::error($config['error'], $config['code'] ?? 500);
+        }
+
+        return Response::json($config);
+    }
+
+    // POST ?action=save_config  (admin)
+    public function saveConfig(Request $request): Response
+    {
+        if (!$this->authService->isAdmin()) {
+            return Response::unauthorized();
+        }
+        if (!$this->authService->validateCsrfToken($request->body('csrf_token', ''))) {
+            return Response::forbidden('Invalid CSRF token');
+        }
+
+        $result = $this->configService->writeConfig($request->allBody());
+
+        if (isset($result['error'])) {
+            return Response::error($result['error'], $result['code'] ?? 500);
         }
 
         return Response::success();

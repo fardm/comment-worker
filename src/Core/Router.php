@@ -130,6 +130,12 @@ class Router
             $method === 'POST' && $action === 'save_settings'
                 => $this->settings->saveSettings($request),
 
+            $method === 'GET'  && $action === 'get_config'
+                => $this->settings->getConfig($request),
+
+            $method === 'POST' && $action === 'save_config'
+                => $this->settings->saveConfig($request),
+
             // ── Admin: Analytics & utilities ─────────────────────────────────
             $method === 'GET'  && $action === 'analytics'
                 => $this->admin->analytics($request),

@@ -175,7 +175,8 @@ $router = new Router(
     ),
     new SettingsController(
         $container->settingsService(),
-        $container->authService()
+        $container->authService(),
+        $container->configService()
     ),
     new AdminController(
         $container->analyticsService(),

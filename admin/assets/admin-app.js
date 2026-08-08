@@ -26,6 +26,7 @@ const NAV_ITEMS = [
     { key: 'posts',          label: 'Posts'          },
     { key: 'analytics',      label: 'Analytics'      },
     { key: 'utilities',      label: 'Utilities'      },
+    { key: 'settings',       label: 'Settings'       },
 ];
 
 // ── Router state ──────────────────────────────────────────────────────────────
@@ -1940,5 +1941,122 @@ VIEWS['utilities'] = {
 
         loadSettings();
         loadDbStats();
+    },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────────────────────────────────────
+VIEWS['settings'] = {
+    title: 'Settings',
+    css: ``,
+    html: () => `
+        <div class="container">
+            <h2 style="margin-bottom: 1.5rem;">Configuration Settings</h2>
+            <div id="settings-message"></div>
+            <div class="settings-form">
+                <div class="form-group">
+                    <label for="config-app-url">Application URL</label>
+                    <p class="help-text">The URL where this comment system is installed (no trailing slash)</p>
+                    <input type="text" id="config-app-url" class="themed-control">
+                </div>
+                <div class="form-group">
+                    <label for="config-allowed-origins">Allowed Origins</label>
+                    <p class="help-text">Comma-separated list of domains allowed to embed comments (CORS)</p>
+                    <input type="text" id="config-allowed-origins" class="themed-control" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label for="config-timezone">Timezone</label>
+                    <p class="help-text">Choose the timezone for comment timestamps</p>
+                    <select id="config-timezone" class="themed-control">
+                        <option value="UTC">UTC</option>
+                        <option value="America/New_York">America/New_York (Eastern Time)</option>
+                        <option value="America/Chicago">America/Chicago (Central Time)</option>
+                        <option value="America/Denver">America/Denver (Mountain Time)</option>
+                        <option value="America/Los_Angeles">America/Los_Angeles (Pacific Time)</option>
+                        <option value="Europe/London">Europe/London (GMT)</option>
+                        <option value="Europe/Paris">Europe/Paris (Central European)</option>
+                        <option value="Europe/Berlin">Europe/Berlin (Central European)</option>
+                        <option value="Asia/Tehran">Asia/Tehran (Iran)</option>
+                        <option value="Asia/Dubai">Asia/Dubai (Gulf)</option>
+                        <option value="Asia/Tokyo">Asia/Tokyo (Japan)</option>
+                        <option value="Asia/Shanghai">Asia/Shanghai (China)</option>
+                        <option value="Australia/Sydney">Australia/Sydney (Australian Eastern)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="config-language">Frontend Language</label>
+                    <p class="help-text">Language for the comment widget interface</p>
+                    <select id="config-language" class="themed-control">
+                        <option value="en">English</option>
+                        <option value="fa">فارسی (Persian)</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
+            </div>
+        </div>`,
+
+    init({ hoistToWindow }) {
+        async function loadConfig() {
+            const msgEl = document.getElementById('settings-message');
+            try {
+                const r = await fetch(`${API_URL}?action=get_config`, { credentials: 'include' });
+                const d = await r.json();
+                if (r.ok) {
+                    document.getElementById('config-app-url').value = d.app_url || '';
+                    document.getElementById('config-allowed-origins').value = Array.isArray(d.allowed_origins) ? d.allowed_origins.join(', ') : '';
+                    document.getElementById('config-timezone').value = d.timezone || 'UTC';
+                    document.getElementById('config-language').value = d.app_language || 'en';
+                } else {
+                    if (msgEl) msgEl.innerHTML = `<div class="message error">${d.error || 'Failed to load configuration'}</div>`;
+                }
+            } catch (e) {
+                if (msgEl) msgEl.innerHTML = '<div class="message error">Network error loading configuration</div>';
+            }
+        }
+
+        async function saveConfig() {
+            const msgEl = document.getElementById('settings-message');
+            const appUrl = document.getElementById('config-app-url').value.trim();
+            const allowedOrigins = document.getElementById('config-allowed-origins').value.split(',').map(s => s.trim()).filter(s => s);
+            const timezone = document.getElementById('config-timezone').value;
+            const language = document.getElementById('config-language').value;
+
+            if (!appUrl) {
+                if (msgEl) msgEl.innerHTML = '<div class="message error">Application URL is required</div>';
+                return;
+            }
+            if (!allowedOrigins.length) {
+                if (msgEl) msgEl.innerHTML = '<div class="message error">At least one allowed origin is required</div>';
+                return;
+            }
+
+            try {
+                await AdminAuth.ensureCsrfToken();
+                const r = await fetch(`${API_URL}?action=save_config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        csrf_token: AdminAuth.getCsrfToken(),
+                        app_url: appUrl,
+                        allowed_origins: allowedOrigins,
+                        timezone: timezone,
+                        app_language: language
+                    })
+                });
+                const d = await r.json();
+                if (r.ok) {
+                    if (msgEl) msgEl.innerHTML = '<div class="message success">Configuration saved successfully</div>';
+                } else {
+                    if (msgEl) msgEl.innerHTML = `<div class="message error">${d.error || 'Failed to save configuration'}</div>`;
+                }
+            } catch (e) {
+                if (msgEl) msgEl.innerHTML = '<div class="message error">Network error saving configuration</div>';
+            }
+        }
+
+        hoistToWindow({ saveConfig });
+        loadConfig();
     },
 };

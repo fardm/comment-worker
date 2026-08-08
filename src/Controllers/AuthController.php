@@ -41,8 +41,14 @@ class AuthController
         $password = $request->body('password', '');
         $result   = $this->authService->login($password, $ip, $request->getUserAgent() ?? '');
 
-        if ($result === null) {
-            return Response::json(['error' => 'Invalid password'], 401);
+        if (isset($result['error'])) {
+            if ($result['error'] === 'admin_password_not_set') {
+                return Response::json(['error' => 'Admin password is not configured. Please run setup.php or set-password.php.'], 401);
+            }
+            if ($result['error'] === 'invalid_password') {
+                return Response::json(['error' => 'Invalid password'], 401);
+            }
+            return Response::json(['error' => 'Authentication failed'], 401);
         }
 
         return Response::json([

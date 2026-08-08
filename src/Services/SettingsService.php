@@ -80,7 +80,13 @@ class SettingsService
      */
     public function getAppLanguage(): string
     {
-        $lang = defined('APP_LANGUAGE') ? APP_LANGUAGE : 'en';
+        // First check if defined in config.php or loaded from database
+        if (defined('APP_LANGUAGE')) {
+            $lang = APP_LANGUAGE;
+        } else {
+            // Fallback to database settings
+            $lang = $this->settingsRepo->get('app_language') ?: 'en';
+        }
         return preg_match('/^[a-z]{2}$/i', $lang) ? strtolower($lang) : 'en';
     }
 }

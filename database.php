@@ -6,6 +6,69 @@ if (file_exists(__DIR__ . '/config.php')) {
     require_once 'config.php';
 }
 
+// Function to load config from database settings
+function loadConfigFromDatabase() {
+    $dbPath = defined('DB_PATH') ? DB_PATH : __DIR__ . '/db/comments.db';
+    if (!file_exists($dbPath)) {
+        return false;
+    }
+    
+    try {
+        $db = new PDO('sqlite:' . $dbPath);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        
+        // Load app_url
+        if (!defined('APP_URL')) {
+            $stmt = $db->prepare("SELECT value FROM settings WHERE key = 'app_url'");
+            $stmt->execute();
+            $result = $stmt->fetch();
+            if ($result && !empty($result['value'])) {
+                define('APP_URL', $result['value']);
+            }
+        }
+        
+        // Load allowed_origins
+        if (!defined('ALLOWED_ORIGINS')) {
+            $stmt = $db->prepare("SELECT value FROM settings WHERE key = 'allowed_origins'");
+            $stmt->execute();
+            $result = $stmt->fetch();
+            if ($result && !empty($result['value'])) {
+                $origins = json_decode($result['value'], true);
+                if (is_array($origins)) {
+                    define('ALLOWED_ORIGINS', $origins);
+                }
+            }
+        }
+        
+        // Load timezone
+        $stmt = $db->prepare("SELECT value FROM settings WHERE key = 'timezone'");
+        $stmt->execute();
+        $result = $stmt->fetch();
+        if ($result && !empty($result['value'])) {
+            date_default_timezone_set($result['value']);
+        }
+        
+        // Load app_language
+        if (!defined('APP_LANGUAGE')) {
+            $stmt = $db->prepare("SELECT value FROM settings WHERE key = 'app_language'");
+            $stmt->execute();
+            $result = $stmt->fetch();
+            if ($result && !empty($result['value'])) {
+                define('APP_LANGUAGE', $result['value']);
+            }
+        }
+        
+        return true;
+    } catch (PDOException $e) {
+        error_log('Failed to load config from database: ' . $e->getMessage());
+        return false;
+    }
+}
+
+// Try to load config from database if not already defined
+loadConfigFromDatabase();
+
 // Define DB_PATH if not already defined
 if (!defined('DB_PATH')) {
     // Auto-detect environment
@@ -107,7 +170,6 @@ function initDatabase() {
             );
 
             INSERT OR IGNORE INTO settings (key, value) VALUES
-                ('admin_password_hash', ''),
                 ('require_moderation', 'true'),
                 ('allow_guest_comments', 'true'),
                 ('max_comment_length', '5000'),

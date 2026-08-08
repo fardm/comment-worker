@@ -63,9 +63,13 @@ class AuthService
     {
         $hash = $this->settingsRepo->get('admin_password_hash');
         
-        if (!$hash || !SecurityHelper::verifyPassword($password, $hash)) {
+        if (!$hash) {
+            return ['error' => 'admin_password_not_set'];
+        }
+        
+        if (!SecurityHelper::verifyPassword($password, $hash)) {
             $this->loginAttemptRepo->record($ipAddress, false);
-            return null;
+            return ['error' => 'invalid_password'];
         }
         
         $this->loginAttemptRepo->record($ipAddress, true);

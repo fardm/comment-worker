@@ -297,6 +297,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
             padding: 40px;
         }
+        .back-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            margin-bottom: 10px;
+            transition: opacity 0.3s;
+            opacity: 0.7;
+        }
+        .back-btn.hidden {
+            visibility: hidden;
+            cursor: default;
+        }
+        .back-btn:hover {
+            opacity: 1;
+        }
+        .back-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: #555;
+            stroke-width: 2;
+            fill: none;
+        }
         h1 {
             color: #333;
             margin-bottom: 10px;
@@ -450,24 +473,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-left: 4px solid #3c3;
         }
         .header {
-            position: relative;
             margin-bottom: 10px;
-        }
-        .back-btn {
-            position: absolute;
-            left: 0;
-            top: 0;
-            background: none;
-            border: none;
-            font-size: 28px;
-            font-weight: 600;
-            color: #666;
-            cursor: pointer;
-            padding: 5px 10px;
-            transition: color 0.3s;
-        }
-        .back-btn:hover {
-            color: #333;
         }
         .header h1 {
             text-align: center;
@@ -482,10 +488,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="container">
+        <button type="button" class="back-btn<?php echo ($step == 1 || $setupComplete) ? ' hidden' : ''; ?>" onclick="goBack()">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
         <div class="header">
-            <?php if ($step > 1 && !$setupComplete): ?>
-                <button type="button" class="back-btn" onclick="goBack()">←</button>
-            <?php endif; ?>
             <h1>🚀 Setup Wizard</h1>
         </div>
         <p class="subtitle">Configure your comment system in a few simple steps</p>

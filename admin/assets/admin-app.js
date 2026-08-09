@@ -19,14 +19,14 @@
 // ── Navigation definition ─────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-    { key: 'pending',        label: 'Pending'        },
-    { key: 'all',            label: 'All Comments'   },
-    { key: 'subscriptions',  label: 'Subscriptions'  },
-    { key: 'post-reactions', label: 'Post Reactions' },
-    { key: 'posts',          label: 'Posts'          },
-    { key: 'analytics',      label: 'Analytics'      },
-    { key: 'utilities',      label: 'Utilities'      },
-    { key: 'settings',       label: 'Settings'       },
+    { key: 'pending',        label: 'Pending',        icon: 'clock' },
+    { key: 'all',            label: 'All Comments',   icon: 'message-square' },
+    { key: 'subscriptions',  label: 'Subscriptions',  icon: 'users' },
+    { key: 'post-reactions', label: 'Post Reactions', icon: 'smile' },
+    { key: 'posts',          label: 'Posts',          icon: 'file-text' },
+    { key: 'analytics',      label: 'Analytics',      icon: 'bar-chart-2' },
+    { key: 'utilities',      label: 'Utilities',      icon: 'tool' },
+    { key: 'settings',       label: 'Settings',       icon: 'settings' },
 ];
 
 // ── Router state ──────────────────────────────────────────────────────────────
@@ -41,11 +41,15 @@ let _windowHandlers = [];         // { name } of properties hoisted to window
 function renderNav(activeKey) {
     const nav = document.getElementById('admin-nav');
     if (!nav) return;
-    nav.innerHTML = NAV_ITEMS.map(({ key, label }) => {
+    nav.innerHTML = NAV_ITEMS.map(({ key, label, icon }) => {
         const cls = key === activeKey ? ' class="active"' : '';
-        return `<a href="#${key}"${cls}>${label}</a>`;
+        return `<a href="#${key}"${cls} title="${label}"><i data-lucide="${icon}"></i><span class="nav-label">${label}</span></a>`;
     }).join('') +
-        `<a href="#" onclick="AdminAuth.logout(); return false;" class="logout-btn">Logout</a>`;
+        '<a href="#" class="logout-btn" onclick="AdminAuth.logout(); return false;" title="Logout"><i data-lucide="log-out"></i><span class="nav-label">Logout</span></a>';
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
 }
 
 // ── View mounting / unmounting ────────────────────────────────────────────────
@@ -103,10 +107,15 @@ async function mountView(key) {
     unmountCurrent();
     _currentViewKey = key;
 
-    // Update document title
+   // Update document title
     document.title = view.title
         ? `Comment System Admin — ${view.title}`
         : 'Comment System Admin';
+
+    const pageTitleEl = document.querySelector('.page-title');
+    if (pageTitleEl && view.title) {
+        pageTitleEl.textContent = view.title;
+    }
 
     // Inject view-specific CSS into <head>
     if (view.css) {
@@ -2061,9 +2070,28 @@ VIEWS['settings'] = {
     },
 };
 
-// Close sidebar on mobile when a navigation link is clicked
+// Sidebar toggle logic
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('admin-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const mobileToggleBtn = document.getElementById('mobile-sidebar-toggle');
+
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+    }
+
+    if (mobileToggleBtn && sidebar) {
+        mobileToggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-active');
+        });
+    }
+});
+
+// Update the existing mobile close logic
 document.getElementById('admin-nav').addEventListener('click', function(e) {
     if (e.target.closest('a') && window.innerWidth <= 768) {
-        document.getElementById('admin-sidebar').classList.remove('active');
+        document.getElementById('admin-sidebar').classList.remove('mobile-active');
     }
 });

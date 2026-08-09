@@ -24,7 +24,7 @@
         ['post-reactions', 'admin-post-reactions.html', 'Post Reactions'],
         ['posts',          'admin-posts.html',          'Posts'],
         ['analytics',      'admin-analytics.html',      'Analytics'],
-        ['utilities',      'admin-utilities.html',      'Utilities'],
+
     ];
 
     // ── Determine active page ─────────────────────────────────────────────────

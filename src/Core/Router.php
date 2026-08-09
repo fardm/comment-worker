@@ -155,9 +155,6 @@ class Router
             $method === 'POST' && $action === 'db_delete_data'
                 => $this->admin->deleteData($request),
 
-            $method === 'POST' && $action === 'normalize_urls'
-                => $this->admin->normalizeUrls($request),
-
             $method === 'POST' && $action === 'test_email'
                 => $this->admin->testEmail($request),
 

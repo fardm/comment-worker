@@ -523,26 +523,4 @@ class CommentRepository extends BaseRepository
     /**
      * Normalize page URLs (strip scheme+host)
      */
-    public function normalizeUrls(): int
-    {
-        $stmt = $this->query("SELECT DISTINCT page_url FROM comments WHERE page_url LIKE 'http%'");
-        $fullUrls = $stmt->fetchAll(\PDO::FETCH_COLUMN);
-        
-        $fixed = 0;
-        $update = $this->prepare("UPDATE comments SET page_url = ? WHERE page_url = ?");
-        
-        foreach ($fullUrls as $url) {
-            $parsed = parse_url($url);
-            $path = $parsed['path'] ?? $url;
-            if (isset($parsed['query'])) $path .= '?' . $parsed['query'];
-            if (isset($parsed['fragment'])) $path .= '#' . $parsed['fragment'];
-            
-            if ($path !== $url) {
-                $update->execute([$path, $url]);
-                $fixed += $update->rowCount();
-            }
-        }
-        
-        return $fixed;
-    }
 }

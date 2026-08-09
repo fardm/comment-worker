@@ -117,19 +117,6 @@ class AdminController
         return Response::json($result);
     }
 
-    // POST ?action=normalize_urls  (admin)
-    public function normalizeUrls(Request $request): Response
-    {
-        if (!$this->authService->isAdmin()) {
-            return Response::unauthorized();
-        }
-        if (!$this->authService->validateCsrfToken($request->body('csrf_token', ''))) {
-            return Response::forbidden('Invalid CSRF token');
-        }
-
-        return Response::json($this->databaseService->normalizeUrls());
-    }
-
     // GET ?action=export_comments  (admin, legacy alias: export_disqus)
     public function exportComments(Request $request): Response
     {

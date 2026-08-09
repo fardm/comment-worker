@@ -195,12 +195,6 @@ class DatabaseService
     /**
      * Normalize all comment URLs
      */
-    public function normalizeUrls(): array
-    {
-        $fixed = $this->commentRepo->normalizeUrls();
-        return ['success' => true, 'comments_updated' => $fixed];
-    }
-
     /**
      * Check if table exists
      */

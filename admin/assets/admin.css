@@ -839,3 +839,101 @@
     background: #de3b3b1a; /* slight red tint */
     border-left-color: var(--red);
 }
+
+/* Collapsible Navigation Styling */
+.nav-parent {
+    margin-bottom: 0.25rem;
+}
+
+.nav-parent summary {
+    padding: 0.75rem 1.25rem;
+    color: var(--body-text);
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    list-style: none; /* Hide default triangle in WebKit */
+}
+
+/* Hide default triangle in Firefox */
+.nav-parent summary::-webkit-details-marker {
+    display: none;
+}
+
+.nav-parent summary:hover {
+    background: #4a90e21a;
+    color: var(--primary);
+}
+
+.nav-parent summary svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.nav-chevron {
+    margin-left: auto;
+    width: 16px !important;
+    height: 16px !important;
+    transition: transform 0.2s;
+    opacity: 0.5;
+}
+
+.nav-parent[open] .nav-chevron {
+    transform: rotate(180deg);
+}
+
+.nav-children {
+    display: flex;
+    flex-direction: column;
+    padding-left: 2.75rem; /* Indent children */
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+
+.nav-children a {
+    padding: 0.5rem 0.75rem;
+    color: var(--body-text);
+    text-decoration: none;
+    border-left: none; /* Remove border from children */
+    border-radius: 4px; /* Give them a border radius instead */
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.nav-children a:hover, .nav-children a.active {
+    background: #4a90e21a;
+    color: var(--primary);
+    opacity: 1;
+    border-left: none;
+}
+
+/* Sidebar collapsed state for nav parent */
+.sidebar.collapsed .nav-parent summary {
+    justify-content: center;
+    padding: 0.75rem 0;
+}
+
+.sidebar.collapsed .nav-chevron {
+    display: none;
+}
+
+.sidebar.collapsed .nav-children {
+    display: none; /* Hide children when sidebar is collapsed */
+}
+
+@media (max-width: 768px) {
+    .sidebar.mobile-active .nav-parent summary {
+        justify-content: flex-start;
+        padding: 0.75rem 1.25rem;
+    }
+    .sidebar.mobile-active .nav-chevron {
+        display: block;
+    }
+    .sidebar.mobile-active .nav-children {
+        display: flex;
+    }
+}

@@ -2060,3 +2060,10 @@ VIEWS['settings'] = {
         loadConfig();
     },
 };
+
+// Close sidebar on mobile when a navigation link is clicked
+document.getElementById('admin-nav').addEventListener('click', function(e) {
+    if (e.target.closest('a') && window.innerWidth <= 768) {
+        document.getElementById('admin-sidebar').classList.remove('active');
+    }
+});

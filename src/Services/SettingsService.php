@@ -15,6 +15,8 @@ class SettingsService
         'require_moderation',
         'enable_notifications',
         'admin_email',
+        'admin_name',
+        'admin_url',
         'comment_sort_order',
     ];
 

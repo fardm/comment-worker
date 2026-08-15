@@ -521,20 +521,20 @@ VIEWS['all'] = {
                         ${comment.status !== 'spam' ? `<button class="btn btn-warning" onclick="moderateComment(${comment.id}, 'spam')">Mark as Spam</button>` : ''}
                         <button class="btn btn-danger" onclick="deleteComment(${comment.id})">Delete</button>
                     </div>
-                    <div id="reply-form-${comment.id}" style="display:none;margin-top:1rem;padding:1rem;background:var(--light,#f8f9fa);border-radius:4px;">
-                        <div style="margin-bottom:0.5rem;"><strong>Reply to comment #${comment.id}</strong></div>
+                    <div id="reply-form-${comment.id}" style="display:none;margin-top:1rem;padding:1rem;background:var(--on-background);border:1px solid var(--gray);border-radius:4px;">
+                        <div style="margin-bottom:0.5rem;color:var(--body-text);"><strong>Reply to comment #${comment.id}</strong></div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">
                             <div>
-                                <label style="font-size:.85rem;color:#555;">Name</label>
+                                <label style="font-size:.85rem;color:var(--body-text);opacity:.8;">Name</label>
                                 <input type="text" id="reply-name-${comment.id}" class="themed-control" style="width:100%;padding:0.5rem;" placeholder="Your name">
                             </div>
                             <div>
-                                <label style="font-size:.85rem;color:#555;">Email</label>
+                                <label style="font-size:.85rem;color:var(--body-text);opacity:.8;">Email</label>
                                 <input type="email" id="reply-email-${comment.id}" class="themed-control" style="width:100%;padding:0.5rem;" placeholder="your@email.com">
                             </div>
                         </div>
                         <div style="margin-bottom:0.5rem;">
-                            <label style="font-size:.85rem;color:#555;">Website (optional)</label>
+                            <label style="font-size:.85rem;color:var(--body-text);opacity:.8;">Website (optional)</label>
                             <input type="url" id="reply-url-${comment.id}" class="themed-control" style="width:100%;padding:0.5rem;" placeholder="https://yourwebsite.com">
                         </div>
                         <textarea id="reply-content-${comment.id}" class="themed-control" rows="3" style="width:100%;resize:vertical;padding:0.5rem;" placeholder="Write your reply..."></textarea>
@@ -633,8 +633,9 @@ VIEWS['all'] = {
 
         let replyingToId = null;
         let replyingToPageUrl = null;
+        let adminProfileCache = null;
 
-        function showReplyForm(commentId, pageUrl) {
+        async function showReplyForm(commentId, pageUrl) {
             replyingToId = commentId;
             replyingToPageUrl = pageUrl;
             // Hide any other open reply forms
@@ -643,6 +644,30 @@ VIEWS['all'] = {
             });
             document.getElementById(`reply-form-${commentId}`).style.display = 'block';
             document.getElementById(`reply-content-${commentId}`).focus();
+
+            if (!adminProfileCache) {
+                try {
+                    const response = await fetch(`${API_URL}?action=get_settings`, { credentials: 'include' });
+                    if (response.ok) {
+                        const data = await response.json();
+                        adminProfileCache = data.settings || {};
+                    }
+                } catch (e) {
+                    adminProfileCache = {};
+                }
+            }
+
+            if (adminProfileCache) {
+                if (adminProfileCache.admin_name) {
+                    document.getElementById(`reply-name-${commentId}`).value = adminProfileCache.admin_name;
+                }
+                if (adminProfileCache.admin_email) {
+                    document.getElementById(`reply-email-${commentId}`).value = adminProfileCache.admin_email;
+                }
+                if (adminProfileCache.admin_url) {
+                    document.getElementById(`reply-url-${commentId}`).value = adminProfileCache.admin_url;
+                }
+            }
         }
 
         function hideReplyForm(commentId) {
@@ -1384,29 +1409,43 @@ VIEWS['post-reactions'] = {
 
     html: () => `
         <div class="container">
-            <div class="stats" id="stats">
-                <div class="stat-card"><div class="stat-number" id="stat-heart">0</div><div class="stat-label">❤️ Love it</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-thumbsup">0</div><div class="stat-label">👍 Good point</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-lightbulb">0</div><div class="stat-label">👎 Dislike</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-pray">0</div><div class="stat-label">🙏 Pray</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-ok">0</div><div class="stat-label">👌 Ok</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-fire">0</div><div class="stat-label">🔥 Fire</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-frown">0</div><div class="stat-label">☹️ Frown</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-rage">0</div><div class="stat-label">😡 Rage</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-funny">0</div><div class="stat-label">😄 Funny</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-neutral">0</div><div class="stat-label">😐 Neutral</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-total-all">0</div><div class="stat-label">Total Reactions</div></div>
-            </div>
-            <div class="section-card">
-                <h2>Reactions by Page</h2>
-                <div id="reactions-message"></div>
-                <div id="reactions-table" class="table-responsive"><p class="no-data">Loading...</p></div>
+            <div class="section-card" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div style="font-weight: 600; font-size: 1.1rem;">
+                    Total Reactions: <span id="stat-total-all" style="color: var(--primary);">0</span>
+                </div>
+                <div id="stats" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                    <div class="reaction-badge" id="stat-heart">❤️ 0</div>
+                    <div class="reaction-badge" id="stat-thumbsup">👍 0</div>
+                    <div class="reaction-badge" id="stat-lightbulb">👎 0</div>
+                    <div class="reaction-badge" id="stat-pray">🙏 0</div>
+                    <div class="reaction-badge" id="stat-ok">👌 0</div>
+                    <div class="reaction-badge" id="stat-fire">🔥 0</div>
+                    <div class="reaction-badge" id="stat-frown">☹️ 0</div>
+                    <div class="reaction-badge" id="stat-rage">😡 0</div>
+                    <div class="reaction-badge" id="stat-funny">😄 0</div>
+                    <div class="reaction-badge" id="stat-neutral">😐 0</div>
+                </div>
             </div>
             <div class="section-card">
                 <div class="section-header">
                     <h2>Latest Reactions</h2>
                     <div class="dropdown-group">
-                        <label for="latest-limit">Show:</label>
+                        <label for="reaction-filter" style="margin-right: 0.5rem;">Filter:</label>
+                        <select id="reaction-filter" onchange="loadLatestReactions()">
+                            <option value="all">All</option>
+                            <option value="heart">❤️</option>
+                            <option value="thumbsup">👍</option>
+                            <option value="lightbulb">👎</option>
+                            <option value="pray">🙏</option>
+                            <option value="ok">👌</option>
+                            <option value="fire">🔥</option>
+                            <option value="frown">☹️</option>
+                            <option value="rage">😡</option>
+                            <option value="funny">😄</option>
+                            <option value="neutral">😐</option>
+                        </select>
+
+                        <label for="latest-limit" style="margin-left: 1rem;">Show:</label>
                         <select id="latest-limit" onchange="loadLatestReactions()">
                             <option value="10">Last 10</option>
                             <option value="25">Last 25</option>
@@ -1425,14 +1464,11 @@ VIEWS['post-reactions'] = {
         const REACTION_TYPES = ['thumbsup','lightbulb','pray','ok','fire','heart','frown','rage','funny','neutral'];
 
         async function loadReactions() {
-            const container = document.getElementById('reactions-table');
-            if (!container) return;
             try {
                 const r = await fetch(`${API_URL}?action=post_reactions_summary&_=${Date.now()}`, { credentials: 'include', cache: 'no-store' });
                 const data = await r.json();
-                if (r.ok) { updateStats(data); displayReactions(data.pages || []); }
-                else { container.innerHTML = `<div class="message error">${data.error || 'Failed to load'}</div>`; }
-            } catch (e) { container.innerHTML = `<div class="message error">Network error: ${e.message}</div>`; }
+                if (r.ok) { updateStats(data); }
+            } catch (e) { console.error('Failed to load reactions summary', e); }
         }
 
         function updateStats(data) {
@@ -1442,30 +1478,14 @@ VIEWS['post-reactions'] = {
                 const reactions = page.reactions || {};
                 REACTION_TYPES.forEach(t => { totals[t] += (parseInt(reactions[t]) || parseInt(page[t]) || 0); });
             });
-            REACTION_TYPES.forEach(t => { const el = document.getElementById(`stat-${t}`); if (el) el.textContent = totals[t]; });
+            REACTION_TYPES.forEach(t => {
+                const el = document.getElementById(`stat-${t}`);
+                if (el) {
+                    el.innerHTML = `${EMOJI_BY_TYPE[t]} ${totals[t]}`;
+                    el.style.opacity = totals[t] === 0 ? '0.5' : '1';
+                }
+            });
             document.getElementById('stat-total-all').textContent = Object.values(totals).reduce((s, v) => s + v, 0);
-        }
-
-        function displayReactions(pages) {
-            const container = document.getElementById('reactions-table');
-            if (!container) return;
-            if (!pages.length) { container.innerHTML = '<p class="no-data">No post reactions yet.</p>'; return; }
-            const allTypesSet = new Set();
-            pages.forEach(p => { Object.keys(p.reactions || {}).forEach(t => allTypesSet.add(t)); ['heart','thumbsup','lightbulb','funny'].forEach(k => { if (p[k] !== undefined) allTypesSet.add(k); }); });
-            const preferred = ['heart','thumbsup','lightbulb','funny'];
-            const remaining = [...allTypesSet].filter(t => !preferred.includes(t)).sort();
-            const columnOrder = [...preferred.filter(t => allTypesSet.has(t)), ...remaining];
-            const thead = '<tr><th>Page</th>' + columnOrder.map(t => `<th class="reaction-cell">${EMOJI_BY_TYPE[t] || t}</th>`).join('') + '<th class="reaction-cell">Total</th><th class="actions-cell">Actions</th></tr>';
-            const rows  = pages.map(p => {
-                const reactions = p.reactions || {};
-                const cells = columnOrder.map(t => { const count = (parseInt(reactions[t]) || 0) || (parseInt(p[t]) || 0); return `<td class="reaction-cell">${count}</td>`; }).join('');
-                const displayUrl = p.page_url_href || p.page_url;
-                const safeUrl = escapeHtml(displayUrl);
-                const total   = p.total || Object.values(reactions).reduce((s, v) => s + (parseInt(v) || 0), 0) || 0;
-                const pageUrlEscaped = (p.page_url || '').replace(/'/g, "\\'");
-                return `<tr><td class="page-url"><a href="${safeUrl}" target="_blank">${safeUrl}</a></td>${cells}<td class="total-cell">${total}</td><td class="actions-cell"><button class="btn btn-danger btn-sm" onclick="clearReactions('${pageUrlEscaped}')">Clear</button></td></tr>`;
-            }).join('');
-            container.innerHTML = `<table><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
         }
 
         async function clearReactions(pageUrl) {
@@ -1495,12 +1515,21 @@ VIEWS['post-reactions'] = {
         async function loadLatestReactions() {
             const container = document.getElementById('latest-reactions-container');
             const limitEl = document.getElementById('latest-limit');
+            const filterEl = document.getElementById('reaction-filter');
             const limit = limitEl ? limitEl.value : 10;
+            const filterVal = filterEl ? filterEl.value : 'all';
+
             if (!container) return;
             try {
                 const r = await fetch(`${API_URL}?action=post_reactions_latest&limit=${limit}&_=${Date.now()}`, { credentials: 'include', cache: 'no-store' });
                 const data = await r.json();
-                if (r.ok) { displayLatestReactions(data.reactions || []); }
+                if (r.ok) {
+                    let reactions = data.reactions || [];
+                    if (filterVal !== 'all') {
+                        reactions = reactions.filter(react => react.reaction_type === filterVal);
+                    }
+                    displayLatestReactions(reactions);
+                }
                 else { container.innerHTML = `<div class="message error">${data.error || 'Failed to load'}</div>`; }
             } catch (e) { container.innerHTML = `<div class="message error">Network error: ${e.message}</div>`; }
         }
@@ -1511,15 +1540,21 @@ VIEWS['post-reactions'] = {
             if (!reactions.length) { container.innerHTML = '<p class="no-data">No reactions yet.</p>'; return; }
             const thead = '<tr><th>Page</th><th>Reaction</th><th>IP Address</th><th>Date</th><th class="actions-cell">Actions</th></tr>';
             const rows  = reactions.map(r => {
-                const safeUrl    = escapeHtml(r.page_url_href || r.page_url);
+                const fullUrl    = r.page_url_href || r.page_url;
+                const safeUrl    = escapeHtml(fullUrl);
+                const truncatedUrl = escapeHtml(fullUrl.replace(/^https?:\/\/[^\/]+/, ''));
                 const emoji      = EMOJI_BY_TYPE[r.reaction_type] || r.reaction_type;
                 const date       = formatDate(r.created_at || r.date);
                 const ip         = escapeHtml(r.ip_address || 'N/A');
                 const reactionId = r.id || r.reaction_id;
                 const pageUrlEsc = (r.page_url || '').replace(/'/g, "\\'");
-                return `<tr><td class="page-url"><a href="${safeUrl}" target="_blank">${safeUrl}</a></td><td class="reaction-emoji-cell">${emoji}</td><td class="ip-cell">${ip}</td><td class="date-cell">${date}</td><td class="actions-cell"><button class="btn btn-danger btn-sm" onclick="clearReaction('${reactionId}','${pageUrlEsc}','${r.reaction_type}')">Delete</button></td></tr>`;
+                return `<tr><td class="page-url"><a href="${safeUrl}" target="_blank">${truncatedUrl}</a></td><td class="reaction-emoji-cell">${emoji}</td><td class="ip-cell">${ip}</td><td class="date-cell">${date}</td><td class="actions-cell"><button class="btn btn-ghost-danger btn-sm" onclick="clearReaction('${reactionId}','${pageUrlEsc}','${r.reaction_type}')"><i data-lucide="trash-2"></i></button></td></tr>`;
             }).join('');
             container.innerHTML = `<table class="latest-reactions-table"><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
+
+            if(window.lucide) {
+                lucide.createIcons();
+            }
         }
 
         hoistToWindow({ clearReactions, clearReaction, loadLatestReactions });
@@ -1628,57 +1663,90 @@ VIEWS['settings-general'] = {
 
 VIEWS['settings-configuration'] = {
     title: 'Configuration',
-    css: ``,
+    css: `
+        .util-card { background:var(--on-background); border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,.1); overflow:hidden; }
+        .util-card-header { padding:1rem 1.5rem; border-bottom:1px solid var(--gray,#e9ecef); display:flex; align-items:center; gap:.6rem; }
+        .util-card-header h2 { font-size:1.1rem; color:var(--body-text,#333); }
+        .util-card-header .icon { font-size:1.2rem; }
+        .util-card-body { padding:1.5rem; }
+        .setting-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; padding:.75rem 0; border-bottom:1px solid var(--gray,#f0f0f0); }
+        .setting-row:last-of-type { border-bottom:none; }
+        .setting-label { flex:1 1 200px; }
+        .setting-label strong { color:var(--body-text); display:block; font-size:.95rem; }
+        .setting-label span { font-size:.82rem; color:var(--body-text); opacity:.8; }
+        .themed-control { background-color:transparent; color:var(--body-text); border:1px solid var(--gray,#ddd); border-radius:4px; padding:.5rem .75rem; font-size:.95rem; width:100%; max-width:300px; }
+        select.themed-control option { background-color:var(--on-background,#fff); color:var(--body-text,#333); }
+    `,
     html: () => `
         <div class="container">
             <h2 style="margin-bottom: 1.5rem;">Configuration</h2>
             <div id="settings-message"></div>
-            <div class="settings-form">
-                <div class="form-group">
-                    <label for="config-app-url">Application URL</label>
-                    <p class="help-text">The URL where this comment system is installed (no trailing slash)</p>
-                    <input type="text" id="config-app-url" class="themed-control">
+
+            <div class="util-card" style="margin-bottom: 1.5rem;">
+                <div class="util-card-header"><span class="icon">⚙️</span><h2>System Configuration</h2></div>
+                <div class="util-card-body">
+                    <div class="setting-row">
+                        <div class="setting-label"><strong>Application URL</strong><span>The URL where this comment system is installed (no trailing slash)</span></div>
+                        <input type="text" id="config-app-url" class="themed-control">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><strong>Allowed Origins</strong><span>Comma-separated list of domains allowed to embed comments (CORS)</span></div>
+                        <input type="text" id="config-allowed-origins" class="themed-control" placeholder="https://example.com">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><strong>Timezone</strong><span>Choose the timezone for comment timestamps</span></div>
+                        <select id="config-timezone" class="themed-control">
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">America/New_York (Eastern Time)</option>
+                            <option value="America/Chicago">America/Chicago (Central Time)</option>
+                            <option value="America/Denver">America/Denver (Mountain Time)</option>
+                            <option value="America/Los_Angeles">America/Los_Angeles (Pacific Time)</option>
+                            <option value="Europe/London">Europe/London (GMT)</option>
+                            <option value="Europe/Paris">Europe/Paris (Central European)</option>
+                            <option value="Europe/Berlin">Europe/Berlin (Central European)</option>
+                            <option value="Asia/Tehran">Asia/Tehran (Iran)</option>
+                            <option value="Asia/Dubai">Asia/Dubai (Gulf)</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo (Japan)</option>
+                            <option value="Asia/Shanghai">Asia/Shanghai (China)</option>
+                            <option value="Australia/Sydney">Australia/Sydney (Australian Eastern)</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><strong>Frontend Language</strong><span>Language for the comment widget interface</span></div>
+                        <select id="config-language" class="themed-control">
+                            <option value="en">English</option>
+                            <option value="fa">فارسی (Persian)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="config-allowed-origins">Allowed Origins</label>
-                    <p class="help-text">Comma-separated list of domains allowed to embed comments (CORS)</p>
-                    <input type="text" id="config-allowed-origins" class="themed-control" placeholder="https://example.com">
-                </div>
-                <div class="form-group">
-                    <label for="config-timezone">Timezone</label>
-                    <p class="help-text">Choose the timezone for comment timestamps</p>
-                    <select id="config-timezone" class="themed-control">
-                        <option value="UTC">UTC</option>
-                        <option value="America/New_York">America/New_York (Eastern Time)</option>
-                        <option value="America/Chicago">America/Chicago (Central Time)</option>
-                        <option value="America/Denver">America/Denver (Mountain Time)</option>
-                        <option value="America/Los_Angeles">America/Los_Angeles (Pacific Time)</option>
-                        <option value="Europe/London">Europe/London (GMT)</option>
-                        <option value="Europe/Paris">Europe/Paris (Central European)</option>
-                        <option value="Europe/Berlin">Europe/Berlin (Central European)</option>
-                        <option value="Asia/Tehran">Asia/Tehran (Iran)</option>
-                        <option value="Asia/Dubai">Asia/Dubai (Gulf)</option>
-                        <option value="Asia/Tokyo">Asia/Tokyo (Japan)</option>
-                        <option value="Asia/Shanghai">Asia/Shanghai (China)</option>
-                        <option value="Australia/Sydney">Australia/Sydney (Australian Eastern)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="config-language">Frontend Language</label>
-                    <p class="help-text">Language for the comment widget interface</p>
-                    <select id="config-language" class="themed-control">
-                        <option value="en">English</option>
-                        <option value="fa">فارسی (Persian)</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
             </div>
+
+            <div class="util-card" style="margin-bottom: 1.5rem;">
+                <div class="util-card-header"><span class="icon">👤</span><h2>Admin Profile</h2></div>
+                <div class="util-card-body">
+                    <div class="setting-row">
+                        <div class="setting-label"><strong>Admin Name</strong><span>Used to pre-fill the reply form</span></div>
+                        <input type="text" id="config-admin-name" class="themed-control" placeholder="Your Name">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><strong>Admin Email</strong><span>Used to pre-fill the reply form</span></div>
+                        <input type="email" id="config-admin-email" class="themed-control" placeholder="your@email.com">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><strong>Admin Website</strong><span>Used to pre-fill the reply form (optional)</span></div>
+                        <input type="url" id="config-admin-url" class="themed-control" placeholder="https://yourwebsite.com">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
         </div>`,
 
     init({ hoistToWindow }) {
         async function loadConfig() {
             const msgEl = document.getElementById('settings-message');
             try {
+                // Load system config
                 const r = await fetch(`${API_URL}?action=get_config`, { credentials: 'include' });
                 const d = await r.json();
                 if (r.ok) {
@@ -1689,6 +1757,15 @@ VIEWS['settings-configuration'] = {
                 } else {
                     if (msgEl) msgEl.innerHTML = `<div class="message error">${d.error || 'Failed to load configuration'}</div>`;
                 }
+
+                // Load admin profile settings
+                const sr = await fetch(`${API_URL}?action=get_settings`, { credentials: 'include' });
+                const sd = await sr.json();
+                if (sr.ok && sd.settings) {
+                    document.getElementById('config-admin-name').value = sd.settings.admin_name || '';
+                    document.getElementById('config-admin-email').value = sd.settings.admin_email || '';
+                    document.getElementById('config-admin-url').value = sd.settings.admin_url || '';
+                }
             } catch (e) {
                 if (msgEl) msgEl.innerHTML = '<div class="message error">Network error loading configuration</div>';
             }
@@ -1696,10 +1773,17 @@ VIEWS['settings-configuration'] = {
 
         async function saveConfig() {
             const msgEl = document.getElementById('settings-message');
+
+            // System Config
             const appUrl = document.getElementById('config-app-url').value.trim();
             const allowedOrigins = document.getElementById('config-allowed-origins').value.split(',').map(s => s.trim()).filter(s => s);
             const timezone = document.getElementById('config-timezone').value;
             const language = document.getElementById('config-language').value;
+
+            // Admin Profile
+            const adminName = document.getElementById('config-admin-name').value.trim();
+            const adminEmail = document.getElementById('config-admin-email').value.trim();
+            const adminUrl = document.getElementById('config-admin-url').value.trim();
 
             if (!appUrl) {
                 if (msgEl) msgEl.innerHTML = '<div class="message error">Application URL is required</div>';
@@ -1712,6 +1796,30 @@ VIEWS['settings-configuration'] = {
 
             try {
                 await AdminAuth.ensureCsrfToken();
+
+                // Fetch current settings to preserve them
+                const sr = await fetch(`${API_URL}?action=get_settings`, { credentials: 'include' });
+                const currentSettings = (await sr.json()).settings || {};
+
+                // Save Settings (Admin Profile)
+                const settingsPayload = {
+                    csrf_token: AdminAuth.getCsrfToken(),
+                    require_moderation: currentSettings.require_moderation || 'false',
+                    enable_notifications: currentSettings.enable_notifications || 'false',
+                    comment_sort_order: currentSettings.comment_sort_order || 'desc',
+                    admin_name: adminName,
+                    admin_email: adminEmail,
+                    admin_url: adminUrl
+                };
+
+                const sReq = await fetch(`${API_URL}?action=save_settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(settingsPayload)
+                });
+
+                // Save Config (System)
                 const r = await fetch(`${API_URL}?action=save_config`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1724,9 +1832,11 @@ VIEWS['settings-configuration'] = {
                         app_language: language
                     })
                 });
+
                 const d = await r.json();
-                if (r.ok) {
-                    if (msgEl) msgEl.innerHTML = '<div class="message success">Configuration saved successfully</div>';
+
+                if (r.ok && sReq.ok) {
+                    if (msgEl) msgEl.innerHTML = '<div class="message success">Configuration and Profile saved successfully</div>';
                 } else {
                     if (msgEl) msgEl.innerHTML = `<div class="message error">${d.error || 'Failed to save configuration'}</div>`;
                 }

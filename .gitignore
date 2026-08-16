@@ -1,15 +1,12 @@
-# Protect database directory (except template)
-db/*
-!db/
-!db/comments-default.db
-
-# Protect backups
-backups/
-
-# Protect logs directory
-logs/
+node_modules/
+.wrangler/
+*.db
+*.sqlite3
+*.db-shm
+*.db-wal
 *.log
-
-# Local development files
-.DS_Store
-dev.marker
+db/
+db-backups/
+dist/
+build/
+target/

@@ -56,7 +56,7 @@ async function resolveCommentsLanguage(apiUrl, container) {
 
 class CommentSystem {
     constructor(options) {
-        this.apiUrl = options.apiUrl || '/comments/api.php';
+        this.apiUrl = options.apiUrl || '/api.php';
         this.pageUrl = options.pageUrl || window.location.pathname;
         this.containerId = options.containerId || 'comments-container';
         this.closed = options.closed || false;
@@ -818,7 +818,7 @@ async function initComments() {
         return;
     }
 
-    const apiUrl = container.dataset.apiUrl || window.COMMENTS_CONFIG?.apiUrl || '/comments/api.php';
+    const apiUrl = container.dataset.apiUrl || window.COMMENTS_CONFIG?.apiUrl || '/api.php';
     const language = await resolveCommentsLanguage(apiUrl, container);
     await loadCommentsTranslations(apiUrl, language);
 

@@ -1,0 +1,28 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "English | [فارسی](https://github.com/fardm/standalone-comments-server/blob/main/README-fa.md)",
+  "main": "comments.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fardm/standalone-comments-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fardm/standalone-comments-server/issues"
+  },
+  "homepage": "https://github.com/fardm/standalone-comments-server#readme",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260816.1",
+    "@types/node": "^26.2.0",
+    "hono": "^4.13.2",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.123.0"
+  }
+}

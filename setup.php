@@ -88,7 +88,10 @@ function createConfigFile($config) {
     $content .= "date_default_timezone_set('" . addslashes($config['timezone']) . "');\n\n";
 
     $content .= "// Frontend comment widget language: 'en' or 'fa'\n";
-    $content .= "define('APP_LANGUAGE', '" . addslashes($config['app_language']) . "');\n";
+    $content .= "define('APP_LANGUAGE', '" . addslashes($config['app_language']) . "');\n\n";
+
+    $content .= "// Calendar system preference: 'gregorian' or 'persian'\n";
+    $content .= "define('APP_CALENDAR', '" . addslashes($config['app_calendar']) . "');\n";
 
     $result = file_put_contents(__DIR__ . '/config.php', $content);
     if ($result === false) {
@@ -213,12 +216,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
                 
             case 4:
-                // Validate language
+                // Validate language and calendar
                 $language = trim($_POST['app_language'] ?? 'en');
+                $calendar = trim($_POST['app_calendar'] ?? 'gregorian');
                 if (!in_array($language, ['en', 'fa'])) {
                     $error = 'Invalid language selected.';
+                } elseif (!in_array($calendar, ['gregorian', 'persian'])) {
+                    $error = 'Invalid calendar selected.';
                 } else {
                     $_SESSION['setup_app_language'] = $language;
+                    $_SESSION['setup_app_calendar'] = $calendar;
                     $step = 5;
                 }
                 break;
@@ -241,6 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'allowed_origins' => $_SESSION['setup_allowed_origins'] ?? [detectCurrentUrl()],
                         'timezone' => $_SESSION['setup_timezone'] ?? 'UTC',
                         'app_language' => $_SESSION['setup_app_language'] ?? 'en',
+                        'app_calendar' => $_SESSION['setup_app_calendar'] ?? 'gregorian',
                     ];
                     
                     // Save to database
@@ -550,14 +558,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
                 
             <?php elseif ($step == 4): ?>
-                <div class="step-title">Language</div>
+                <div class="step-title">Language & Calendar</div>
                 <?php if ($error): ?>
                     <div class="error">✗ <?php echo htmlspecialchars($error); ?></div>
                 <?php endif; ?>
                 <p class="help-text">Language for the comment widget interface</p>
-                <select name="app_language" id="app_language" required>
+                <select name="app_language" id="app_language" required style="margin-bottom: 1rem;">
                     <option value="en" <?php echo (($_SESSION['setup_app_language'] ?? 'en') === 'en') ? 'selected' : ''; ?>>English</option>
                     <option value="fa" <?php echo (($_SESSION['setup_app_language'] ?? 'en') === 'fa') ? 'selected' : ''; ?>>فارسی (Persian)</option>
+                </select>
+
+                <p class="help-text">Calendar preference for the admin panel</p>
+                <select name="app_calendar" id="app_calendar" required>
+                    <option value="gregorian" <?php echo (($_SESSION['setup_app_calendar'] ?? 'gregorian') === 'gregorian') ? 'selected' : ''; ?>>Gregorian</option>
+                    <option value="persian" <?php echo (($_SESSION['setup_app_calendar'] ?? 'gregorian') === 'persian') ? 'selected' : ''; ?>>Solar Hijri (Jalali / شمسی)</option>
                 </select>
                 
             <?php elseif ($step == 5): ?>

@@ -183,12 +183,24 @@ function formatBytes(bytes) {
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     try {
-        const d = new Date(dateString);
+        // Adjust for UTC string mapping from PHP if it lacks a Z
+        const isUTC = !dateString.includes('T') || !dateString.endsWith('Z');
+        const d = new Date(isUTC ? dateString.replace(' ', 'T') + 'Z' : dateString);
         if (isNaN(d)) return 'N/A';
-        return d.toLocaleDateString('en-US', {
+
+        let tz = 'UTC';
+        let cal = 'gregory';
+        if (window.AdminConfig) {
+            if (window.AdminConfig.timezone) tz = window.AdminConfig.timezone;
+            if (window.AdminConfig.calendar === 'persian') cal = 'persian';
+        }
+
+        return new Intl.DateTimeFormat('en-US', {
             year: 'numeric', month: 'short', day: 'numeric',
             hour: '2-digit', minute: '2-digit', hour12: true,
-        });
+            timeZone: tz,
+            calendar: cal
+        }).format(d);
     } catch (_) {
         return 'N/A';
     }

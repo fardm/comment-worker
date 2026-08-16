@@ -32,26 +32,22 @@ This project adds a commenting system to [Quartz](https://quartz.jzhao.xyz/). Th
 1. Get a shared hosting account and create a subdomain, for example: `comments.yourdomain.com`.
 2. Download this repository by clicking the green **Code** button and selecting **Download ZIP**.
 3. Upload the ZIP file to your hosting account's `public_html` directory and extract it.
-4. Edit the `config.php` file:
-   - Set `APP_URL` to the subdomain where you uploaded the files, for example: `https://comments.yourdomain.com`  
-   - Set `ALLOWED_ORIGINS` to your Quartz website domain, for example: `https://yourdomain.com`  
-   - Set `APP_LANGUAGE` to choose the frontend language (`en` or `fa`)
-5. Open `set-password.php` in your browser:
+4. Open `setup.php` in your browser:
 
    ```
-   https://comments.yourdomain.com/set-password.php
+   https://comments.yourdomain.com/setup.php
    ```
 
-6. Choose an admin password.
-7. Open the admin panel:
+5. Follow the on-screen instructions to set up your configuration (App URL, Allowed Origins, Admin Password, Timezone, and Calendar System).
+6. Open the admin panel:
 
    ```
    https://comments.yourdomain.com/admin/index.html
    ```
 
-8. Enter the password you selected and log in.
+7. Enter the password you selected and log in.
 
-After successfully logging in, delete the `set-password.php` file from your `public_html` directory.
+After successfully logging in, delete the `setup.php` file from your `public_html` directory for security purposes.
 
 ### Step 2: Install the Quartz Plugin
 
@@ -132,11 +128,12 @@ Email notifications require a cron job. If you installed the system on a subdoma
 Summary of the changes I made to the original project:
 
 - Added language configuration support for the frontend (i18n-ready setup).
+- Dynamic Timezone and Calendar system (Gregorian/Solar Hijri) settings affecting the entire admin panel dynamically.
 - Jalali (Persian) date support
 - Added comment sorting controls in the admin panel.
 - Refactored import/export system to include all data types (comments, reactions, subscriptions, and spam).
 - Added a one-click database cleanup feature with selectable data categories.
-- Improved styling and UI
+- Improved styling, modern UI, and unified admin settings.
 - Dark mode for the admin panel
 - Redesigned emoji reactions (the original version only included four Disqus-style reactions; this version provides a wider GitHub-style emoji selection)
 - Formatting help displayed inside the comment editor

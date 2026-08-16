@@ -208,6 +208,17 @@
     filter: brightness(120%);
  }
 
+ .btn-ghost-danger {
+     background-color: transparent;
+     color: var(--red);
+     border: 1px solid transparent;
+     transition: background-color 0.2s;
+ }
+
+ .btn-ghost-danger:hover {
+     background-color: #de3b3b1a;
+ }
+
  .btn-secondary {
     background-color: #6c757d;
     color: white;
@@ -229,6 +240,17 @@
     border-radius: 3px;
     font-size: 0.8rem;
     font-weight: 600;
+}
+
+.reaction-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--light);
+    border: 1px solid var(--gray);
+    color: var(--body-text);
 }
 
 .badge-approved {

@@ -37,6 +37,7 @@ class ConfigService
             'allowed_origins' => defined('ALLOWED_ORIGINS') ? ALLOWED_ORIGINS : [],
             'timezone' => $this->getCurrentTimezone(),
             'app_language' => defined('APP_LANGUAGE') ? APP_LANGUAGE : 'en',
+            'app_calendar' => defined('APP_CALENDAR') ? APP_CALENDAR : 'gregorian',
         ];
     }
 
@@ -80,8 +81,13 @@ class ConfigService
             return $appLanguage;
         }
 
+        $appCalendar = $this->validateAppCalendar($data['app_calendar'] ?? 'gregorian');
+        if (isset($appCalendar['error'])) {
+            return $appCalendar;
+        }
+
         // Generate config.php content
-        $content = $this->generateConfigContent($appUrl, $allowedOrigins, $timezone, $appLanguage);
+        $content = $this->generateConfigContent($appUrl, $allowedOrigins, $timezone, $appLanguage, $appCalendar);
 
         // Write to file
         $result = file_put_contents($this->configPath, $content);
@@ -163,7 +169,7 @@ class ConfigService
     /**
      * Validate APP_LANGUAGE
      */
-    private function validateAppLanguage($value): array
+    private function validateAppLanguage($value): string|array
     {
         $value = trim($value);
         if (!in_array($value, ['en', 'fa'])) {
@@ -173,9 +179,21 @@ class ConfigService
     }
 
     /**
+     * Validate APP_CALENDAR
+     */
+    private function validateAppCalendar($value): string|array
+    {
+        $value = trim($value);
+        if (!in_array($value, ['gregorian', 'persian'])) {
+            return ['error' => 'Invalid calendar. Must be "gregorian" or "persian"', 'code' => 400];
+        }
+        return $value;
+    }
+
+    /**
      * Generate config.php content
      */
-    private function generateConfigContent(string $appUrl, array $allowedOrigins, string $timezone, string $appLanguage): string
+    private function generateConfigContent(string $appUrl, array $allowedOrigins, string $timezone, string $appLanguage, string $appCalendar): string
     {
         $content = "<?php\n\n";
         $content .= "// Define the base URL where the comment system is installed. Do not include a trailing slash.\n";
@@ -188,7 +206,10 @@ class ConfigService
         $content .= "date_default_timezone_set('" . addslashes($timezone) . "');\n\n";
 
         $content .= "// Frontend comment widget language: 'en' or 'fa'\n";
-        $content .= "define('APP_LANGUAGE', '" . addslashes($appLanguage) . "');\n";
+        $content .= "define('APP_LANGUAGE', '" . addslashes($appLanguage) . "');\n\n";
+
+        $content .= "// Calendar system preference: 'gregorian' or 'persian'\n";
+        $content .= "define('APP_CALENDAR', '" . addslashes($appCalendar) . "');\n";
 
         return $content;
     }

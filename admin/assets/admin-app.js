@@ -23,7 +23,6 @@ const NAV_ITEMS = [
     { key: 'all',            label: 'All Comments',   icon: 'message-square' },
     { key: 'subscriptions',  label: 'Subscriptions',  icon: 'users' },
     { key: 'post-reactions', label: 'Post Reactions', icon: 'smile' },
-    { key: 'posts',          label: 'Posts',          icon: 'file-text' },
     { key: 'analytics',      label: 'Analytics',      icon: 'bar-chart-2' },
     { key: 'settings',       label: 'Settings',       icon: 'settings', isParent: true, children: [
         { key: 'settings-general',       label: 'General' },

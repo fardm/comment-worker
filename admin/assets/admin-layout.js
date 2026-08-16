@@ -22,7 +22,6 @@
         ['all',            'admin-all.html',            'All Comments'],
         ['subscriptions',  'admin-subscriptions.html',  'Subscriptions'],
         ['post-reactions', 'admin-post-reactions.html', 'Post Reactions'],
-        ['posts',          'admin-posts.html',          'Posts'],
         ['analytics',      'admin-analytics.html',      'Analytics'],
 
     ];

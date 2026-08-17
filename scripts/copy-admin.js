@@ -27,9 +27,40 @@ function copyRecursiveSync(src, dest) {
     }
 }
 
+// 1. Clear out destDir
 rmrf(destDir);
 if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
 }
+
+// 2. Copy admin directory to worker/public/admin
 copyRecursiveSync(srcDir, destDir);
 console.log('✅ Copied admin assets successfully.');
+
+// 3. Copy root frontend assets to worker/public
+const rootFilesToCopy = [
+    'comments.css',
+    'comments.js',
+    'recent-comments.html'
+];
+rootFilesToCopy.forEach(file => {
+    const srcFile = path.join(__dirname, '..', file);
+    const destFile = path.join(publicDir, file);
+    if (fs.existsSync(srcFile)) {
+        fs.copyFileSync(srcFile, destFile);
+        console.log(`✅ Copied ${file}`);
+    } else {
+        console.warn(`⚠️ Warning: Root file ${file} not found.`);
+    }
+});
+
+// 4. Copy lang directory
+const srcLangDir = path.join(__dirname, '../lang');
+const destLangDir = path.join(publicDir, 'lang');
+if (fs.existsSync(srcLangDir)) {
+    rmrf(destLangDir);
+    copyRecursiveSync(srcLangDir, destLangDir);
+    console.log('✅ Copied lang directory successfully.');
+} else {
+    console.warn('⚠️ Warning: lang directory not found.');
+}

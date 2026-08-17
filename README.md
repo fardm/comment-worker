@@ -98,3 +98,39 @@ For example:
 `https://standalone-comments-server.<your-username>.workers.dev/admin/index.html`
 
 Log in using the password you chose during the `npm run setup` step.
+
+## Testing Your Deployed Worker Without Installation
+
+If you want to quickly verify that your worker is working, copy the following HTML snippet and save it as an `index.html` file, or paste it directly into an existing test page. Make sure to replace `<YOUR_WORKER_URL>` with your actual deployed Worker URL!
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comments Test</title>
+    <!-- 1. Load the CSS -->
+    <link rel="stylesheet" href="<YOUR_WORKER_URL>/comments.css">
+</head>
+<body>
+    <h1>Comments Test Page</h1>
+
+    <!-- 2. Create a container for the comments -->
+    <div id="comments-container"></div>
+
+    <!-- 3. Configure the worker URL -->
+    <script>
+        window.COMMENTS_CONFIG = {
+            apiUrl: "<YOUR_WORKER_URL>/api.php",
+            url: "https://example.com/my-test-page",
+            title: "My Test Page"
+        };
+    </script>
+
+    <!-- 4. Load the JS file to initialize the comments -->
+    <script src="<YOUR_WORKER_URL>/comments.js"></script>
+</body>
+</html>
+```
+
+Open your HTML file in a browser, and you should see the comment section load and connect correctly to your backend!

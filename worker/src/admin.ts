@@ -27,9 +27,23 @@ export class AdminService {
 
   async getDbStats() {
     const counts = await this.getAnalytics()
+    // The admin frontend expects an object with 'tables' (array of objects)
+    // and 'comment_statuses' object
     return {
       db_size_bytes: 1024 * 1024, // Fake size for now
-      counts
+      counts,
+      tables: [
+        { name: 'comments', rows: counts.total_comments },
+        { name: 'subscriptions', rows: counts.total_subscriptions },
+        { name: 'settings', rows: 6 },
+        { name: 'votes', rows: 0 },
+        { name: 'post_reactions', rows: 0 }
+      ],
+      comment_statuses: {
+        pending: counts.pending_comments,
+        spam: counts.spam_comments,
+        total: counts.total_comments
+      }
     }
   }
 }

@@ -113,10 +113,15 @@ app.all('/api.php', async (c) => {
 
     if (method === 'GET' && action === 'post_reactions_summary') {
       const url = c.req.query('url')
-      if (!url) return c.json({ error: 'URL required' }, 400)
+      if (!url) {
+        // Return global summary if no url is provided
+        const result = await reactions.getGlobalPostReactionsSummary()
+        return c.json(result)
+      }
       const result = await reactions.getPostReactionsSummary(url, ip)
       return c.json(result)
     }
+
 
     // ── Auth Routes ─────────────────────────────────────────────
 
@@ -143,6 +148,13 @@ app.all('/api.php', async (c) => {
     if (!(await auth.isAdmin(c))) {
       return c.json({ error: 'Unauthorized' }, 401)
     }
+
+    if (method === 'GET' && action === 'post_reactions_latest') {
+      const limit = parseInt(c.req.query('limit') || '10')
+      const result = await reactions.getLatestPostReactions(limit)
+      return c.json(result)
+    }
+
 
     if (method === 'GET' && action === 'pending') {
       const result = await db.prepare("SELECT * FROM comments WHERE status = 'pending' ORDER BY created_at DESC").all()
@@ -179,6 +191,22 @@ app.all('/api.php', async (c) => {
       const result = await admin.getAnalytics()
       return c.json(result)
     }
+
+    if (method === 'GET' && action === 'db_stats') {
+      const result = await admin.getDbStats()
+      return c.json(result)
+    }
+
+
+    if (method === 'GET' && action === 'get_config') {
+      const config = await settings.getAllSettings()
+      return c.json({
+        ...config,
+        app_url: c.env.APP_URL || '',
+        allowed_origins: c.env.ALLOWED_ORIGINS ? c.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : ['*']
+      })
+    }
+
 
     if (method === 'GET' && action === 'get_settings') {
       const result = await settings.getAllSettings()

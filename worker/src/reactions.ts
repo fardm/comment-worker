@@ -51,4 +51,34 @@ export class ReactionService {
 
     return summary
   }
+
+  async getGlobalPostReactionsSummary() {
+    // Group by page_url, then reaction_type
+    const { results } = await this.db.prepare('SELECT page_url, reaction_type, COUNT(*) as count FROM post_reactions GROUP BY page_url, reaction_type').all()
+
+    // Admin dashboard expects { pages: [{ page_url, reactions: { type: count } }], total: N }
+    const pagesMap: Record<string, Record<string, number>> = {}
+    let total = 0
+    for (const r of results) {
+      const url = r.page_url as string
+      const type = r.reaction_type as string
+      const count = r.count as number
+      if (!pagesMap[url]) pagesMap[url] = {}
+      pagesMap[url][type] = count
+      total += count
+    }
+
+    const pages = Object.entries(pagesMap).map(([page_url, reactions]) => ({
+      page_url,
+      reactions
+    }))
+
+    return { pages, total }
+  }
+
+  async getLatestPostReactions(limit: number) {
+    const { results } = await this.db.prepare('SELECT * FROM post_reactions ORDER BY created_at DESC LIMIT ?').bind(limit).all()
+    return { reactions: results, total: results.length }
+  }
+
 }

@@ -47,6 +47,8 @@ Now, run the automatic setup script. This script will automatically create a dat
 
 `npm run setup`
 
+*(Note: If you've already created the database before, or if you run this script again, it will gracefully detect the existing database, retrieve its configuration, and let you update your password safely without data loss.)*
+
 ### Step 3: Local Development (Optional)
 
 If you want to test the server locally on your machine before deploying, run:

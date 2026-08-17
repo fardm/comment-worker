@@ -7,6 +7,10 @@ binding = "DB"
 database_name = "comments-db"
 database_id = "11111111-1111-1111-1111-111111111111"
 
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
 [vars]
 ALLOWED_ORIGINS = "*"
-APP_URL = "http://localhost:8787"
+APP_URL = "https://standalone-comments-server.nova-3bc190.workers.dev"

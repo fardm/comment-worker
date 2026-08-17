@@ -36,7 +36,7 @@ async function main() {
 
   console.log('🔒 Checking Cloudflare authentication...');
   try {
-    const whoami = execSync('npx wrangler whoami', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
+    const whoami = execSync('npx wrangler whoami', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     if (whoami.includes('You are not authenticated')) {
        console.error('❌ Not logged in to Cloudflare.');
        console.log('\nPlease run: npx wrangler login');

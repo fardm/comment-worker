@@ -80,13 +80,13 @@ export class AuthService {
       return { error: 'admin_password_not_set' }
     }
 
-    // In a real migration we'd need bcrypt for workers, or reset the password.
-    // For this rewrite, we'll assume the admin password matches for simplicity
-    // or we'd implement a WebCrypto check if it was hashed that way.
-    // Let's accept if password matches hash (which assumes it's plain for testing)
-    // OR we always accept "admin" for testing this migration.
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    const success = (password === hash); // Bypass for migration test purposes
+    const success = (inputHash === hash);
 
     if (!success) {
       await this.recordLoginAttempt(ip, false)

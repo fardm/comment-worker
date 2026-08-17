@@ -10,3 +10,4 @@ db-backups/
 dist/
 build/
 target/
+worker/public

@@ -4,7 +4,12 @@
   "description": "English | [فارسی](https://github.com/fardm/standalone-comments-server/blob/main/README-fa.md)",
   "main": "comments.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "node scripts/setup.js",
+    "dev": "cd worker && npx wrangler dev",
+    "deploy": "cd worker && npx wrangler deploy",
+    "predev": "node scripts/copy-admin.js",
+    "predeploy": "node scripts/copy-admin.js"
   },
   "repository": {
     "type": "git",

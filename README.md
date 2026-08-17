@@ -1,16 +1,12 @@
-English | [فارسی](https://github.com/fardm/standalone-comments-server/blob/main/README-fa.md)
-
 # Quartz Standalone Comments
 
 This project adds a commenting system to [Quartz](https://quartz.jzhao.xyz/). The original repository can be found here: https://github.com/dlnorman/standalone-comments.
 
- I made several modifications to improve compatibility and usability for Quartz websites.
+I made several modifications to improve compatibility and usability for Quartz websites, now simplified with automated setup and configuration using Cloudflare Workers and D1!
 
- > ✅ Compatible with Quartz v5
+> ✅ Compatible with Quartz v5
 
 ## Features
-
-![image](comments.webp)
 
 - 🌍 Multilingual support (English & Persian, extendable via i18n)
 - 😀 Reactions with 10 emoji options for both posts and comments
@@ -19,134 +15,86 @@ This project adds a commenting system to [Quartz](https://quartz.jzhao.xyz/). Th
 - 🛠️ Admin panel for viewing and managing comments
 - 📦 Data import and export support
 - 🛡️ Spam protection and moderation system
-- 📧 Email notifications for new comments
+- 📧 Email notifications for new comments (requires configuration)
 
 <br>
 
-## Installation
+## Setup & Deployment Guide
 
-> ⚠️ It is recommended to use PHP 8.0 or newer. Although the original project claims support for PHP 7.4, I encountered errors with PHP 8.1. The issues were resolved after upgrading to PHP 8.3.
+This setup guide is for complete beginners! We will use **Cloudflare Workers** (to run the code) and **Cloudflare D1** (to store the comments).
 
-### Step 1: Install on Your Server
+### Prerequisites
 
-1. Get a shared hosting account and create a subdomain, for example: `comments.yourdomain.com`.
-2. Download this repository by clicking the green **Code** button and selecting **Download ZIP**.
-3. Upload the ZIP file to your hosting account's `public_html` directory and extract it.
-4. Open `setup.php` in your browser:
+1. **Node.js**: Make sure you have Node.js installed. You can download it from [nodejs.org](https://nodejs.org/).
+2. **Cloudflare Account**: Sign up for a free account at [Cloudflare](https://dash.cloudflare.com/sign-up).
+3. Download or clone this repository to your computer and open a terminal inside the project folder.
 
-   ```
-   https://comments.yourdomain.com/setup.php
-   ```
+### Step 1: Login to Cloudflare
 
-5. Follow the on-screen instructions to set up your configuration (App URL, Allowed Origins, Admin Password, Timezone, and Calendar System).
-6. Open the admin panel:
+Run this command in your terminal to connect to your Cloudflare account:
 
-   ```
-   https://comments.yourdomain.com/admin/index.html
-   ```
+`npx wrangler login`
 
-7. Enter the password you selected and log in.
+A browser window will open asking you to authorize Wrangler.
 
-After successfully logging in, delete the `setup.php` file from your `public_html` directory for security purposes.
+### Step 2: Install and Setup
 
-### Step 2: Install the Quartz Plugin
+Install the required packages:
+
+`npm install`
+
+Now, run the automatic setup script. This script will automatically create a database, configure it, and ask you to choose an admin password.
+
+`npm run setup`
+
+*(Note: If you've already created the database before, or if you run this script again, it will gracefully detect the existing database, retrieve its configuration, and let you update your password safely without data loss.)*
+
+### Step 3: Local Development (Optional)
+
+If you want to test the server locally on your machine before deploying, run:
+
+`npm run dev`
+
+Your server will be available at `http://127.0.0.1:8787`. You can also visit `http://127.0.0.1:8787/admin/index.html` to see the admin panel locally.
+
+### Step 4: Deploy to Production
+
+Once you are ready, deploy the comments server to Cloudflare:
+
+`npm run deploy`
+
+The terminal will give you a public URL (e.g., `https://standalone-comments-server.<your-username>.workers.dev`). This is your **Backend URL**.
+
+<br>
+
+## Install the Quartz Plugin
 
 Run the following command inside your Quartz project:
 
-```bash
-npx quartz plugin add github:fardm/quartz-standalone-comments
-```
+`npx quartz plugin add github:fardm/quartz-standalone-comments`
 
-Once installed, open the `quartz.config.yaml` file and configure the plugin. Set `backendUrl` to the URL of the server where you uploaded the comment system:
+Once installed, open your `quartz.config.yaml` file and configure the plugin. Set `backendUrl` to the URL you got after running `npm run deploy`:
 
 ```yaml
 - source: github:fardm/quartz-standalone-comments
   enabled: true
   options:
-    backendUrl: https://comments.yourdomain.com
+    backendUrl: https://standalone-comments-server.<your-username>.workers.dev
     type: full
   layout:
     position: afterBody
     priority: 100
 ```
 
-Start the local preview server:
-
-```bash
-npx quartz build --serve
-```
-
-You should now see the comment section at the bottom of your pages.
-
-Keep in mind that this is only a local preview. Since the site is running locally, reactions and comments will not be stored in the database.
-
-Deploy and sync your site using:
-
-```bash
-npx quartz sync
-```
-
-After deployment, visit your website and test both comments and reactions.
+Start your local Quartz server (`npx quartz build --serve`) to see the comments in action!
 
 <br>
 
-## Recent Comments Widget
+## Accessing the Admin Panel
 
-To display the latest comments in your sidebar or any other part of your site's layout, simply add the following configuration to your `quartz.config.yaml` file:
+To manage comments and change settings, go to your deployed URL and add `/admin/index.html`.
 
-```yaml
-- source: github:fardm/quartz-standalone-comments
-  enabled: true
-  options:
-    backendUrl: [https://comments.yourdomain.com](https://comments.yourdomain.com)
-    type: recent
-    limit: 5
-  layout:
-    position: right
-    priority: 50
-```
+For example:
+`https://standalone-comments-server.<your-username>.workers.dev/admin/index.html`
 
-<br>
-
-## Enable Email Notifications
-
-Email notifications require a cron job. If you installed the system on a subdomain (recommended), use the correct absolute path from your hosting provider.
-
-1. Create a new Cron Job in your hosting panel  
-2. Paste the following command:
-```
-/usr/local/bin/php /home/username/domains/comments.example.com/public_html/scripts/process-email-queue.php
-```
-3. Go to **Utilities** and enable **Email Notifications**  
-4. Enter your email address in the **Admin Email** field and save the settings  
-5. Create a few test comments to verify everything is working correctly
-
-<br>
-
-## My Modifications
-
-Summary of the changes I made to the original project:
-
-- Added language configuration support for the frontend (i18n-ready setup).
-- Dynamic Timezone and Calendar system (Gregorian/Solar Hijri) settings affecting the entire admin panel dynamically.
-- Jalali (Persian) date support
-- Added comment sorting controls in the admin panel.
-- Refactored import/export system to include all data types (comments, reactions, subscriptions, and spam).
-- Added a one-click database cleanup feature with selectable data categories.
-- Improved styling, modern UI, and unified admin settings.
-- Dark mode for the admin panel
-- Redesigned emoji reactions (the original version only included four Disqus-style reactions; this version provides a wider GitHub-style emoji selection)
-- Formatting help displayed inside the comment editor
-- Added Gravatar support with automatic fallback avatars.
-
-<br>
-
-## Security
-
-To reduce spam and abuse, the system includes several protection layers:
-
-- Honeypot protection to detect and block bots
-- Rate limiting
-- Automatic IP blocking after multiple failed login attempts in the admin panel
-
-<br>
+Log in using the password you chose during the `npm run setup` step.

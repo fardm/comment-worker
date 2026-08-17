@@ -8,5 +8,6 @@ database_name = "comments-db"
 database_id = "00000000-0000-0000-0000-000000000000"
 
 [vars]
-ALLOWED_ORIGINS = "*"
+ALLOWED_ORIGINS = "http://localhost:8787, http://localhost:8080"
 APP_URL = "http://localhost:8787"
+ADMIN_PASSWORD_HASH = ""

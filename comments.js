@@ -5,10 +5,20 @@
 
 const COMMENTS_DEFAULT_LANGUAGE = 'en';
 
-function getCommentsAssetBaseUrl(apiUrl) {
-    const url = new URL(apiUrl, window.location.href);
-    const path = url.pathname.replace(/\/api\.php$/, '');
-    return url.origin + path;
+function getCommentsAssetBaseUrl() {
+    if (window.COMMENTS_CONFIG?.assetUrl) {
+        return window.COMMENTS_CONFIG.assetUrl;
+    }
+
+    // Try to derive from the script source
+    const script = document.currentScript;
+    if (script && script.src) {
+        const url = new URL(script.src);
+        const path = url.pathname.replace(/\/[^\/]+$/, '');
+        return url.origin + path;
+    }
+
+    return '';
 }
 
 function loadCommentsScript(src) {
@@ -21,9 +31,9 @@ function loadCommentsScript(src) {
     });
 }
 
-async function loadCommentsTranslations(apiUrl, language) {
+async function loadCommentsTranslations(language) {
     const lang = /^[a-z]{2}$/i.test(language) ? language.toLowerCase() : COMMENTS_DEFAULT_LANGUAGE;
-    const baseUrl = getCommentsAssetBaseUrl(apiUrl);
+    const baseUrl = getCommentsAssetBaseUrl();
     try {
         await loadCommentsScript(`${baseUrl}/lang/${lang}.js`);
     } catch (e) {
@@ -820,7 +830,7 @@ async function initComments() {
 
     const apiUrl = container.dataset.apiUrl || window.COMMENTS_CONFIG?.apiUrl || '/api.php';
     const language = await resolveCommentsLanguage(apiUrl, container);
-    await loadCommentsTranslations(apiUrl, language);
+    await loadCommentsTranslations(language);
 
     const config = {
         apiUrl,

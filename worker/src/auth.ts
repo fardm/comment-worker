@@ -6,9 +6,11 @@ export const SESSION_LIFETIME = 3600 * 24 * 30
 
 export class AuthService {
   private db: D1Database
+  private env: any
 
-  constructor(db: D1Database) {
+  constructor(db: D1Database, env?: any) {
     this.db = db
+    this.env = env
   }
 
   async getSetting(key: string): Promise<string | null> {
@@ -75,7 +77,7 @@ export class AuthService {
       return { error: 'too_many_requests' }
     }
 
-    const hash = await this.getSetting('admin_password_hash')
+    const hash = this.env?.ADMIN_PASSWORD_HASH
     if (!hash) {
       return { error: 'admin_password_not_set' }
     }
@@ -123,7 +125,7 @@ export class AuthService {
 }
 
 export async function adminMiddleware(c: Context, next: Next) {
-  const auth = new AuthService(c.env.DB)
+  const auth = new AuthService(c.env.DB, c.env)
   const isAuth = await auth.isAdmin(c)
   if (!isAuth) {
     return c.json({ error: 'Unauthorized' }, 401)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://unpkg.com;">
     <title>Comment System Admin</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/admin.css">
@@ -15,9 +15,11 @@
         <h2 style="margin-bottom: 1.5rem;">Admin Login</h2>
         <div id="login-message"></div>
         <form id="login-form">
+            <!-- Hidden username for password managers -->
+            <input type="text" name="username" autocomplete="username" value="admin" style="display:none;" tabindex="-1" aria-hidden="true">
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" required>
+                <input type="password" id="password" autocomplete="current-password" required>
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
         </form>
@@ -64,6 +66,12 @@
     </div>
 
     <!-- ── Shared scripts ─────────────────────────────────────────────────── -->
+    <script>
+        // Uncomment and set this if your API is hosted on a different domain than the admin panel
+        // window.COMMENTS_CONFIG = {
+        //     apiUrl: 'https://api.yourdomain.com/api.php'
+        // };
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="assets/admin-common.js"></script>
     <script src="assets/admin-comment-edit.js"></script>

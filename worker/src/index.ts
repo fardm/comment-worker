@@ -24,7 +24,13 @@ app.use('*', async (c, next) => {
   const allowedOrigins = c.env.ALLOWED_ORIGINS || '*'
 
   const corsMiddleware = cors({
-    origin: allowedOrigins === '*' ? '*' : allowedOrigins.split(',').map(o => o.trim()),
+    origin: (origin, c) => {
+      const allowedList = allowedOrigins.split(',').map(o => o.trim())
+      if (allowedList.includes('*') || (origin && allowedList.includes(origin))) {
+        return origin || '*'
+      }
+      return null
+    },
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization', 'X-Admin-Token'],
     credentials: true,
@@ -34,6 +40,7 @@ app.use('*', async (c, next) => {
 })
 
 app.get('/', (c) => c.text('Cloudflare Comments API is running.'))
+app.get('/health', (c) => c.json({ status: 'ok' }))
 
 // The single endpoint to match the old api.php routing logic
 app.all('/api.php', async (c) => {
@@ -42,7 +49,7 @@ app.all('/api.php', async (c) => {
 
   const db = c.env.DB
 
-  const auth = new AuthService(db)
+  const auth = new AuthService(db, c.env)
   const comments = new CommentService(db)
   const reactions = new ReactionService(db)
   const admin = new AdminService(db)

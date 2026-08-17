@@ -1,16 +1,10 @@
-English | [فارسی](https://github.com/fardm/standalone-comments-server/blob/main/README-fa.md)
-
 # Quartz Standalone Comments
 
-This project adds a commenting system to [Quartz](https://quartz.jzhao.xyz/). The original repository can be found here: https://github.com/dlnorman/standalone-comments.
+This project adds a commenting system to [Quartz](https://quartz.jzhao.xyz/). The original repository can be found here: https://github.com/dlnorman/standalone-comments. This project has been heavily modified to be fully serverless, running on Cloudflare Workers and Cloudflare D1.
 
- I made several modifications to improve compatibility and usability for Quartz websites.
-
- > ✅ Compatible with Quartz v5
+> ✅ Compatible with Quartz v5
 
 ## Features
-
-![image](comments.webp)
 
 - 🌍 Multilingual support (English & Persian, extendable via i18n)
 - 😀 Reactions with 10 emoji options for both posts and comments
@@ -21,35 +15,89 @@ This project adds a commenting system to [Quartz](https://quartz.jzhao.xyz/). Th
 - 🛡️ Spam protection and moderation system
 - 📧 Email notifications for new comments
 
-<br>
+---
 
-## Installation
+## 1. Requirements and installation
 
-> ⚠️ It is recommended to use PHP 8.0 or newer. Although the original project claims support for PHP 7.4, I encountered errors with PHP 8.1. The issues were resolved after upgrading to PHP 8.3.
+- A Cloudflare account.
+- Node.js installed locally.
+- Git repository clone of this project.
 
-### Step 1: Install on Your Server
+Run `npm install` inside the project to install dependencies.
 
-1. Get a shared hosting account and create a subdomain, for example: `comments.yourdomain.com`.
-2. Download this repository by clicking the green **Code** button and selecting **Download ZIP**.
-3. Upload the ZIP file to your hosting account's `public_html` directory and extract it.
-4. Open `setup.php` in your browser:
+## 2. Admin password/secrets setup
 
-   ```
-   https://comments.yourdomain.com/setup.php
-   ```
+The system secures the admin interface using an environment variable.
 
-5. Follow the on-screen instructions to set up your configuration (App URL, Allowed Origins, Admin Password, Timezone, and Calendar System).
-6. Open the admin panel:
+First, generate a secure password hash or simply use a strong plain-text password for the `ADMIN_PASSWORD_HASH` variable (if deploying plainly, although hashing is recommended for real deployments, the current config compares directly).
 
-   ```
-   https://comments.yourdomain.com/admin/index.html
-   ```
+You must add this secret to your Cloudflare Worker:
+```bash
+cd worker
+npx wrangler secret put ADMIN_PASSWORD_HASH
+```
+When prompted, enter your secure password.
 
-7. Enter the password you selected and log in.
+## 3. Local configuration
 
-After successfully logging in, delete the `setup.php` file from your `public_html` directory for security purposes.
+In `worker/wrangler.toml`, there are several variables you can configure:
 
-### Step 2: Install the Quartz Plugin
+- `ALLOWED_ORIGINS`: A comma-separated list of domains allowed to access the API. (e.g. `https://your-quartz-site.com, https://admin.yourdomain.com`). Set it to localhost origins for testing.
+- `APP_URL`: The URL of your API Worker.
+- `ADMIN_PASSWORD_HASH`: For local testing, you can set it directly in `wrangler.toml` under `[vars]`, but it should remain empty in source control and set via `wrangler secret put` in production.
+
+## 4. Database setup
+
+The project uses Cloudflare D1. To initialize the database:
+
+**Local Development:**
+```bash
+cd worker
+npx wrangler d1 execute comments-db --local --file=./schema.sql
+```
+
+**Production:**
+First, create the database:
+```bash
+npx wrangler d1 create comments-db
+```
+Update your `worker/wrangler.toml` with the generated `database_id`. Then initialize it:
+```bash
+npx wrangler d1 execute comments-db --file=./schema.sql
+```
+
+## 5. Running Worker and Admin locally
+
+To run the Worker API locally:
+```bash
+cd worker
+npx wrangler dev
+```
+The API will be available at `http://localhost:8787`.
+
+To run the Admin panel locally, you can use any static file server in the project root:
+```bash
+npx serve .
+```
+Navigate to `http://localhost:3000/admin/index.html`. You can configure the `window.COMMENTS_CONFIG.apiUrl` inside `admin/index.html` to point to `http://localhost:8787/api.php` if needed.
+
+## 6. Worker deployment
+
+To deploy the API Worker to Cloudflare:
+```bash
+cd worker
+npx wrangler deploy
+```
+
+## 7. Admin Pages deployment
+
+You can host the Admin panel and static assets on Cloudflare Pages. From the root directory:
+```bash
+npx wrangler pages deploy . --project-name comments-admin
+```
+Follow the interactive prompts to create the project. The admin panel will be accessible at `https://<your-pages-domain>.pages.dev/admin/index.html`.
+
+## 8. Frontend comments integration
 
 Run the following command inside your Quartz project:
 
@@ -57,96 +105,16 @@ Run the following command inside your Quartz project:
 npx quartz plugin add github:fardm/quartz-standalone-comments
 ```
 
-Once installed, open the `quartz.config.yaml` file and configure the plugin. Set `backendUrl` to the URL of the server where you uploaded the comment system:
+Once installed, open the `quartz.config.yaml` file and configure the plugin. Set `backendUrl` to the URL of the server where you uploaded the comment system. You can define `apiUrl` and `assetUrl` separately if they are hosted on different domains.
 
-```yaml
-- source: github:fardm/quartz-standalone-comments
-  enabled: true
-  options:
-    backendUrl: https://comments.yourdomain.com
-    type: full
-  layout:
-    position: afterBody
-    priority: 100
-```
+## 9. Production configuration
 
-Start the local preview server:
+Make sure `ALLOWED_ORIGINS` in your `wrangler.toml` (or via Cloudflare Dashboard) includes the exact origin of your Quartz site and your Admin panel site (e.g., `https://my-blog.com, https://comments-admin.pages.dev`).
 
-```bash
-npx quartz build --serve
-```
+In `admin/index.html`, uncomment the `window.COMMENTS_CONFIG` block and set `apiUrl` to your Worker URL (e.g., `https://comments-worker.<your-username>.workers.dev/api.php`).
 
-You should now see the comment section at the bottom of your pages.
+## 10. Troubleshooting
 
-Keep in mind that this is only a local preview. Since the site is running locally, reactions and comments will not be stored in the database.
-
-Deploy and sync your site using:
-
-```bash
-npx quartz sync
-```
-
-After deployment, visit your website and test both comments and reactions.
-
-<br>
-
-## Recent Comments Widget
-
-To display the latest comments in your sidebar or any other part of your site's layout, simply add the following configuration to your `quartz.config.yaml` file:
-
-```yaml
-- source: github:fardm/quartz-standalone-comments
-  enabled: true
-  options:
-    backendUrl: [https://comments.yourdomain.com](https://comments.yourdomain.com)
-    type: recent
-    limit: 5
-  layout:
-    position: right
-    priority: 50
-```
-
-<br>
-
-## Enable Email Notifications
-
-Email notifications require a cron job. If you installed the system on a subdomain (recommended), use the correct absolute path from your hosting provider.
-
-1. Create a new Cron Job in your hosting panel  
-2. Paste the following command:
-```
-/usr/local/bin/php /home/username/domains/comments.example.com/public_html/scripts/process-email-queue.php
-```
-3. Go to **Utilities** and enable **Email Notifications**  
-4. Enter your email address in the **Admin Email** field and save the settings  
-5. Create a few test comments to verify everything is working correctly
-
-<br>
-
-## My Modifications
-
-Summary of the changes I made to the original project:
-
-- Added language configuration support for the frontend (i18n-ready setup).
-- Dynamic Timezone and Calendar system (Gregorian/Solar Hijri) settings affecting the entire admin panel dynamically.
-- Jalali (Persian) date support
-- Added comment sorting controls in the admin panel.
-- Refactored import/export system to include all data types (comments, reactions, subscriptions, and spam).
-- Added a one-click database cleanup feature with selectable data categories.
-- Improved styling, modern UI, and unified admin settings.
-- Dark mode for the admin panel
-- Redesigned emoji reactions (the original version only included four Disqus-style reactions; this version provides a wider GitHub-style emoji selection)
-- Formatting help displayed inside the comment editor
-- Added Gravatar support with automatic fallback avatars.
-
-<br>
-
-## Security
-
-To reduce spam and abuse, the system includes several protection layers:
-
-- Honeypot protection to detect and block bots
-- Rate limiting
-- Automatic IP blocking after multiple failed login attempts in the admin panel
-
-<br>
+- **CORS Credentials Errors:** The API does not allow `*` when credentials are included. Ensure your exact frontend domains are listed in `ALLOWED_ORIGINS`.
+- **404 Assets (lang/en.js):** The script automatically resolves asset URLs based on where `comments.js` is loaded from, or from `window.COMMENTS_CONFIG.assetUrl`.
+- **Login fails / CSRF errors:** Ensure `ADMIN_PASSWORD_HASH` is set via Wrangler secrets, and that your API URL is correctly configured in the Admin panel.

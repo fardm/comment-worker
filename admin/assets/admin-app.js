@@ -1955,11 +1955,11 @@ VIEWS['settings-import-export'] = {
                 <div class="util-card-body">
                     <div class="export-row">
                         <div class="export-info"><strong>Comments Export XML</strong><span>Disqus-compatible format: all comments, reactions, subscriptions, IP addresses, and metadata</span></div>
-                        <a href="/api.php?action=export_comments" class="btn btn-primary btn-sm">Download XML</a>
+                        <a href="/api?action=export_comments" class="btn btn-primary btn-sm">Download XML</a>
                     </div>
                     <div class="export-row" style="margin-top:1rem;">
                         <div class="export-info"><strong>Comments Export JSON</strong><span>Native format: all comments, reactions, subscriptions, IP addresses, and metadata</span></div>
-                        <a href="/api.php?action=export_comments_json" class="btn btn-success btn-sm">Download JSON</a>
+                        <a href="/api?action=export_comments_json" class="btn btn-success btn-sm">Download JSON</a>
                     </div>
                     <div style="margin-top:1rem;"><div id="export-message"></div></div>
                 </div>

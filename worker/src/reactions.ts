@@ -5,33 +5,43 @@ export class ReactionService {
     this.db = db
   }
 
-  async addVote(commentId: number, ip: string, reactionType: string) {
+  async toggleVote(commentId: number, ip: string, reactionType: string) {
+    let voted = true;
     try {
       await this.db.prepare('INSERT INTO votes (comment_id, ip_address, reaction_type) VALUES (?, ?, ?)').bind(commentId, ip, reactionType).run()
-      return { success: true }
     } catch (e) {
       // SQLite UNIQUE constraint violation
-      return { error: 'already_voted' }
+      await this.db.prepare('DELETE FROM votes WHERE comment_id = ? AND ip_address = ? AND reaction_type = ?').bind(commentId, ip, reactionType).run()
+      voted = false;
     }
+
+    // Get updated counts for this comment
+    const { results } = await this.db.prepare('SELECT reaction_type, COUNT(*) as count FROM votes WHERE comment_id = ? GROUP BY reaction_type').bind(commentId).all()
+    const counts: Record<string, number> = {}
+    for (const r of results) {
+      counts[r.reaction_type as string] = r.count as number
+    }
+
+    return { success: true, voted, counts }
   }
 
-  async removeVote(commentId: number, ip: string, reactionType: string) {
-    await this.db.prepare('DELETE FROM votes WHERE comment_id = ? AND ip_address = ? AND reaction_type = ?').bind(commentId, ip, reactionType).run()
-    return { success: true }
-  }
-
-  async addPostReaction(url: string, ip: string, reactionType: string) {
+  async togglePostReaction(url: string, ip: string, reactionType: string) {
+    let voted = true;
     try {
       await this.db.prepare('INSERT INTO post_reactions (page_url, ip_address, reaction_type) VALUES (?, ?, ?)').bind(url, ip, reactionType).run()
-      return { success: true }
     } catch (e) {
-      return { error: 'already_reacted' }
+      await this.db.prepare('DELETE FROM post_reactions WHERE page_url = ? AND ip_address = ? AND reaction_type = ?').bind(url, ip, reactionType).run()
+      voted = false;
     }
-  }
 
-  async removePostReaction(url: string, ip: string, reactionType: string) {
-    await this.db.prepare('DELETE FROM post_reactions WHERE page_url = ? AND ip_address = ? AND reaction_type = ?').bind(url, ip, reactionType).run()
-    return { success: true }
+    // Get updated counts for this post
+    const summary = await this.getPostReactionsSummary(url, ip)
+    const counts: Record<string, number> = {}
+    for (const key in summary) {
+        counts[key] = summary[key].count
+    }
+
+    return { success: true, voted, counts }
   }
 
   async getPostReactionsSummary(url: string, ip: string) {

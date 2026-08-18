@@ -76,6 +76,12 @@ const handler = async (c: any) => {
       return c.json(result)
     }
 
+    if (method === 'GET' && action === 'recent') {
+      const limit = parseInt(c.req.query('limit') || '8')
+      const result = await comments.getRecentComments(limit)
+      return c.json(result)
+    }
+
     if (method === 'POST' && action === 'post') {
       const body = await c.req.json()
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
@@ -86,29 +92,19 @@ const handler = async (c: any) => {
     if (method === 'POST' && action === 'post_reaction') {
       const body = await c.req.json()
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
-      const isDelete = c.req.query('delete') === '1'
-      if (!isDelete && await ratelimit.isVoteRateLimited(ip)) return c.json({ error: "Too many votes. Please try again later." }, 429)
-      if (isDelete) {
-        const result = await reactions.removePostReaction(body.url, ip, body.reaction_type)
-        return c.json(result)
-      } else {
-        const result = await reactions.addPostReaction(body.url, ip, body.reaction_type)
-        return c.json(result)
-      }
+      if (await ratelimit.isVoteRateLimited(ip)) return c.json({ error: "Too many votes. Please try again later." }, 429)
+
+      const result = await reactions.togglePostReaction(body.page_url || body.url, ip, body.reaction_type)
+      return c.json(result)
     }
 
     if (method === 'POST' && action === 'vote') {
       const body = await c.req.json()
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
-      const isDelete = c.req.query('delete') === '1'
-      if (!isDelete && await ratelimit.isVoteRateLimited(ip)) return c.json({ error: "Too many votes. Please try again later." }, 429)
-      if (isDelete) {
-        const result = await reactions.removeVote(body.comment_id, ip, body.reaction_type)
-        return c.json(result)
-      } else {
-        const result = await reactions.addVote(body.comment_id, ip, body.reaction_type)
-        return c.json(result)
-      }
+      if (await ratelimit.isVoteRateLimited(ip)) return c.json({ error: "Too many votes. Please try again later." }, 429)
+
+      const result = await reactions.toggleVote(body.comment_id, ip, body.reaction_type)
+      return c.json(result)
     }
 
     if (method === 'GET' && action === 'post_reactions_summary') {
@@ -167,23 +163,26 @@ const handler = async (c: any) => {
     }
 
     if (method === 'PUT' && action === 'moderate') {
-      const body = await c.req.json()
+      const body = await c.req.json().catch(() => ({}))
+      const id = parseInt(c.req.query('id') || '0') || body.id
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
-      const result = await comments.moderateComment(body.id, body.status)
+      const result = await comments.moderateComment(id, body.status)
       return c.json(result)
     }
 
     if (method === 'PUT' && action === 'edit_content') {
-      const body = await c.req.json()
+      const body = await c.req.json().catch(() => ({}))
+      const id = parseInt(c.req.query('id') || '0') || body.id
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
-      const result = await comments.editComment(body.id, body.content)
+      const result = await comments.editComment(id, body.content)
       return c.json(result)
     }
 
     if (method === 'DELETE' && action === 'delete') {
-      const body = await c.req.json()
+      const body = await c.req.json().catch(() => ({}))
+      const id = parseInt(c.req.query('id') || '0') || body.id
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
-      const result = await comments.deleteComment(body.id)
+      const result = await comments.deleteComment(id)
       return c.json(result)
     }
 

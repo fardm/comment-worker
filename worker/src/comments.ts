@@ -21,7 +21,20 @@ export class CommentService {
     const topLevel: any[] = []
     const repliesMap = new Map<number, any[]>()
 
+    // Fetch all reactions for these comments to map to counts
+    const commentIds = comments.map(c => c.id).join(',');
+    const votesMap = new Map<number, Record<string, number>>();
+    if (commentIds) {
+      const { results: votes } = await this.db.prepare(`SELECT comment_id, reaction_type, COUNT(*) as count FROM votes WHERE comment_id IN (${commentIds}) GROUP BY comment_id, reaction_type`).all();
+      for (const v of votes) {
+        const cId = v.comment_id as number;
+        if (!votesMap.has(cId)) votesMap.set(cId, {});
+        votesMap.get(cId)![v.reaction_type as string] = v.count as number;
+      }
+    }
+
     for (const comment of comments) {
+      comment.reactions = votesMap.get(comment.id as number) || {};
       const parentId = comment.parent_id as number | null;
       if (parentId) {
         if (!repliesMap.has(parentId)) {

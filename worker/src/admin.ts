@@ -9,13 +9,22 @@ export class AdminService {
     const totalComments = await this.db.prepare('SELECT COUNT(*) as count FROM comments').first<{count: number}>()
     const pendingComments = await this.db.prepare("SELECT COUNT(*) as count FROM comments WHERE status = 'pending'").first<{count: number}>()
     const spamComments = await this.db.prepare("SELECT COUNT(*) as count FROM comments WHERE status = 'spam'").first<{count: number}>()
+    const approvedComments = await this.db.prepare("SELECT COUNT(*) as count FROM comments WHERE status = 'approved'").first<{count: number}>()
     const totalSubscriptions = await this.db.prepare('SELECT COUNT(*) as count FROM subscriptions').first<{count: number}>()
 
     return {
       total_comments: totalComments?.count || 0,
       pending_comments: pendingComments?.count || 0,
       spam_comments: spamComments?.count || 0,
-      total_subscriptions: totalSubscriptions?.count || 0
+      total_subscriptions: totalSubscriptions?.count || 0,
+      status_totals: {
+        pending: pendingComments?.count || 0,
+        spam: spamComments?.count || 0,
+        approved: approvedComments?.count || 0,
+        deleted: 0
+      },
+      unique_commenters: 0,
+      unique_ips: 0
     }
   }
 
@@ -27,18 +36,17 @@ export class AdminService {
 
   async getDbStats() {
     const counts = await this.getAnalytics()
-    // The admin frontend expects an object with 'tables' (array of objects)
-    // and 'comment_statuses' object
     return {
       db_size_bytes: 1024 * 1024, // Fake size for now
       counts,
-      tables: [
-        { name: 'comments', rows: counts.total_comments },
-        { name: 'subscriptions', rows: counts.total_subscriptions },
-        { name: 'settings', rows: 6 },
-        { name: 'votes', rows: 0 },
-        { name: 'post_reactions', rows: 0 }
-      ],
+      tables: {
+        comments: counts.total_comments,
+        subscriptions: counts.total_subscriptions,
+        settings: 6,
+        votes: 0,
+        post_reactions: 0,
+        reactions: 0
+      },
       comment_statuses: {
         pending: counts.pending_comments,
         spam: counts.spam_comments,

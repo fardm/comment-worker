@@ -29,7 +29,7 @@
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const API_URL = window.COMMENTS_CONFIG?.apiUrl || '/api.php';
+const API_URL = window.COMMENTS_CONFIG?.apiUrl || '/api';
 
 // ── AdminAuth ─────────────────────────────────────────────────────────────────
 

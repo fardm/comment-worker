@@ -7,7 +7,7 @@ const COMMENTS_DEFAULT_LANGUAGE = 'en';
 
 function getCommentsAssetBaseUrl(apiUrl) {
     const url = new URL(apiUrl, window.location.href);
-    const path = url.pathname.replace(/\/api\.php$/, '');
+    const path = url.pathname.replace(/\/(api|api\.php)$/, '');
     return url.origin + path;
 }
 
@@ -56,7 +56,7 @@ async function resolveCommentsLanguage(apiUrl, container) {
 
 class CommentSystem {
     constructor(options) {
-        this.apiUrl = options.apiUrl || '/api.php';
+        this.apiUrl = options.apiUrl || '/api';
         this.pageUrl = options.pageUrl || window.location.pathname;
         this.containerId = options.containerId || 'comments-container';
         this.closed = options.closed || false;
@@ -818,7 +818,7 @@ async function initComments() {
         return;
     }
 
-    const apiUrl = container.dataset.apiUrl || window.COMMENTS_CONFIG?.apiUrl || '/api.php';
+    const apiUrl = container.dataset.apiUrl || window.COMMENTS_CONFIG?.apiUrl || '/api';
     const language = await resolveCommentsLanguage(apiUrl, container);
     await loadCommentsTranslations(apiUrl, language);
 

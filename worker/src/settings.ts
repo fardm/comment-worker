@@ -14,12 +14,13 @@ export class SettingsService {
     return config
   }
 
-  async saveSettings(settings: Record<string, string>) {
+  async saveSettings(settings: Record<string, any>) {
     // Cloudflare D1 batching
     const stmts = []
     for (const [key, value] of Object.entries(settings)) {
       if (key !== 'admin_token') {
-        stmts.push(this.db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').bind(key, value))
+        const val = typeof value === 'object' ? JSON.stringify(value) : String(value)
+        stmts.push(this.db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').bind(key, val))
       }
     }
 

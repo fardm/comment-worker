@@ -35,8 +35,8 @@ app.use('*', async (c, next) => {
 
 app.get('/', (c) => c.text('Cloudflare Comments API is running.'))
 
-// The single endpoint to match the old api.php routing logic
-app.all('/api.php', async (c) => {
+// Allow /api as the new canonical endpoint, while keeping /api.php for backward compatibility
+const handler = async (c: any) => {
   const method = c.req.method
   const action = c.req.query('action')
 
@@ -200,22 +200,37 @@ app.all('/api.php', async (c) => {
 
     if (method === 'GET' && action === 'get_config') {
       const config = await settings.getAllSettings()
+      let allowed_origins = c.env.ALLOWED_ORIGINS ? c.env.ALLOWED_ORIGINS.split(',').map((o: string) => o.trim()) : ['*']
+      if (config.allowed_origins) {
+        try {
+          allowed_origins = JSON.parse(config.allowed_origins)
+        } catch {
+          allowed_origins = config.allowed_origins.split(',').map((o: string) => o.trim())
+        }
+      }
       return c.json({
         ...config,
-        app_url: c.env.APP_URL || '',
-        allowed_origins: c.env.ALLOWED_ORIGINS ? c.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : ['*']
+        app_url: config.app_url || c.env.APP_URL || '',
+        allowed_origins
       })
     }
 
 
     if (method === 'GET' && action === 'get_settings') {
       const result = await settings.getAllSettings()
-      return c.json(result)
+      return c.json({ settings: result })
     }
 
     if (method === 'POST' && action === 'save_settings') {
       const body = await c.req.json()
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
+      const result = await settings.saveSettings(body)
+      return c.json(result)
+    }
+
+    if (method === 'POST' && action === 'save_config') {
+      const body = await c.req.json()
+      // Save config as settings. The system currently uses `settings` to store both `settings` and `config`.
       const result = await settings.saveSettings(body)
       return c.json(result)
     }
@@ -252,6 +267,9 @@ app.all('/api.php', async (c) => {
   } catch (e: any) {
     return c.json({ error: 'Internal Server Error', message: e.message }, 500)
   }
-})
+}
+
+app.all('/api', handler)
+app.all('/api.php', handler)
 
 export default app

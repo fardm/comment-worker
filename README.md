@@ -121,9 +121,9 @@ If you want to quickly verify that your worker is working, copy the following HT
     <!-- 3. Configure the worker URL -->
     <script>
         window.COMMENTS_CONFIG = {
-            apiUrl: "<YOUR_WORKER_URL>/api.php",
-            url: "https://example.com/my-test-page",
-            title: "My Test Page"
+            apiUrl: "<YOUR_WORKER_URL>/api",
+            pageUrl: window.location.pathname,
+            title: document.title
         };
     </script>
 

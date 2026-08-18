@@ -1186,7 +1186,10 @@ VIEWS['post-reactions'] = {
                     el.style.opacity = '1';
                 }
             });
-            document.getElementById('stat-total-all').textContent = Object.values(totals).reduce((s, v) => s + v, 0);
+            const totalAllEl = document.getElementById('stat-total-all');
+            if (totalAllEl) {
+                totalAllEl.textContent = Object.values(totals).reduce((s, v) => s + v, 0);
+            }
         }
 
         async function clearReactions(pageUrl) {

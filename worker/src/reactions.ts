@@ -91,4 +91,9 @@ export class ReactionService {
     return { reactions: results, total: results.length }
   }
 
+  async deleteReaction(id: number) {
+    await this.db.prepare('DELETE FROM post_reactions WHERE id = ?').bind(id).run()
+    return { success: true }
+  }
+
 }

@@ -9,7 +9,7 @@ export class CommentService {
     this.spamService = new SpamService(db)
   }
 
-  async getComments(url: string, limit: number, offset: number) {
+  async getComments(url: string, limit: number, offset: number, ip: string) {
     const { results: comments } = await this.db.prepare(`
       SELECT * FROM comments
       WHERE page_url = ? AND status = 'approved'
@@ -23,13 +23,21 @@ export class CommentService {
 
     // Fetch all reactions for these comments to map to counts
     const commentIds = comments.map(c => c.id).join(',');
-    const votesMap = new Map<number, Record<string, number>>();
+    const votesMap = new Map<number, Record<string, any>>();
     if (commentIds) {
       const { results: votes } = await this.db.prepare(`SELECT comment_id, reaction_type, COUNT(*) as count FROM votes WHERE comment_id IN (${commentIds}) GROUP BY comment_id, reaction_type`).all();
+
+      const { results: userVotes } = await this.db.prepare(`SELECT comment_id, reaction_type FROM votes WHERE comment_id IN (${commentIds}) AND ip_address = ?`).bind(ip).all();
+      const userVotesSet = new Set(userVotes.map(v => `${v.comment_id}-${v.reaction_type}`));
+
       for (const v of votes) {
         const cId = v.comment_id as number;
         if (!votesMap.has(cId)) votesMap.set(cId, {});
-        votesMap.get(cId)![v.reaction_type as string] = v.count as number;
+        const rType = v.reaction_type as string;
+        votesMap.get(cId)![rType] = {
+          count: v.count as number,
+          voted: userVotesSet.has(`${cId}-${rType}`)
+        };
       }
     }
 

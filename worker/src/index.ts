@@ -63,7 +63,8 @@ const handler = async (c: any) => {
       return c.json({
         require_moderation: config.require_moderation === 'true',
         allow_guest_comments: config.allow_guest_comments === 'true',
-        max_comment_length: parseInt(config.max_comment_length || '5000')
+        max_comment_length: parseInt(config.max_comment_length || '5000'),
+        language: config.language || 'en'
       })
     }
 
@@ -72,8 +73,11 @@ const handler = async (c: any) => {
       if (!url) return c.json({ error: 'URL is required' }, 400)
       const limit = parseInt(c.req.query('limit') || '500')
       const offset = parseInt(c.req.query('offset') || '0')
-      const result = await comments.getComments(url, limit, offset)
-      return c.json(result)
+      const result = await comments.getComments(url, limit, offset, ip)
+
+      // Also fetch and attach post_reactions to the result
+      const postReactionsSummary = await reactions.getPostReactionsSummary(url, ip)
+      return c.json({ ...result, post_reactions: postReactionsSummary })
     }
 
     if (method === 'GET' && action === 'recent') {
@@ -86,6 +90,11 @@ const handler = async (c: any) => {
       const body = await c.req.json()
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
       const result = await comments.createComment(body, ip, userAgent)
+
+      if (result.success && body.subscribe && body.author_email) {
+        await subscriptions.addSubscription(body.page_url || body.url, body.author_email)
+      }
+
       return c.json(result)
     }
 
@@ -158,14 +167,60 @@ const handler = async (c: any) => {
     }
 
     if (method === 'GET' && action === 'all') {
-      const result = await db.prepare("SELECT * FROM comments ORDER BY created_at DESC").all()
-      return c.json({ comments: result.results, total: result.results.length })
+      const limit = parseInt(c.req.query('limit') || '50')
+      const offset = parseInt(c.req.query('offset') || '0')
+      const status = c.req.query('status')
+      const search = c.req.query('search')
+
+      let query = "SELECT * FROM comments"
+      let countQuery = "SELECT COUNT(*) as count FROM comments"
+      let conditions = []
+      let params = []
+
+      if (status && status !== 'all') {
+        conditions.push("status = ?")
+        params.push(status)
+      }
+
+      if (search) {
+        conditions.push("(author_name LIKE ? OR content LIKE ? OR author_email LIKE ?)")
+        const searchTerm = `%${search}%`
+        params.push(searchTerm, searchTerm, searchTerm)
+      }
+
+      if (conditions.length > 0) {
+        query += " WHERE " + conditions.join(" AND ")
+        countQuery += " WHERE " + conditions.join(" AND ")
+      }
+
+      query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+
+      const countStmt = db.prepare(countQuery)
+      const stmt = db.prepare(query)
+
+      const countResult = await countStmt.bind(...params).first()
+      const totalCount = countResult ? countResult.count : 0
+
+      const result = await stmt.bind(...params, limit, offset).all()
+
+      // Calculate aggregates
+      const aggregatesResult = await db.prepare("SELECT status, COUNT(*) as count FROM comments GROUP BY status").all()
+      const aggregates: Record<string, number> = { pending: 0, approved: 0, spam: 0, all: 0 }
+      for (const row of aggregatesResult.results) {
+        aggregates[row.status as string] = row.count as number
+        aggregates.all += row.count as number
+      }
+
+      return c.json({
+        comments: result.results,
+        pagination: { total: totalCount },
+        aggregates
+      })
     }
 
     if (method === 'PUT' && action === 'moderate') {
       const body = await c.req.json().catch(() => ({}))
       const id = parseInt(c.req.query('id') || '0') || body.id
-      if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
       const result = await comments.moderateComment(id, body.status)
       return c.json(result)
     }
@@ -173,7 +228,6 @@ const handler = async (c: any) => {
     if (method === 'PUT' && action === 'edit_content') {
       const body = await c.req.json().catch(() => ({}))
       const id = parseInt(c.req.query('id') || '0') || body.id
-      if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
       const result = await comments.editComment(id, body.content)
       return c.json(result)
     }
@@ -181,7 +235,6 @@ const handler = async (c: any) => {
     if (method === 'DELETE' && action === 'delete') {
       const body = await c.req.json().catch(() => ({}))
       const id = parseInt(c.req.query('id') || '0') || body.id
-      if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
       const result = await comments.deleteComment(id)
       return c.json(result)
     }
@@ -222,7 +275,6 @@ const handler = async (c: any) => {
 
     if (method === 'POST' && action === 'save_settings') {
       const body = await c.req.json()
-      if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
       const result = await settings.saveSettings(body)
       return c.json(result)
     }
@@ -232,6 +284,27 @@ const handler = async (c: any) => {
       // Save config as settings. The system currently uses `settings` to store both `settings` and `config`.
       const result = await settings.saveSettings(body)
       return c.json(result)
+    }
+
+    if (method === 'POST' && action === 'db_delete_data') {
+      const body = await c.req.json()
+      let result: Record<string, number> = {}
+
+      if (body.delete_comments) {
+        const { meta } = await db.prepare('DELETE FROM comments').run()
+        result.comments = meta.changes || 0
+      }
+      if (body.delete_reactions) {
+        const { meta: postMeta } = await db.prepare('DELETE FROM post_reactions').run()
+        const { meta: voteMeta } = await db.prepare('DELETE FROM votes').run()
+        result.reactions = (postMeta.changes || 0) + (voteMeta.changes || 0)
+      }
+      if (body.delete_subscriptions) {
+        const { meta } = await db.prepare('DELETE FROM subscriptions').run()
+        result.subscriptions = meta.changes || 0
+      }
+
+      return c.json({ deleted: result })
     }
 
     if (method === 'GET' && action === 'export_comments_json') {
@@ -254,9 +327,14 @@ const handler = async (c: any) => {
       return c.json({ subscriptions: result, total: result.length })
     }
 
+    if (method === 'DELETE' && action === 'delete_single_reaction') {
+      const id = parseInt(c.req.query('id') || '0')
+      const result = await reactions.deleteReaction(id)
+      return c.json(result)
+    }
+
     if (method === 'DELETE' && action === 'delete_subscription') {
       const body = await c.req.json()
-      if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
       const result = await subscriptions.deleteSubscription(body.id)
       return c.json(result)
     }

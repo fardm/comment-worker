@@ -99,6 +99,18 @@ For example:
 
 Log in using the password you chose during the `npm run setup` step.
 
+## Testing Guide
+
+After deployment or when making changes, test the key features to ensure they function properly:
+
+- **Frontend Language**: In the Admin panel under "Settings -> Configuration", change the Frontend Language. Reload your comments widget on your site to see the UI text updated.
+- **Comment Reactions**: Click reaction emojis on both the comment widget itself and check the "All Comments" or "Post Reactions" section in the Admin panel to ensure counts increase properly without refreshing.
+- **Recent Comments**: Post a new comment and check the "Recent Comments" widget (if embedded on the sidebar). It should show a brief excerpt of your comment.
+- **Vacuum DB**: Go to "Settings -> Database" in the Admin panel and click "Optimize (VACUUM)". You should see a success message that the database size was optimized.
+- **Export JSON**: Go to "Settings -> Import & Export" in the Admin panel and click "Download JSON". Ensure a `.json` file downloads automatically to your computer rather than displaying in the browser tab.
+- **Unsubscribe & Delete Subscription**: Navigate to "Subscriptions" in the Admin panel. Click "Unsubscribe" to toggle the active status of an email, and click "Delete" to ensure the subscription is removed from the database completely.
+- **Import Comments**: In "Settings -> Import & Export", drop a `.json` or `.xml` export file. Click "Preview" to see the data, then "Import" to populate the database with the comments.
+
 ## Testing Your Deployed Worker Without Installation
 
 If you want to quickly verify that your worker is working, copy the following HTML snippet and save it as an `index.html` file, or paste it directly into an existing test page. Make sure to replace `<YOUR_WORKER_URL>` with your actual deployed Worker URL!

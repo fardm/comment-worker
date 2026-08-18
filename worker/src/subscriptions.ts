@@ -20,13 +20,18 @@ export class SubscriptionService {
     return results
   }
 
-  async deleteSubscription(id: number) {
-    await this.db.prepare('DELETE FROM subscriptions WHERE id = ?').bind(id).run()
+  async deleteSubscription(token: string) {
+    await this.db.prepare('DELETE FROM subscriptions WHERE token = ?').bind(token).run()
     return { success: true }
   }
 
   async unsubscribe(token: string) {
     const result = await this.db.prepare('DELETE FROM subscriptions WHERE token = ?').bind(token).run()
     return result.success
+  }
+
+  async toggleSubscription(token: string, active: number) {
+    await this.db.prepare('UPDATE subscriptions SET active = ? WHERE token = ?').bind(active, token).run()
+    return { success: true }
   }
 }

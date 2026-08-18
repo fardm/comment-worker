@@ -64,7 +64,7 @@ const handler = async (c: any) => {
         require_moderation: config.require_moderation === 'true',
         allow_guest_comments: config.allow_guest_comments === 'true',
         max_comment_length: parseInt(config.max_comment_length || '5000'),
-        language: config.language || 'en'
+        language: config.app_language || 'en'
       })
     }
 
@@ -163,6 +163,23 @@ const handler = async (c: any) => {
 
     if (method === 'GET' && action === 'pending') {
       const result = await db.prepare("SELECT * FROM comments WHERE status = 'pending' ORDER BY created_at DESC").all()
+
+      const commentIds = result.results.map((c: any) => c.id).join(',');
+      const votesMap = new Map<number, Record<string, any>>();
+      if (commentIds) {
+        const { results: votes } = await db.prepare(`SELECT comment_id, reaction_type, COUNT(*) as count FROM votes WHERE comment_id IN (${commentIds}) GROUP BY comment_id, reaction_type`).all();
+        for (const v of votes) {
+          const cId = v.comment_id as number;
+          if (!votesMap.has(cId)) votesMap.set(cId, {});
+          const rType = v.reaction_type as string;
+          votesMap.get(cId)![rType] = v.count as number;
+        }
+      }
+
+      for (const comment of result.results) {
+        comment.votes_by_reaction_type = votesMap.get(comment.id as number) || {};
+      }
+
       return c.json({ comments: result.results, total: result.results.length })
     }
 
@@ -202,6 +219,22 @@ const handler = async (c: any) => {
       const totalCount = countResult ? countResult.count : 0
 
       const result = await stmt.bind(...params, limit, offset).all()
+
+      const commentIdsAll = result.results.map((c: any) => c.id).join(',');
+      const votesMapAll = new Map<number, Record<string, any>>();
+      if (commentIdsAll) {
+        const { results: votes } = await db.prepare(`SELECT comment_id, reaction_type, COUNT(*) as count FROM votes WHERE comment_id IN (${commentIdsAll}) GROUP BY comment_id, reaction_type`).all();
+        for (const v of votes) {
+          const cId = v.comment_id as number;
+          if (!votesMapAll.has(cId)) votesMapAll.set(cId, {});
+          const rType = v.reaction_type as string;
+          votesMapAll.get(cId)![rType] = v.count as number;
+        }
+      }
+
+      for (const comment of result.results) {
+        comment.votes_by_reaction_type = votesMapAll.get(comment.id as number) || {};
+      }
 
       // Calculate aggregates
       const aggregatesResult = await db.prepare("SELECT status, COUNT(*) as count FROM comments GROUP BY status").all()
@@ -249,6 +282,11 @@ const handler = async (c: any) => {
       return c.json(result)
     }
 
+    if (method === 'POST' && action === 'vacuum') {
+      const result = await admin.vacuumDb()
+      return c.json(result)
+    }
+
 
     if (method === 'GET' && action === 'get_config') {
       const config = await settings.getAllSettings()
@@ -286,6 +324,21 @@ const handler = async (c: any) => {
       return c.json(result)
     }
 
+    if (method === 'POST' && action === 'import_comments') {
+      const body = await c.req.json()
+      const preview = c.req.query('preview') === '1'
+
+      if (preview) {
+        const result = await importExport.previewImport(body.content)
+        if (result.error) return c.json(result, 400)
+        return c.json(result)
+      } else {
+        const result = await importExport.runImport(body.content)
+        if (result.error) return c.json(result, 400)
+        return c.json(result)
+      }
+    }
+
     if (method === 'POST' && action === 'db_delete_data') {
       const body = await c.req.json()
       let result: Record<string, number> = {}
@@ -309,7 +362,12 @@ const handler = async (c: any) => {
 
     if (method === 'GET' && action === 'export_comments_json') {
       const result = await importExport.exportCommentsJson()
-      return c.json(result)
+      return new Response(JSON.stringify(result, null, 2), {
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Disposition": "attachment; filename=\"comments.json\""
+        }
+      })
     }
 
     if (method === 'GET' && action === 'export_comments') {
@@ -327,6 +385,12 @@ const handler = async (c: any) => {
       return c.json({ subscriptions: result, total: result.length })
     }
 
+    if (method === 'POST' && action === 'toggle_subscription') {
+      const body = await c.req.json()
+      const result = await subscriptions.toggleSubscription(body.token, body.active)
+      return c.json(result)
+    }
+
     if (method === 'DELETE' && action === 'delete_single_reaction') {
       const id = parseInt(c.req.query('id') || '0')
       const result = await reactions.deleteReaction(id)
@@ -334,8 +398,9 @@ const handler = async (c: any) => {
     }
 
     if (method === 'DELETE' && action === 'delete_subscription') {
-      const body = await c.req.json()
-      const result = await subscriptions.deleteSubscription(body.id)
+      const token = c.req.query('token')
+      if (!token) return c.json({ error: 'Token is required' }, 400)
+      const result = await subscriptions.deleteSubscription(token)
       return c.json(result)
     }
 

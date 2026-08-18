@@ -42,7 +42,7 @@ export class CommentService {
     }
 
     for (const comment of comments) {
-      comment.reactions = votesMap.get(comment.id as number) || {};
+      comment.votes_by_reaction_type = votesMap.get(comment.id as number) || {};
       const parentId = comment.parent_id as number | null;
       if (parentId) {
         if (!repliesMap.has(parentId)) {
@@ -120,6 +120,11 @@ export class CommentService {
       ORDER BY created_at DESC
       LIMIT ?
     `).bind(limit).all()
+
+    for (const row of results) {
+      const content = row.content as string;
+      row.excerpt = content.length > 150 ? content.substring(0, 150) + '...' : content;
+    }
     return results
   }
 }

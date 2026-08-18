@@ -125,6 +125,6 @@ export class CommentService {
       const content = row.content as string;
       row.excerpt = content.length > 150 ? content.substring(0, 150) + '...' : content;
     }
-    return results
+    return { comments: results }
   }
 }

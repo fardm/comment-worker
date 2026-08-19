@@ -1842,6 +1842,18 @@ VIEWS['settings-notifications'] = {
             </div>
 
             <div class="util-card" style="margin-top: 1.5rem;">
+                <div class="util-card-header"><span class="icon">✈️</span><h2>Telegram Notifications</h2></div>
+                <div class="util-card-body">
+                    <p>Get notified in Telegram when new comments are submitted. Configure the bot token and chat ID using <code style="background:var(--gray,#f0f0f0);padding:.15rem .4rem;border-radius:3px;font-size:.88rem;">npm run telegram</code>.</p>
+                    <div id="telegram-message"></div>
+                    <div class="setting-row">
+                        <div class="setting-label"><strong>Telegram Notifications</strong><span>Send new comment alerts to Telegram</span></div>
+                        <label class="toggle-switch"><input type="checkbox" id="setting-telegram-enabled"><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="util-card" style="margin-top: 1.5rem;">
                 <div class="util-card-header"><span class="icon">✉️</span><h2>Test Email</h2></div>
                 <div class="util-card-body">
                     <p>Send a test email to verify your server's mail configuration.</p>
@@ -1869,7 +1881,46 @@ VIEWS['settings-notifications'] = {
             } catch (e) { console.error('Settings load failed', e); }
         }
 
+        async function loadTelegramStatus() {
+            try {
+                const r = await fetch(`${API_URL}?action=telegram_status`, { credentials: 'include' });
+                if (r.ok) {
+                    const d = await r.json();
+                    const cb = document.getElementById('setting-telegram-enabled');
+                    if (cb) cb.checked = d.telegram_enabled;
+                }
+            } catch (e) { console.error('Telegram status load failed', e); }
+        }
+
+        async function toggleTelegram() {
+            const cb = document.getElementById('setting-telegram-enabled');
+            const msgEl = document.getElementById('telegram-message');
+            if (!cb) return;
+            const enabled = cb.checked;
+            try {
+                await AdminAuth.ensureCsrfToken();
+                const r = await fetch(`${API_URL}?action=telegram_toggle`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ telegram_enabled: enabled, csrf_token: AdminAuth.getCsrfToken() }),
+                });
+                const d = await r.json();
+                if (r.ok) {
+                    cb.checked = d.telegram_enabled;
+                    if (msgEl) {
+                        msgEl.innerHTML = `<div class="message success">Telegram notifications ${d.telegram_enabled ? 'enabled' : 'disabled'}.</div>`;
+                        setTimeout(() => { msgEl.innerHTML = ''; }, 2500);
+                    }
+                } else {
+                    if (msgEl) msgEl.innerHTML = `<div class="message error">${d.error || 'Failed to update'}</div>`;
+                }
+            } catch (e) {
+                if (msgEl) msgEl.innerHTML = '<div class="message error">Network error</div>';
+            }
+        }
+
         document.getElementById('setting-enable-notifications')?.addEventListener('change', saveSettings);
+        document.getElementById('setting-telegram-enabled')?.addEventListener('change', toggleTelegram);
 
         async function saveSettings() {
             const msgEl = document.getElementById('settings-message');
@@ -1916,8 +1967,9 @@ VIEWS['settings-notifications'] = {
             } catch(e) { if(msgEl) msgEl.innerHTML = '<div class="message error">Network error</div>'; }
         }
 
-        hoistToWindow({ saveSettings, sendTestEmail });
+        hoistToWindow({ saveSettings, sendTestEmail, toggleTelegram });
         loadSettings();
+        loadTelegramStatus();
     }
 };
 

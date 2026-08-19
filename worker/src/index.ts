@@ -9,6 +9,7 @@ import { EmailService } from "./email"
 import { ImportExportService } from "./importexport"
 import { SubscriptionService } from './subscriptions'
 import { SettingsService } from './settings'
+import { TelegramService } from './telegram'
 import { getCookie } from 'hono/cookie'
 
 type Bindings = {
@@ -16,6 +17,7 @@ type Bindings = {
   ALLOWED_ORIGINS: string
   APP_URL: string
   ADMIN_PASSWORD_HASH?: string
+  TELEGRAM_BOT_TOKEN?: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -93,6 +95,30 @@ const handler = async (c: any) => {
 
       if (result.success && body.subscribe && body.author_email) {
         await subscriptions.addSubscription(body.page_url || body.url, body.author_email)
+      }
+
+      // Fire-and-forget Telegram notification via waitUntil
+      if (result.success) {
+        const telegram = new TelegramService(db)
+        const telegramSettings = await telegram.getSettings()
+        const botToken = c.env.TELEGRAM_BOT_TOKEN as string | undefined
+        if (telegramSettings.telegram_enabled === 'true' && botToken && telegramSettings.telegram_chat_id) {
+          const ctx = c.executionCtx as any
+          if (ctx && typeof ctx.waitUntil === 'function') {
+            ctx.waitUntil(
+              telegram
+                .sendCommentNotification(
+                  botToken,
+                  telegramSettings.telegram_chat_id,
+                  body.page_url || body.url || '',
+                  body.author_name || 'Anonymous',
+                  body.content || '',
+                  `${c.env.APP_URL}/admin/index.html`,
+                )
+                .catch((e) => console.error('[Telegram] Background notification failed:', e))
+            )
+          }
+        }
       }
 
       return c.json(result)
@@ -322,6 +348,26 @@ const handler = async (c: any) => {
       // Save config as settings. The system currently uses `settings` to store both `settings` and `config`.
       const result = await settings.saveSettings(body)
       return c.json(result)
+    }
+
+    // ── Telegram Admin Toggle ────────────────────────────────────────
+
+    if (method === 'GET' && action === 'telegram_status') {
+      const telegram = new TelegramService(db)
+      const tgSettings = await telegram.getSettings()
+      return c.json({
+        telegram_enabled: tgSettings.telegram_enabled === 'true',
+        chat_id_set: tgSettings.telegram_chat_id !== '',
+        bot_token_set: !!(c.env.TELEGRAM_BOT_TOKEN as string),
+      })
+    }
+
+    if (method === 'POST' && action === 'telegram_toggle') {
+      const telegram = new TelegramService(db)
+      const body = await c.req.json().catch(() => ({}))
+      const enabled = body.telegram_enabled === true || body.telegram_enabled === 'true' ? 'true' : 'false'
+      await telegram.saveSettings({ telegram_enabled: enabled })
+      return c.json({ success: true, telegram_enabled: enabled === 'true' })
     }
 
     if (method === 'POST' && action === 'import_comments') {

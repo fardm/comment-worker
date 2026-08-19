@@ -11,3 +11,4 @@ dist/
 build/
 target/
 worker/public
+worker/.dev.vars

@@ -45,7 +45,9 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
     ('allow_guest_comments', 'true'),
     ('max_comment_length', '5000'),
     ('enable_notifications', 'false'),
-    ('admin_email', '');
+    ('admin_email', ''),
+    ('telegram_enabled', 'false'),
+    ('telegram_chat_id', '');
 
 -- Subscriptions table for email notifications
 CREATE TABLE IF NOT EXISTS subscriptions (

@@ -9,7 +9,8 @@
     "dev": "cd worker && npx wrangler dev",
     "deploy": "cd worker && npx wrangler deploy",
     "predev": "node scripts/copy-admin.js",
-    "predeploy": "node scripts/copy-admin.js"
+    "predeploy": "node scripts/copy-admin.js",
+    "telegram": "node scripts/telegram.js"
   },
   "repository": {
     "type": "git",

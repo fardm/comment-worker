@@ -111,6 +111,60 @@ After deployment or when making changes, test the key features to ensure they fu
 - **Unsubscribe & Delete Subscription**: Navigate to "Subscriptions" in the Admin panel. Click "Unsubscribe" to toggle the active status of an email, and click "Delete" to ensure the subscription is removed from the database completely.
 - **Import Comments**: In "Settings -> Import & Export", drop a `.json` or `.xml` export file. Click "Preview" to see the data, then "Import" to populate the database with the comments.
 
+## Telegram Notifications
+
+You can receive instant Telegram notifications whenever a new comment is posted. This uses the official Telegram Bot API — no server-side polling required.
+
+### 1. Create a Bot
+
+1. Open Telegram and search for **@BotFather**.
+2. Send `/newbot` and follow the prompts to choose a name and username for your bot.
+3. BotFather will give you a **Bot Token** (looks like `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`). Copy it.
+
+### 2. Get Your Chat ID
+
+1. Open a chat with your new bot in Telegram and send any message (e.g. `/start`).
+2. Open this URL in your browser (replace `<TOKEN>` with your Bot Token):
+
+   ```
+   https://api.telegram.org/bot<TOKEN>/getUpdates
+   ```
+
+3. Look for `"chat":{"id":` in the JSON response — the number that follows is your **Chat ID**.
+
+   > 💡 For group chats, add the bot to the group first, then send a message there before calling `getUpdates`. For channels, post a message as the bot.
+
+### 3. Configure via CLI
+
+Run the interactive setup:
+
+`npm run telegram`
+
+Choose **option 1 (Setup / Reconfigure)** and follow the prompts:
+
+- Enter your **Bot Token** — it is pushed as a Cloudflare Worker Secret (`TELEGRAM_BOT_TOKEN`) and saved locally in `worker/.dev.vars` for development.
+- Enter your **Chat ID** — it is stored in your D1 database alongside other settings.
+- Choose whether to enable notifications and send a test message.
+
+You can return to this menu anytime to change the token, chat ID, enable/disable notifications, or send another test:
+
+| Option | Description |
+|--------|-------------|
+| `1` | Full setup / reconfigure |
+| `2` | Change Bot Token |
+| `3` | Change Chat ID |
+| `4` | Enable notifications |
+| `5` | Disable notifications |
+| `6` | Send test notification |
+
+### Where Things Are Stored
+
+| What | Where | Why |
+|------|-------|-----|
+| **Bot Token** | Cloudflare Worker Secret (`TELEGRAM_BOT_TOKEN`) + local `worker/.dev.vars` | Secrets are never stored in the database — only in encrypted Cloudflare storage and your local dev file (which is git-ignored). |
+| **Chat ID** | D1 `settings` table | Kept in the database so it can be managed from both the CLI and the Admin Panel. |
+| **Enabled/Disabled** | D1 `settings` table | Toggle from the CLI (`npm run telegram`) or the Admin Panel. |
+
 ## Testing Your Deployed Worker Without Installation
 
 If you want to quickly verify that your worker is working, copy the following HTML snippet and save it as an `index.html` file, or paste it directly into an existing test page. Make sure to replace `<YOUR_WORKER_URL>` with your actual deployed Worker URL!

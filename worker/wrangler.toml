@@ -5,7 +5,7 @@ compatibility_date = "2024-03-20"
 [[d1_databases]]
 binding = "DB"
 database_name = "comments-db"
-database_id = "11111111-1111-1111-1111-111111111111"
+database_id = "2b69a6e6-a081-4616-8b86-b735591c9a84"
 
 [assets]
 directory = "./public"

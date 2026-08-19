@@ -7,20 +7,31 @@ const WRANGLER_TOML = path.join(__dirname, '../worker/wrangler.toml');
 const DEV_VARS = path.join(__dirname, '../worker/.dev.vars');
 const CWD = path.join(__dirname, '../worker');
 
+/**
+ * Run a command silently. Returns stdout on success, null on failure.
+ * Uses shell:true so that npx/npx.cmd resolves correctly on every OS.
+ */
 function run(command) {
   try {
-    return execSync(command, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'], cwd: CWD });
+    return execSync(command, {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+      cwd: CWD,
+      shell: true,
+    });
   } catch (error) {
     return null;
   }
 }
 
+/**
+ * Run a command with inherited stdio (user sees output). Returns true on success.
+ */
 function runVerbose(command) {
   try {
-    execSync(command, { encoding: 'utf-8', stdio: ['inherit'], cwd: CWD });
+    execSync(command, { encoding: 'utf-8', stdio: 'inherit', cwd: CWD, shell: true });
     return true;
   } catch (error) {
-    console.error(`Error: ${error.message}`);
     return false;
   }
 }
@@ -49,21 +60,15 @@ function getDbName() {
   return match ? match[1] : 'comments-db';
 }
 
-function runD1(command) {
-  try {
-    return execSync(command, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'], cwd: CWD });
-  } catch (error) {
-    return null;
-  }
-}
-
 function getSetting(dbName, key) {
-  const result = runD1(`npx wrangler d1 execute "${dbName}" --command="SELECT value FROM settings WHERE key='${key}'" --json`);
+  const result = run(`npx wrangler d1 execute "${dbName}" --command="SELECT value FROM settings WHERE key='${key}'" --json`);
   if (result) {
     try {
       const data = JSON.parse(result);
-      if (data.results && data.results.length > 0 && data.results[0].value !== undefined) {
-        return String(data.results[0].value);
+      // Wrangler v4 wraps the output in an array: [{results: [...]}]
+      const first = Array.isArray(data) ? data[0] : data;
+      if (first && first.results && first.results.length > 0 && first.results[0].value !== undefined) {
+        return String(first.results[0].value);
       }
     } catch (e) {}
   }
@@ -71,7 +76,25 @@ function getSetting(dbName, key) {
 }
 
 function updateSetting(dbName, key, value) {
-  return runD1(`npx wrangler d1 execute "${dbName}" --command="INSERT OR REPLACE INTO settings (key, value) VALUES ('${key}', '${value}')"`);
+  return run(`npx wrangler d1 execute "${dbName}" --command="INSERT OR REPLACE INTO settings (key, value) VALUES ('${key}', '${value}')"`);
+}
+
+/**
+ * Push the bot token to the Cloudflare Worker secret using execSync with input piping.
+ * Works cross-platform because execSync with shell:true resolves npx → npx.cmd on Windows.
+ */
+function pushSecret(token) {
+  try {
+    execSync('npx wrangler secret put TELEGRAM_BOT_TOKEN', {
+      input: token,
+      cwd: CWD,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: true,
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 async function setupTelegram() {
@@ -98,28 +121,11 @@ async function setupTelegram() {
   const dbName = getDbName();
 
   console.log('\n🔑 Setting bot token as Cloudflare Worker secret...');
-  if (run(`npx wrangler secret list`)) {
-    // Try to set via secret
-    const child = require('child_process').spawn('npx', [
-      'wrangler', 'secret', 'put', 'TELEGRAM_BOT_TOKEN'
-    ], { cwd: CWD, stdio: ['pipe', 'pipe', 'pipe'] });
-    child.stdin.write(token);
-    child.stdin.end();
-    try {
-      execSync(`npx wrangler secret put TELEGRAM_BOT_TOKEN`, {
-        input: token,
-        cwd: CWD,
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
-      console.log('✅ Secret set for production.');
-    } catch (e) {
-      if (e.stdout && e.stdout.includes('success')) {
-        console.log('✅ Secret set for production.');
-      } else {
-        console.log('⚠️  Could not set remote secret. Setting it when you deploy.\n');
-        console.log('   Run manually: cd worker && echo "YOUR_TOKEN" | npx wrangler secret put TELEGRAM_BOT_TOKEN');
-      }
-    }
+  if (pushSecret(token)) {
+    console.log('✅ Secret set for production.');
+  } else {
+    console.log('⚠️  Could not set remote secret. You can set it later when you deploy.');
+    console.log('   Run manually: cd worker && echo "YOUR_TOKEN" | npx wrangler secret put TELEGRAM_BOT_TOKEN');
   }
 
   console.log('🔧 Updating local dev secret (.dev.vars)...');
@@ -184,14 +190,9 @@ async function changeToken() {
   }
 
   console.log('\n🔑 Updating secret...');
-  try {
-    execSync(`npx wrangler secret put TELEGRAM_BOT_TOKEN`, {
-      input: token,
-      cwd: CWD,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
+  if (pushSecret(token)) {
     console.log('✅ Secret updated for production.');
-  } catch (e) {
+  } else {
     console.log('⚠️  Could not update remote secret.');
     console.log('   Run manually: cd worker && echo "NEW_TOKEN" | npx wrangler secret put TELEGRAM_BOT_TOKEN');
   }

@@ -7,19 +7,38 @@ const WRANGLER_TOML = path.join(__dirname, '../worker/wrangler.toml');
 const DEV_VARS = path.join(__dirname, '../worker/.dev.vars');
 const CWD = path.join(__dirname, '../worker');
 
-// Reusable readline instance — creating/closing one per prompt can cause
-// stdin to stay paused and silently swallow the next input.
+// ── Readline ──────────────────────────────────────────────────────────────────
+// One persistent readline instance for the lifetime of the process.
+// Closing and re-creating between questions on Windows breaks stdin.
 let rl = null;
-function getRl() {
-  if (!rl) rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+function ensureRl() {
+  if (!rl) {
+    rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  }
   return rl;
 }
-function closeRl() { if (rl) { rl.close(); rl = null; } }
 
-/**
- * Run a command silently. Returns stdout on success, null on failure.
- * Uses shell:true so that npx/npx.cmd resolves correctly on every OS.
- */
+function prompt(question) {
+  return new Promise(resolve => {
+    // Ensure stdin is in flowing mode before readline reads from it.
+    // On Windows, execSync with shell:true can pause stdin as a side-effect,
+    // causing the next readline.question() to silently hang or error.
+    process.stdin.resume();
+    ensureRl().question(question, answer => resolve(answer.trim()));
+  });
+}
+
+function cleanup() {
+  if (rl) { rl.close(); rl = null; }
+}
+
+// Ensure cleanup on any exit path
+process.on('SIGINT', () => { cleanup(); process.exit(0); });
+process.on('exit', cleanup);
+
+// ── Wrangler helpers ──────────────────────────────────────────────────────────
+
 function run(command) {
   try {
     return execSync(command, {
@@ -33,52 +52,18 @@ function run(command) {
   }
 }
 
-/**
- * Run a command with inherited stdio (user sees output). Returns true on success.
- */
-function runVerbose(command) {
-  try {
-    execSync(command, { encoding: 'utf-8', stdio: 'inherit', cwd: CWD, shell: true });
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-function prompt(question) {
-  return new Promise(resolve => {
-    getRl().question(question, answer => resolve(answer.trim()));
-  });
-}
-
-function updateDevVars(token) {
-  let content = '';
-  if (fs.existsSync(DEV_VARS)) content = fs.readFileSync(DEV_VARS, 'utf-8');
-  if (content.includes('TELEGRAM_BOT_TOKEN=')) {
-    content = content.replace(/TELEGRAM_BOT_TOKEN=.*/, `TELEGRAM_BOT_TOKEN="${token}"`);
-  } else {
-    content = content.trimEnd() + `\nTELEGRAM_BOT_TOKEN="${token}"\n`;
-  }
-  fs.writeFileSync(DEV_VARS, content);
-}
-
 function getDbName() {
   const toml = fs.readFileSync(WRANGLER_TOML, 'utf-8');
   const match = toml.match(/database_name\s*=\s*"([^"]+)"/);
   return match ? match[1] : 'comments-db';
 }
 
-/**
- * Read the production APP_URL from [vars] in wrangler.toml.
- * This is always the canonical public admin URL — never localhost.
- */
 function getProductionUrl() {
   const toml = fs.readFileSync(WRANGLER_TOML, 'utf-8');
   const match = toml.match(/APP_URL\s*=\s*"([^"]+)"/);
   return match ? match[1] : '';
 }
 
-/** Build the admin panel URL for Telegram inline buttons. */
 function getAdminUrl() {
   const base = getProductionUrl();
   return base ? `${base}/admin/index.html` : '';
@@ -89,7 +74,6 @@ function getSetting(dbName, key) {
   if (result) {
     try {
       const data = JSON.parse(result);
-      // Wrangler v4 wraps the output in an array: [{results: [...]}]
       const first = Array.isArray(data) ? data[0] : data;
       if (first && first.results && first.results.length > 0 && first.results[0].value !== undefined) {
         return String(first.results[0].value);
@@ -103,9 +87,21 @@ function updateSetting(dbName, key, value) {
   return run(`npx wrangler d1 execute "${dbName}" --command="INSERT OR REPLACE INTO settings (key, value) VALUES ('${key}', '${value}')"`);
 }
 
+function updateDevVars(token) {
+  let content = '';
+  if (fs.existsSync(DEV_VARS)) content = fs.readFileSync(DEV_VARS, 'utf-8');
+  if (content.includes('TELEGRAM_BOT_TOKEN=')) {
+    content = content.replace(/TELEGRAM_BOT_TOKEN=.*/, `TELEGRAM_BOT_TOKEN="${token}"`);
+  } else {
+    content = content.trimEnd() + `\nTELEGRAM_BOT_TOKEN="${token}"\n`;
+  }
+  fs.writeFileSync(DEV_VARS, content);
+}
+
 /**
- * Push the bot token to the Cloudflare Worker secret using execSync with input piping.
- * Works cross-platform because execSync with shell:true resolves npx → npx.cmd on Windows.
+ * Push bot token via wrangler secret put.
+ * Uses execSync with input (creates its own stdin pipe) — never touches
+ * the parent readline's stdin.
  */
 function pushSecret(token) {
   try {
@@ -121,13 +117,15 @@ function pushSecret(token) {
   }
 }
 
+// ── Actions ───────────────────────────────────────────────────────────────────
+
 async function setupTelegram() {
   console.log('✈️  Telegram Notification Setup\n');
 
   const token = await prompt('Enter your Telegram Bot Token: ');
   if (!token || !token.includes(':')) {
     console.error('❌ Invalid bot token format.');
-    process.exit(1);
+    return;
   }
 
   const dbName = getDbName();
@@ -142,13 +140,12 @@ async function setupTelegram() {
   const chatId = await prompt('Enter your Telegram Chat ID (numeric): ');
   if (!chatId) {
     console.error('❌ Chat ID is required.');
-    process.exit(1);
+    return;
   }
 
   updateSetting(dbName, 'telegram_chat_id', chatId);
   console.log('✅ Chat ID saved.');
 
-  // Send test notification
   const test = await prompt('Send a test notification? (y/n): ');
   if (test.toLowerCase() === 'y' || test.toLowerCase() === 'yes') {
     try {
@@ -179,19 +176,17 @@ async function changeToken() {
   const token = await prompt('Enter new Bot Token: ');
   if (!token || !token.includes(':')) {
     console.error('❌ Invalid bot token format.');
-    process.exit(1);
+    return;
   }
 
-  console.log('\n🔑 Updating secret...');
   if (pushSecret(token)) {
-    console.log('✅ Secret updated for production.');
+    console.log('✅ Bot token updated for production.');
   } else {
-    console.log('⚠️  Could not update remote secret.');
-    console.log('   Run manually: cd worker && echo "NEW_TOKEN" | npx wrangler secret put TELEGRAM_BOT_TOKEN');
+    console.log('⚠️  Could not update remote secret. Set it manually with: cd worker && npx wrangler secret put TELEGRAM_BOT_TOKEN');
   }
-
   updateDevVars(token);
-  console.log('✅ Updated .dev.vars.');
+  console.log('✅ Local .dev.vars updated.');
+  console.log();
 }
 
 async function changeChatId() {
@@ -199,30 +194,30 @@ async function changeChatId() {
   const chatId = await prompt('Enter new Chat ID (numeric): ');
   if (!chatId) {
     console.error('❌ Chat ID is required.');
-    process.exit(1);
+    return;
   }
 
   const dbName = getDbName();
   updateSetting(dbName, 'telegram_chat_id', chatId);
   console.log('✅ Chat ID updated.');
+  console.log();
 }
 
 async function enableNotifications() {
   const dbName = getDbName();
   updateSetting(dbName, 'telegram_enabled', 'true');
-  console.log('✅ Telegram notifications enabled.');
+  console.log('✅ Telegram notifications enabled.\n');
 }
 
 async function disableNotifications() {
   const dbName = getDbName();
   updateSetting(dbName, 'telegram_enabled', 'false');
-  console.log('✅ Telegram notifications disabled.');
+  console.log('✅ Telegram notifications disabled.\n');
 }
 
 async function sendTest() {
   console.log('📨 Sending test notification...\n');
 
-  // Read token from env var, .dev.vars, or prompt
   let token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token && fs.existsSync(DEV_VARS)) {
     const content = fs.readFileSync(DEV_VARS, 'utf-8');
@@ -231,17 +226,14 @@ async function sendTest() {
   }
 
   if (!token) {
-    console.log('❌ No bot token found.');
-    console.log('   Set TELEGRAM_BOT_TOKEN environment variable,');
-    console.log('   or run: npm run telegram (first-time setup)');
+    console.log('❌ No bot token found. Run option 1 first.\n');
     return;
   }
 
   const dbName = getDbName();
   const chatId = getSetting(dbName, 'telegram_chat_id');
   if (!chatId) {
-    console.log('❌ No Chat ID configured.');
-    console.log('   Run: npm run telegram (first-time setup)');
+    console.log('❌ No Chat ID configured. Run option 1 first.\n');
     return;
   }
 
@@ -257,61 +249,62 @@ async function sendTest() {
       }),
     });
     if (response.ok) {
-      console.log('✅ Test notification sent successfully!');
+      console.log('✅ Test notification sent!\n');
     } else {
       const err = await response.text();
       console.error('❌ Failed to send test notification.');
-      console.error('   Make sure your Bot Token and Chat ID are correct.');
-      console.error('   Response:', err);
+      console.error('   Response:', err, '\n');
     }
   } catch (e) {
-    console.error('❌ Failed to send test notification:', e.message);
+    console.error('❌ Failed:', e.message, '\n');
   }
 }
 
-async function showMenu() {
-  try {
-  console.log('✈️  Telegram Notification Configuration\n');
-  console.log('Select an option:\n');
-  console.log('  1. Setup / Reconfigure');
-  console.log('  2. Change Bot Token');
-  console.log('  3. Change Chat ID');
-  console.log('  4. Enable notifications');
-  console.log('  5. Disable notifications');
-  console.log('  6. Send test notification');
-  console.log('');
+// ── Main loop ─────────────────────────────────────────────────────────────────
 
-  const choice = await prompt('Enter option (1-6): ');
-  console.log('');
+async function main() {
+  const args = process.argv.slice(2);
 
-  switch (choice) {
-    case '1': return setupTelegram();
-    case '2': return changeToken();
-    case '3': return changeChatId();
-    case '4': return enableNotifications();
-    case '5': return disableNotifications();
-    case '6': return sendTest();
-    default:
-      console.error('❌ Invalid option.');
-      process.exit(1);
-  }
-  } finally {
-    closeRl();
+  // Non-interactive CLI flags
+  if (args.includes('--enable')) { await enableNotifications(); return; }
+  if (args.includes('--disable')) { await disableNotifications(); return; }
+  if (args.includes('--test')) { await sendTest(); return; }
+  if (args.includes('--setup')) { await setupTelegram(); return; }
+  if (args.includes('--token')) { await changeToken(); return; }
+  if (args.includes('--chat-id')) { await changeChatId(); return; }
+
+  // Interactive menu loop
+  const actions = {
+    '1': setupTelegram,
+    '2': changeToken,
+    '3': changeChatId,
+    '4': enableNotifications,
+    '5': disableNotifications,
+    '6': sendTest,
+  };
+
+  let running = true;
+  while (running) {
+    console.log('✈️  Telegram Notification Configuration\n');
+    console.log('  1. Setup / Reconfigure');
+    console.log('  2. Change Bot Token');
+    console.log('  3. Change Chat ID');
+    console.log('  4. Enable notifications');
+    console.log('  5. Disable notifications');
+    console.log('  6. Send test notification');
+    console.log('  0. Exit\n');
+
+    const choice = await prompt('Enter option (0-6): ');
+    console.log('');
+
+    if (choice === '0' || choice === '') {
+      running = false;
+    } else if (actions[choice]) {
+      await actions[choice]();
+    } else {
+      console.error('❌ Invalid option.\n');
+    }
   }
 }
 
-// Handle CLI arguments
-const args = process.argv.slice(2);
-const handled = (
-  (args.includes('--enable') && enableNotifications()) ||
-  (args.includes('--disable') && disableNotifications()) ||
-  (args.includes('--test') && sendTest()) ||
-  (args.includes('--setup') && setupTelegram()) ||
-  (args.includes('--token') && changeToken()) ||
-  (args.includes('--chat-id') && changeChatId())
-);
-if (handled) {
-  Promise.resolve(handled).then(() => closeRl()).catch(e => { closeRl(); console.error(e); process.exit(1); });
-} else {
-  showMenu().catch(err => { closeRl(); console.error(err); process.exit(1); });
-}
+main().catch(err => { console.error(err); process.exit(1); });

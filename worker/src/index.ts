@@ -376,7 +376,17 @@ const handler = async (c: any) => {
     }
 
     if (method === 'POST' && action === 'import_comments') {
-      const body = await c.req.json()
+      let body: any
+      try {
+        body = await c.req.json()
+      } catch {
+        return c.json({ error: 'Invalid request body: expected JSON' }, 400)
+      }
+
+      if (!body.content || typeof body.content !== 'string') {
+        return c.json({ error: 'Missing or invalid content field' }, 400)
+      }
+
       const preview = c.req.query('preview') === '1'
 
       if (preview) {
@@ -412,21 +422,12 @@ const handler = async (c: any) => {
     }
 
     if (method === 'GET' && action === 'export_comments_json') {
-      const result = await importExport.exportCommentsJson()
+      const result = await importExport.exportFullJson()
+      const dateStr = new Date().toISOString().slice(0, 10)
       return new Response(JSON.stringify(result, null, 2), {
         headers: {
           "Content-Type": "application/json",
-          "Content-Disposition": "attachment; filename=\"comments.json\""
-        }
-      })
-    }
-
-    if (method === 'GET' && action === 'export_comments') {
-      const result = await importExport.exportCommentsXml()
-      return new Response(result, {
-        headers: {
-          "Content-Type": "application/xml",
-          "Content-Disposition": "attachment; filename=\"comments.xml\""
+          "Content-Disposition": `attachment; filename="comments-backup-${dateStr}.json"`
         }
       })
     }

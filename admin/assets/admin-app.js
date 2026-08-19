@@ -1114,7 +1114,7 @@ VIEWS['post-reactions'] = {
                 <div style="font-weight: 600; font-size: 1.1rem;">
                     Total Reactions: <span id="stat-total-all" style="color: var(--primary);">0</span>
                 </div>
-                <div id="stats" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                <div id="stats" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: space-between;">
                     <div class="reaction-badge" id="stat-heart">❤️ 0</div>
                     <div class="reaction-badge" id="stat-thumbsup">👍 0</div>
                     <div class="reaction-badge" id="stat-lightbulb">👎 0</div>
@@ -2006,11 +2006,7 @@ VIEWS['settings-import-export'] = {
                 <div class="util-card-header"><span class="icon">📤</span><h2>Export Comments</h2></div>
                 <div class="util-card-body">
                     <div class="export-row">
-                        <div class="export-info"><strong>Comments Export XML</strong><span>Disqus-compatible format: all comments, reactions, subscriptions, IP addresses, and metadata</span></div>
-                        <a href="/api?action=export_comments" class="btn btn-primary btn-sm">Download XML</a>
-                    </div>
-                    <div class="export-row" style="margin-top:1rem;">
-                        <div class="export-info"><strong>Comments Export JSON</strong><span>Native format: all comments, reactions, subscriptions, IP addresses, and metadata</span></div>
+                        <div class="export-info"><strong>Full Backup JSON</strong><span>Complete backup: comments, post reactions, comment reactions, subscriptions, IP addresses, and metadata</span></div>
                         <a href="/api?action=export_comments_json" class="btn btn-success btn-sm">Download JSON</a>
                     </div>
                     <div style="margin-top:1rem;"><div id="export-message"></div></div>
@@ -2020,11 +2016,11 @@ VIEWS['settings-import-export'] = {
             <div class="util-card" style="margin-top: 1.5rem;">
                 <div class="util-card-header"><span class="icon">📥</span><h2>Import Comments</h2></div>
                 <div class="util-card-body">
-                    <p>Import from a Comments Export file (XML or JSON), legacy project export, Disqus XML, or WordPress WXR. Native exports restore comments (all statuses), reactions, subscriptions, IP addresses, and metadata. Duplicate comments are skipped automatically.</p>
+                    <p>Import from a full backup JSON or a legacy JSON array of comments. Full backups restore comments, post reactions, comment reactions, subscriptions, and metadata. Duplicate records are skipped automatically.</p>
                     <div class="file-drop" id="file-drop" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-                        <input type="file" id="import-file" accept=".xml,.json" onchange="handleFileSelect(event)">
+                        <input type="file" id="import-file" accept=".json" onchange="handleFileSelect(event)">
                         <div class="drop-icon">📂</div>
-                        <div class="drop-label">Drop XML or JSON file here or click to browse</div>
+                        <div class="drop-label">Drop JSON backup file here or click to browse</div>
                         <div class="file-selected" id="file-selected-label" style="display:none;"></div>
                     </div>
                     <div id="import-preview" style="display:none;"></div>
@@ -2062,8 +2058,8 @@ VIEWS['settings-import-export'] = {
             document.getElementById('import-message').innerHTML = '';
 
             const flabel = document.getElementById('file-selected-label');
-            if (!file.name.endsWith('.xml') && !file.name.endsWith('.json')) {
-                if(flabel) { flabel.style.display = 'block'; flabel.style.color = '#dc3545'; flabel.textContent = 'Unsupported file type. Please select .xml or .json'; }
+            if (!file.name.endsWith('.json')) {
+                if(flabel) { flabel.style.display = 'block'; flabel.style.color = '#dc3545'; flabel.textContent = 'Unsupported file type. Please select a .json backup file.'; }
                 return;
             }
             if(flabel) { flabel.style.display = 'block'; flabel.style.color = '#28a745'; flabel.textContent = `Selected: ${file.name} (${formatBytes(file.size)})`; }
@@ -2087,18 +2083,18 @@ VIEWS['settings-import-export'] = {
                     if (msgEl) msgEl.innerHTML = '';
                     if (prevEl) {
                         prevEl.style.display = 'block';
-                        const formatName = (d.format === 'wxr') ? 'WordPress WXR' : (d.format === 'disqus') ? 'Disqus XML' : (d.format === 'native_json') ? 'Native JSON' : (d.format === 'legacy_json') ? 'Legacy JSON' : 'Comments Export XML';
+                        const formatName = (d.format === 'json') ? 'Full Backup' : (d.format === 'legacy_json') ? 'Legacy Comments' : 'Comments Export';
                         prevEl.innerHTML = `
                             <strong>Preview (${formatName})</strong>
                             <table>
                                 <tbody>
-                                    <tr><td>Comments to import</td><td>${d.comments}</td></tr>
-                                    <tr><td>Reactions to import</td><td>${d.reactions ?? 0}</td></tr>
-                                    <tr><td>Post reactions to import</td><td>${d.post_reactions ?? 0}</td></tr>
-                                    <tr><td>Subscriptions to import</td><td>${d.subscriptions ?? 0}</td></tr>
+                                    <tr><td>Comments</td><td>${d.comments ?? 0}</td></tr>
+                                    <tr><td>Comment reactions</td><td>${d.comment_reactions ?? 0}</td></tr>
+                                    <tr><td>Post reactions</td><td>${d.post_reactions ?? 0}</td></tr>
+                                    <tr><td>Subscriptions</td><td>${d.subscriptions ?? 0}</td></tr>
                                 </tbody>
                             </table>
-                            <div style="margin-top:.75rem;font-size:.85rem;color:#666;">Note: Duplicate comments will be automatically skipped during import.</div>
+                            <div style="margin-top:.75rem;font-size:.85rem;color:#666;">Note: Duplicate records will be automatically skipped during import.</div>
                         `;
                     }
                     importPreviewDone = true;
@@ -2124,11 +2120,12 @@ VIEWS['settings-import-export'] = {
                 if(statusEl) statusEl.textContent = '';
                 if(r.ok) {
                     const parts = [];
-                    if(d.imported > 0) parts.push(`${d.imported} comment${d.imported !== 1 ? 's' : ''} across ${d.unique_pages} page${d.unique_pages !== 1 ? 's' : ''}`);
-                    if((d.reactions_imported ?? 0) > 0) parts.push(`${d.reactions_imported} comment reaction${d.reactions_imported !== 1 ? 's' : ''}`);
-                    if((d.post_reactions_imported ?? 0) > 0) parts.push(`${d.post_reactions_imported} post reaction${d.post_reactions_imported !== 1 ? 's' : ''}`);
-                    if((d.subscriptions_imported ?? 0) > 0) parts.push(`${d.subscriptions_imported} subscription${d.subscriptions_imported !== 1 ? 's' : ''}`);
-                    const dupNote = d.skipped_duplicates > 0 ? ` (${d.skipped_duplicates} duplicate comments skipped)` : '';
+                    if((d.imported_comments ?? 0) > 0) parts.push(`${d.imported_comments} comment${d.imported_comments !== 1 ? 's' : ''}`);
+                    if((d.imported_comment_reactions ?? 0) > 0) parts.push(`${d.imported_comment_reactions} comment reaction${d.imported_comment_reactions !== 1 ? 's' : ''}`);
+                    if((d.imported_post_reactions ?? 0) > 0) parts.push(`${d.imported_post_reactions} post reaction${d.imported_post_reactions !== 1 ? 's' : ''}`);
+                    if((d.imported_subscriptions ?? 0) > 0) parts.push(`${d.imported_subscriptions} subscription${d.imported_subscriptions !== 1 ? 's' : ''}`);
+                    const skipped = (d.skipped_comments ?? 0) + (d.skipped_comment_reactions ?? 0) + (d.skipped_post_reactions ?? 0) + (d.skipped_subscriptions ?? 0);
+                    const dupNote = skipped > 0 ? ` (${skipped} duplicate${skipped !== 1 ? 's' : ''} skipped)` : '';
                     if(msgEl) msgEl.innerHTML = `<div class="message success">Imported ${parts.length ? parts.join(', ') : 'no new items'}${dupNote}.</div>`;
                     const iprev = document.getElementById('import-preview'); if(iprev) iprev.style.display = 'none';
                     importFileContent = null; importPreviewDone = false;

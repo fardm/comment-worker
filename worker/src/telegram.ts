@@ -58,19 +58,17 @@ export class TelegramService {
   ): Promise<boolean> {
     if (!botToken || !chatId) return false;
 
-    const inlineKeyboard = adminUrl
-      ? JSON.stringify({
-          inline_keyboard: [[{ text: '⚙️ Open Admin', url: adminUrl }]],
-        })
-      : undefined;
-
     const body: Record<string, unknown> = {
       chat_id: chatId,
       text,
       parse_mode: 'HTML',
       disable_web_page_preview: true,
     };
-    if (inlineKeyboard) body.reply_markup = inlineKeyboard;
+    if (adminUrl) {
+      body.reply_markup = {
+        inline_keyboard: [[{ text: '⚙️ Open Admin', url: adminUrl }]],
+      };
+    }
 
     try {
       const response = await fetch(
@@ -107,7 +105,7 @@ export class TelegramService {
     adminUrl?: string,
   ): Promise<boolean> {
     const message =
-      `🆕 New comment\n` +
+      `🆕 <b>New comment</b>\n` +
       `📄 Post: ${postTitle}\n` +
       `👤 Author: ${authorName}\n` +
       `💬 Comment:\n` +

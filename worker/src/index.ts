@@ -102,9 +102,11 @@ const handler = async (c: any) => {
         const telegram = new TelegramService(db)
         const telegramSettings = await telegram.getSettings()
         const botToken = c.env.TELEGRAM_BOT_TOKEN as string | undefined
+        console.log(`[Telegram] Comment posted. enabled=${telegramSettings.telegram_enabled}, hasToken=${!!botToken}, chatId=${telegramSettings.telegram_chat_id || '(empty)'}`)
         if (telegramSettings.telegram_enabled === 'true' && botToken && telegramSettings.telegram_chat_id) {
           const ctx = c.executionCtx as any
           if (ctx && typeof ctx.waitUntil === 'function') {
+            console.log('[Telegram] Sending notification via waitUntil...')
             ctx.waitUntil(
               telegram
                 .sendCommentNotification(
@@ -115,8 +117,11 @@ const handler = async (c: any) => {
                   body.content || '',
                   `${c.env.APP_URL}/admin/index.html`,
                 )
+                .then((ok) => console.log(`[Telegram] Notification result: ${ok}`))
                 .catch((e) => console.error('[Telegram] Background notification failed:', e))
             )
+          } else {
+            console.error('[Telegram] executionCtx.waitUntil not available')
           }
         }
       }

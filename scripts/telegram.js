@@ -123,18 +123,6 @@ function pushSecret(token) {
 
 async function setupTelegram() {
   console.log('✈️  Telegram Notification Setup\n');
-  console.log('Configure your Telegram bot to receive admin notifications.\n');
-  console.log('📖 Steps:');
-  console.log('   1. Open Telegram and search for @BotFather');
-  console.log('   2. Send /newbot and follow the instructions');
-  console.log('   3. Copy the Bot Token (format: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11)');
-  console.log('   4. Add your bot to a group or create a channel');
-  console.log('   5. Get the Chat ID (see below)\n');
-  console.log('💡 To find your Chat ID:');
-  console.log('   • For a group: add @userinfobot to the group, then forward');
-  console.log('     a message from your bot to @userinfobot');
-  console.log('   • For a channel: post a message, then visit:');
-  console.log('     https://api.telegram.org/bot<TOKEN>/getUpdates\n');
 
   const token = await prompt('Enter your Telegram Bot Token: ');
   if (!token || !token.includes(':')) {
@@ -144,17 +132,12 @@ async function setupTelegram() {
 
   const dbName = getDbName();
 
-  console.log('\n🔑 Setting bot token as Cloudflare Worker secret...');
   if (pushSecret(token)) {
-    console.log('✅ Secret set for production.');
+    console.log('✅ Bot token set as Worker secret.');
   } else {
-    console.log('⚠️  Could not set remote secret. You can set it later when you deploy.');
-    console.log('   Run manually: cd worker && echo "YOUR_TOKEN" | npx wrangler secret put TELEGRAM_BOT_TOKEN');
+    console.log('⚠️  Could not set remote secret. Set it later with: cd worker && npx wrangler secret put TELEGRAM_BOT_TOKEN');
   }
-
-  console.log('🔧 Updating local dev secret (.dev.vars)...');
   updateDevVars(token);
-  console.log('✅ Updated .dev.vars\n');
 
   const chatId = await prompt('Enter your Telegram Chat ID (numeric): ');
   if (!chatId) {
@@ -162,47 +145,33 @@ async function setupTelegram() {
     process.exit(1);
   }
 
-  console.log('\n💾 Saving Chat ID to database...');
   updateSetting(dbName, 'telegram_chat_id', chatId);
-  console.log(`✅ Chat ID saved to ${dbName}.\n`);
+  console.log('✅ Chat ID saved.');
 
   // Send test notification
-  const test = await prompt('Send a test notification now? (y/n): ');
+  const test = await prompt('Send a test notification? (y/n): ');
   if (test.toLowerCase() === 'y' || test.toLowerCase() === 'yes') {
-    console.log('\n📨 Sending test notification...');
     try {
       const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
-          text: '✅ <b>Telegram integration test</b>\n\nYour Telegram notifications are working correctly!\n\nYou will receive notifications for new comments here.',
+          text: '✅ <b>Telegram integration test</b>\n\nNotifications are working!',
           parse_mode: 'HTML',
         }),
       });
-      if (response.ok) {
-        console.log('✅ Test notification sent successfully!');
-      } else {
-        const err = await response.text();
-        console.error('❌ Failed to send test notification.');
-        console.error('   Response:', err);
-      }
+      console.log(response.ok ? '✅ Test notification sent!' : `❌ Failed: ${await response.text()}`);
     } catch (e) {
-      console.error('❌ Failed to send test notification:', e.message);
+      console.error('❌ Failed:', e.message);
     }
   }
 
-  // Enable Telegram notifications
-  const enable = await prompt('Enable Telegram notifications? (y/n): ');
-  if (enable.toLowerCase() === 'y' || enable.toLowerCase() === 'yes') {
-    updateSetting(dbName, 'telegram_enabled', 'true');
-    console.log('✅ Telegram notifications enabled.');
-  } else {
-    updateSetting(dbName, 'telegram_enabled', 'false');
-    console.log('ℹ️  Telegram notifications saved as disabled. Enable them from the Admin Panel.');
-  }
-
-  console.log('\n✨ Setup complete!\n');
+  const enable = await prompt('Enable notifications? (y/n): ');
+  const enabled = enable.toLowerCase() === 'y' || enable.toLowerCase() === 'yes';
+  updateSetting(dbName, 'telegram_enabled', enabled ? 'true' : 'false');
+  console.log(enabled ? '✅ Telegram notifications enabled.' : 'ℹ️  Telegram notifications disabled.');
+  console.log();
 }
 
 async function changeToken() {

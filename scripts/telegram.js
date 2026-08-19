@@ -7,6 +7,15 @@ const WRANGLER_TOML = path.join(__dirname, '../worker/wrangler.toml');
 const DEV_VARS = path.join(__dirname, '../worker/.dev.vars');
 const CWD = path.join(__dirname, '../worker');
 
+// Reusable readline instance — creating/closing one per prompt can cause
+// stdin to stay paused and silently swallow the next input.
+let rl = null;
+function getRl() {
+  if (!rl) rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return rl;
+}
+function closeRl() { if (rl) { rl.close(); rl = null; } }
+
 /**
  * Run a command silently. Returns stdout on success, null on failure.
  * Uses shell:true so that npx/npx.cmd resolves correctly on every OS.
@@ -37,9 +46,8 @@ function runVerbose(command) {
 }
 
 function prompt(question) {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => {
-    rl.question(question, answer => { rl.close(); resolve(answer.trim()); });
+    getRl().question(question, answer => resolve(answer.trim()));
   });
 }
 
@@ -58,6 +66,22 @@ function getDbName() {
   const toml = fs.readFileSync(WRANGLER_TOML, 'utf-8');
   const match = toml.match(/database_name\s*=\s*"([^"]+)"/);
   return match ? match[1] : 'comments-db';
+}
+
+/**
+ * Read the production APP_URL from [vars] in wrangler.toml.
+ * This is always the canonical public admin URL — never localhost.
+ */
+function getProductionUrl() {
+  const toml = fs.readFileSync(WRANGLER_TOML, 'utf-8');
+  const match = toml.match(/APP_URL\s*=\s*"([^"]+)"/);
+  return match ? match[1] : '';
+}
+
+/** Build the admin panel URL for Telegram inline buttons. */
+function getAdminUrl() {
+  const base = getProductionUrl();
+  return base ? `${base}/admin/index.html` : '';
 }
 
 function getSetting(dbName, key) {
@@ -260,9 +284,7 @@ async function sendTest() {
         chat_id: chatId,
         text: '✅ <b>Telegram integration test</b>\n\nYour Telegram notifications are working correctly!\n\nYou will receive notifications for new comments here.',
         parse_mode: 'HTML',
-        reply_markup: JSON.stringify({
-          inline_keyboard: [[{ text: '⚙️ Open Admin', url: 'http://localhost:8787/admin/index.html' }]],
-        }),
+        ...(getAdminUrl() ? { reply_markup: JSON.stringify({ inline_keyboard: [[{ text: '⚙️ Open Admin', url: getAdminUrl() }]] }) } : {}),
       }),
     });
     if (response.ok) {
@@ -279,6 +301,7 @@ async function sendTest() {
 }
 
 async function showMenu() {
+  try {
   console.log('✈️  Telegram Notification Configuration\n');
   console.log('Select an option:\n');
   console.log('  1. Setup / Reconfigure');
@@ -303,15 +326,23 @@ async function showMenu() {
       console.error('❌ Invalid option.');
       process.exit(1);
   }
+  } finally {
+    closeRl();
+  }
 }
 
 // Handle CLI arguments
 const args = process.argv.slice(2);
-if (args.includes('--enable')) return enableNotifications();
-if (args.includes('--disable')) return disableNotifications();
-if (args.includes('--test')) return sendTest();
-if (args.includes('--setup')) return setupTelegram();
-if (args.includes('--token')) return changeToken();
-if (args.includes('--chat-id')) return changeChatId();
-
-showMenu();
+const handled = (
+  (args.includes('--enable') && enableNotifications()) ||
+  (args.includes('--disable') && disableNotifications()) ||
+  (args.includes('--test') && sendTest()) ||
+  (args.includes('--setup') && setupTelegram()) ||
+  (args.includes('--token') && changeToken()) ||
+  (args.includes('--chat-id') && changeChatId())
+);
+if (handled) {
+  Promise.resolve(handled).then(() => closeRl()).catch(e => { closeRl(); console.error(e); process.exit(1); });
+} else {
+  showMenu().catch(err => { closeRl(); console.error(err); process.exit(1); });
+}

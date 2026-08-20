@@ -70,7 +70,7 @@ function getAdminUrl() {
 }
 
 function getSetting(dbName, key) {
-  const result = run(`npx wrangler d1 execute "${dbName}" --command="SELECT value FROM settings WHERE key='${key}'" --json`);
+  const result = run(`npx wrangler d1 execute "${dbName}" --remote --command="SELECT value FROM settings WHERE key='${key}'" --json`);
   if (result) {
     try {
       const data = JSON.parse(result);
@@ -84,7 +84,7 @@ function getSetting(dbName, key) {
 }
 
 function updateSetting(dbName, key, value) {
-  return run(`npx wrangler d1 execute "${dbName}" --command="INSERT OR REPLACE INTO settings (key, value) VALUES ('${key}', '${value}')"`);
+  return run(`npx wrangler d1 execute "${dbName}" --remote --command="INSERT OR REPLACE INTO settings (key, value) VALUES ('${key}', '${value}')"`);
 }
 
 function updateDevVars(token) {
@@ -146,6 +146,14 @@ async function setupTelegram() {
   updateSetting(dbName, 'telegram_chat_id', chatId);
   console.log('✅ Chat ID saved.');
 
+  // Verify: read it back from production D1
+  const saved = getSetting(dbName, 'telegram_chat_id');
+  if (saved === chatId) {
+    console.log(`✅ Verified: telegram_chat_id = ${saved}`);
+  } else {
+    console.error(`❌ Verification failed! Expected "${chatId}" but got "${saved}".`);
+  }
+
   const test = await prompt('Send a test notification? (y/n): ');
   if (test.toLowerCase() === 'y' || test.toLowerCase() === 'yes') {
     try {
@@ -200,6 +208,14 @@ async function changeChatId() {
   const dbName = getDbName();
   updateSetting(dbName, 'telegram_chat_id', chatId);
   console.log('✅ Chat ID updated.');
+
+  // Verify: read it back from production D1
+  const saved = getSetting(dbName, 'telegram_chat_id');
+  if (saved === chatId) {
+    console.log(`✅ Verified: telegram_chat_id = ${saved}`);
+  } else {
+    console.error(`❌ Verification failed! Expected "${chatId}" but got "${saved}".`);
+  }
   console.log();
 }
 
@@ -260,7 +276,7 @@ async function sendTest() {
   }
 }
 
-// ── Main loop ─────────────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
   const args = process.argv.slice(2);
@@ -273,7 +289,15 @@ async function main() {
   if (args.includes('--token')) { await changeToken(); return; }
   if (args.includes('--chat-id')) { await changeChatId(); return; }
 
-  // Interactive menu loop
+  // Interactive menu — select one operation, run it, then exit
+  console.log('✈️  Telegram Notification Configuration\n');
+  console.log('  1. Setup / Reconfigure');
+  console.log('  2. Change Bot Token');
+  console.log('  3. Change Chat ID');
+  console.log('  4. Enable notifications');
+  console.log('  5. Disable notifications');
+  console.log('  6. Send test notification\n');
+
   const actions = {
     '1': setupTelegram,
     '2': changeToken,
@@ -283,27 +307,13 @@ async function main() {
     '6': sendTest,
   };
 
-  let running = true;
-  while (running) {
-    console.log('✈️  Telegram Notification Configuration\n');
-    console.log('  1. Setup / Reconfigure');
-    console.log('  2. Change Bot Token');
-    console.log('  3. Change Chat ID');
-    console.log('  4. Enable notifications');
-    console.log('  5. Disable notifications');
-    console.log('  6. Send test notification');
-    console.log('  0. Exit\n');
+  const choice = await prompt('Enter option (1-6): ');
 
-    const choice = await prompt('Enter option (0-6): ');
+  if (actions[choice]) {
     console.log('');
-
-    if (choice === '0' || choice === '') {
-      running = false;
-    } else if (actions[choice]) {
-      await actions[choice]();
-    } else {
-      console.error('❌ Invalid option.\n');
-    }
+    await actions[choice]();
+  } else {
+    console.error('❌ Invalid option.');
   }
 }
 

@@ -95,23 +95,20 @@ export class TelegramService {
 
   /**
    * Send a new comment notification.
-   */
-  async sendCommentNotification(
+   */  async sendCommentNotification(
     botToken: string,
     chatId: string,
     postTitle: string,
     authorName: string,
     content: string,
-    adminUrl?: string,
   ): Promise<boolean> {
     const message =
-      `🆕 <b>New comment</b>\n` +
-      `📄 Post: ${postTitle}\n` +
-      `👤 Author: ${authorName}\n` +
-      `💬 Comment:\n` +
-      content;
-
-    return this.sendMessage(botToken, chatId, message, adminUrl);
+      `🔗 ${postTitle}\n` +
+      `👤 ${authorName}\n` +
+      `\n` +
+      `\n` +
+      `💬 ${content}`;
+    return this.sendMessage(botToken, chatId, message);
   }
 
   /**

@@ -101,6 +101,7 @@ export class TelegramService {
     postTitle: string,
     authorName: string,
     content: string,
+    adminUrl?: string,
   ): Promise<boolean> {
     const message =
       `🔗 ${postTitle}\n` +
@@ -108,7 +109,7 @@ export class TelegramService {
       `\n` +
       `\n` +
       `💬 ${content}`;
-    return this.sendMessage(botToken, chatId, message);
+    return this.sendMessage(botToken, chatId, message, adminUrl);
   }
 
   /**

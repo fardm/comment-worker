@@ -315,6 +315,9 @@ async function main() {
   } else {
     console.error('❌ Invalid option.');
   }
+
+  cleanup();
+  process.exit(0);
 }
 
 main().catch(err => { console.error(err); process.exit(1); });

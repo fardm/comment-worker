@@ -1823,7 +1823,7 @@ VIEWS['settings-notifications'] = {
     `,
     html: () => `
         <div class="container">
-            <h2 style="margin-bottom: 1.5rem;">Notification Settings</h2>
+            <h2 style="margin-bottom: 1.5rem;">Notification</h2>
             <div class="util-card">
                 <div class="util-card-header"><span class="icon">🔔</span><h2>Notifications</h2></div>
                 <div class="util-card-body">

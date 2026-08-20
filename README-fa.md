@@ -1,6 +1,6 @@
 [English](https://github.com/fardm/standalone-comments-server/blob/main/README.md) | فارسی
 
-# نظرات مستقل کوارتز (Quartz Standalone Comments)
+# کامنت گاردن
 
 این پروژه یک سیستم ثبت نظر را به [Quartz](https://quartz.jzhao.xyz/) اضافه می‌کند. مخزن اصلی را می‌توانید در اینجا پیدا کنید: https://github.com/dlnorman/standalone-comments.
 

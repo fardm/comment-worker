@@ -1,4 +1,4 @@
-# Quartz Standalone Comments
+# Comments Garden
 
 This project adds a commenting system to [Quartz](https://quartz.jzhao.xyz/). The original repository can be found here: https://github.com/dlnorman/standalone-comments.
 

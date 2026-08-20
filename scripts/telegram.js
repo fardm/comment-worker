@@ -55,7 +55,7 @@ function run(command) {
 function getDbName() {
   const toml = fs.readFileSync(WRANGLER_TOML, 'utf-8');
   const match = toml.match(/database_name\s*=\s*"([^"]+)"/);
-  return match ? match[1] : 'comments-db';
+  return match ? match[1] : 'comment-garden-db';
 }
 
 function getSetting(dbName, key) {

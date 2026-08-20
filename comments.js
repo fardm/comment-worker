@@ -526,6 +526,7 @@ class CommentSystem {
             author_email: authorEmail,
             author_url: authorUrl,
             content: formData.get('content'),
+            author_role: 'user',
         };
 
         try {
@@ -699,8 +700,9 @@ class CommentSystem {
             </div>
         `;
 
+        const isAdmin = comment.author_role === 'admin';
         let html = `
-            <div class="comment ${isPending ? 'comment-pending' : ''}" id="comment-${comment.id}" style="margin-inline-start: ${depth * 30}px">
+            <div class="comment ${isPending ? 'comment-pending' : ''} ${isAdmin ? 'admin-comment' : ''}" id="comment-${comment.id}" style="margin-inline-start: ${depth * 30}px">
                 <div class="comment-meta">
                     ${avatarHtml}
                     <div class="comment-author-info">

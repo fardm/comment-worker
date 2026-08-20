@@ -243,10 +243,12 @@ export class CommentService {
 
     const isSpam = await this.spamService.checkSpam(data.content, data.author_name, data.author_email, data.author_url || '', ip, userAgent)
     const status = isSpam ? 'spam' : 'pending' // Should read from settings 'require_moderation'
+    // Public comments always get 'user' role — admin role is only set via createAdminComment
+    const authorRole = 'user'
 
     const result = await this.db.prepare(`
-      INSERT INTO comments (page_url, parent_id, author_name, author_email, author_url, content, ip_address, user_agent, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO comments (page_url, parent_id, author_name, author_email, author_url, content, ip_address, user_agent, status, author_role)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       data.page_url,
       data.parent_id || null,
@@ -256,7 +258,8 @@ export class CommentService {
       data.content,
       ip,
       userAgent,
-      status
+      status,
+      authorRole
     ).run()
 
     if (result.success) {
@@ -264,6 +267,33 @@ export class CommentService {
         success: true,
         message: status === 'pending' ? 'Your comment is awaiting moderation.' : 'Comment posted successfully.',
         status
+      }
+    }
+    return { error: 'Database error' }
+  }
+
+  async createAdminComment(data: any, ip: string, userAgent: string) {
+    const result = await this.db.prepare(`
+      INSERT INTO comments (page_url, parent_id, author_name, author_email, author_url, content, ip_address, user_agent, status, author_role)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      data.page_url,
+      data.parent_id || null,
+      data.author_name,
+      data.author_email,
+      data.author_url || null,
+      data.content,
+      ip,
+      userAgent,
+      'approved',
+      'admin'
+    ).run()
+
+    if (result.success) {
+      return {
+        success: true,
+        message: 'Reply posted successfully.',
+        status: 'approved'
       }
     }
     return { error: 'Database error' }

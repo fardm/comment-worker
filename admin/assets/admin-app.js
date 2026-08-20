@@ -727,7 +727,7 @@ VIEWS['all'] = {
                 statusEl.textContent = 'Submitting...';
                 statusEl.style.color = 'var(--body-text,#888)';
 
-                const response = await fetch(`${API_URL}?action=post`, {
+                const response = await fetch(`${API_URL}?action=admin_post`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -738,6 +738,7 @@ VIEWS['all'] = {
                         author_email: email,
                         author_url: url || null,
                         content: content,
+                        author_role: 'admin',
                         csrf_token: AdminAuth.getCsrfToken()
                     })
                 });

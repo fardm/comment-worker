@@ -185,6 +185,12 @@ const handler = async (c: any) => {
       return c.json(result)
     }
 
+    if (method === 'POST' && action === 'admin_post') {
+      const body = await c.req.json()
+      const result = await comments.createAdminComment(body, ip, userAgent)
+      // No Telegram notification for admin comments
+      return c.json(result)
+    }
 
     if (method === 'GET' && action === 'pending') {
       const result = await db.prepare("SELECT * FROM comments WHERE status = 'pending' ORDER BY created_at DESC").all()

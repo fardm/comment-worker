@@ -380,6 +380,10 @@
     background-color: var(--cs-pending-bg);
 }
 
+.comment.admin-comment {
+    border-inline-start: 3px solid var(--secondary);
+}
+
 .comments-system .comment-meta {
     display: flex;
     align-items: center;

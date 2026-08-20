@@ -138,6 +138,34 @@ async function main() {
   }
   console.log('✅ Schema initialized\n');
 
+  console.log('🟢 3b. Applying author_role migration...');
+  const alterCmd = `npx wrangler d1 execute comments-db --command="ALTER TABLE comments ADD COLUMN author_role TEXT DEFAULT 'user';"`;
+  // Local
+  try {
+    execSync(`${alterCmd} --local`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'], cwd: path.join(__dirname, '../worker') });
+    console.log('   -> Local: column added');
+  } catch (e) {
+    const msg = (e.stderr || e.stdout || '').toLowerCase();
+    if (msg.includes('duplicate column')) {
+      console.log('   -> Local: column already exists, skipping');
+    } else {
+      console.log('   -> Local: migration skipped (' + (e.message || 'unknown error') + ')');
+    }
+  }
+  // Remote
+  try {
+    execSync(`${alterCmd} --remote`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'], cwd: path.join(__dirname, '../worker') });
+    console.log('   -> Remote: column added');
+  } catch (e) {
+    const msg = (e.stderr || e.stdout || '').toLowerCase();
+    if (msg.includes('duplicate column')) {
+      console.log('   -> Remote: column already exists, skipping');
+    } else {
+      console.log('   -> Remote: migration skipped (' + (e.message || 'unknown error') + ')');
+    }
+  }
+  console.log('✅ author_role migration applied\n');
+
   console.log('🔐 4. Admin Account Setup');
   let password = await prompt('Enter a new admin password: ');
   while (!password || password.trim().length < 4) {

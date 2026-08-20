@@ -4,7 +4,6 @@ export interface ExportPayload {
   comments: any[]
   post_reactions: any[]
   comment_reactions: any[]
-  subscriptions: any[]
 }
 
 export class ImportExportService {
@@ -17,11 +16,10 @@ export class ImportExportService {
   // ── Export ───────────────────────────────────────────────────────
 
   async exportFullJson(): Promise<ExportPayload> {
-    const [comments, postReactions, commentReactions, subscriptions] = await Promise.all([
+    const [comments, postReactions, commentReactions] = await Promise.all([
       this.db.prepare('SELECT * FROM comments ORDER BY id ASC').all(),
       this.db.prepare('SELECT * FROM post_reactions ORDER BY id ASC').all(),
       this.db.prepare('SELECT * FROM votes ORDER BY id ASC').all(),
-      this.db.prepare('SELECT * FROM subscriptions ORDER BY id ASC').all(),
     ])
 
     return {
@@ -30,7 +28,6 @@ export class ImportExportService {
       comments: comments.results,
       post_reactions: postReactions.results,
       comment_reactions: commentReactions.results,
-      subscriptions: subscriptions.results,
     }
   }
 
@@ -49,7 +46,6 @@ export class ImportExportService {
         comments: data.comments!.length,
         post_reactions: 0,
         comment_reactions: 0,
-        subscriptions: 0,
       }
     }
 
@@ -59,7 +55,6 @@ export class ImportExportService {
       comments: data.comments?.length ?? 0,
       post_reactions: data.post_reactions?.length ?? 0,
       comment_reactions: data.comment_reactions?.length ?? 0,
-      subscriptions: data.subscriptions?.length ?? 0,
     }
   }
 
@@ -123,7 +118,7 @@ export class ImportExportService {
       if (!c.content || typeof c.content !== 'string') return `Comment #${i} is missing content.`
     }
 
-    const validArrays = ['post_reactions', 'comment_reactions', 'subscriptions'] as const
+    const validArrays = ['post_reactions', 'comment_reactions'] as const
     for (const key of validArrays) {
       if (data[key] !== undefined && !Array.isArray(data[key])) {
         return `Field "${key}" must be an array if provided.`
@@ -131,22 +126,12 @@ export class ImportExportService {
     }
 
     // Validate comment_reactions reference valid comment IDs (by export ID)
-    const commentIds = new Set(data.comments.map(c => c.id).filter(Boolean))
     if (data.comment_reactions) {
       for (let i = 0; i < data.comment_reactions.length; i++) {
         const r = data.comment_reactions[i]
         if (!r.comment_id) return `Comment reaction #${i} is missing comment_id.`
         if (!r.ip_address) return `Comment reaction #${i} is missing ip_address.`
         if (!r.reaction_type) return `Comment reaction #${i} is missing reaction_type.`
-      }
-    }
-
-    if (data.subscriptions) {
-      for (let i = 0; i < data.subscriptions.length; i++) {
-        const s = data.subscriptions[i]
-        if (!s.email || typeof s.email !== 'string') return `Subscription #${i} is missing a valid email.`
-        if (!s.page_url || typeof s.page_url !== 'string') return `Subscription #${i} is missing page_url.`
-        if (!s.token || typeof s.token !== 'string') return `Subscription #${i} is missing token.`
       }
     }
 
@@ -314,40 +299,6 @@ export class ImportExportService {
       imported_comment_reactions += batch.length
     }
 
-    // Step 6: Import subscriptions (deduplicate by page_url + email)
-    let imported_subscriptions = 0
-    let skipped_subscriptions = 0
-    const subscriptionStmts: D1PreparedStatement[] = []
-
-    if (data.subscriptions) {
-      const existingSubs = await this.getExistingSubscriptionKeys()
-      for (const s of data.subscriptions) {
-        const key = `${s.page_url}|${s.email}`
-        if (existingSubs.has(key)) {
-          skipped_subscriptions++
-          continue
-        }
-        subscriptionStmts.push(
-          this.db.prepare(`
-            INSERT INTO subscriptions (page_url, email, token, subscribed_at, active)
-            VALUES (?, ?, ?, ?, ?)
-          `).bind(
-            s.page_url,
-            s.email,
-            s.token,
-            s.subscribed_at || new Date().toISOString(),
-            s.active !== undefined ? (s.active ? 1 : 0) : 1,
-          )
-        )
-      }
-    }
-
-    for (let i = 0; i < subscriptionStmts.length; i += 50) {
-      const batch = subscriptionStmts.slice(i, i + 50)
-      await this.db.batch(batch)
-      imported_subscriptions += batch.length
-    }
-
     return {
       imported_comments,
       skipped_comments,
@@ -355,8 +306,6 @@ export class ImportExportService {
       skipped_post_reactions,
       imported_comment_reactions,
       skipped_comment_reactions,
-      imported_subscriptions,
-      skipped_subscriptions,
     }
   }
 
@@ -455,17 +404,6 @@ export class ImportExportService {
     const set = new Set<string>()
     for (const r of results) {
       set.add(`${r.comment_id}|${r.ip_address}|${r.reaction_type}`)
-    }
-    return set
-  }
-
-  private async getExistingSubscriptionKeys(): Promise<Set<string>> {
-    const { results } = await this.db.prepare(
-      'SELECT page_url, email FROM subscriptions'
-    ).all()
-    const set = new Set<string>()
-    for (const r of results) {
-      set.add(`${r.page_url}|${r.email}`)
     }
     return set
   }

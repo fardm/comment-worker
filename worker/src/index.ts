@@ -1,16 +1,13 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { adminMiddleware, AuthService, ADMIN_TOKEN_COOKIE } from './auth'
+import { AuthService } from './auth'
 import { CommentService } from './comments'
 import { ReactionService } from './reactions'
 import { AdminService } from './admin'
 import { RateLimitService } from "./ratelimit"
-import { EmailService } from "./email"
 import { ImportExportService } from "./importexport"
-import { SubscriptionService } from './subscriptions'
 import { SettingsService } from './settings'
 import { TelegramService } from './telegram'
-import { getCookie } from 'hono/cookie'
 
 type Bindings = {
   DB: D1Database
@@ -48,10 +45,8 @@ const handler = async (c: any) => {
   const comments = new CommentService(db)
   const reactions = new ReactionService(db)
   const admin = new AdminService(db)
-  const subscriptions = new SubscriptionService(db)
   const settings = new SettingsService(db)
   const ratelimit = new RateLimitService(db)
-  const emailService = new EmailService(db)
   const importExport = new ImportExportService(db)
 
   const ip = c.req.header('CF-Connecting-IP') || '127.0.0.1'
@@ -92,10 +87,6 @@ const handler = async (c: any) => {
       const body = await c.req.json()
       if (await ratelimit.isCommentRateLimited(ip)) return c.json({ error: "Too many comments. Please try again later." }, 429)
       const result = await comments.createComment(body, ip, userAgent)
-
-      if (result.success && body.subscribe && body.author_email) {
-        await subscriptions.addSubscription(body.page_url || body.url, body.author_email)
-      }
 
       // Fire-and-forget Telegram notification via waitUntil
       if (result.success) {
@@ -416,10 +407,6 @@ const handler = async (c: any) => {
         const { meta: voteMeta } = await db.prepare('DELETE FROM votes').run()
         result.reactions = (postMeta.changes || 0) + (voteMeta.changes || 0)
       }
-      if (body.delete_subscriptions) {
-        const { meta } = await db.prepare('DELETE FROM subscriptions').run()
-        result.subscriptions = meta.changes || 0
-      }
 
       return c.json({ deleted: result })
     }
@@ -435,27 +422,9 @@ const handler = async (c: any) => {
       })
     }
 
-    if (method === 'GET' && action === 'subscriptions') {
-      const result = await subscriptions.getSubscriptions()
-      return c.json({ subscriptions: result, total: result.length })
-    }
-
-    if (method === 'POST' && action === 'toggle_subscription') {
-      const body = await c.req.json()
-      const result = await subscriptions.toggleSubscription(body.token, body.active)
-      return c.json(result)
-    }
-
     if (method === 'DELETE' && action === 'delete_single_reaction') {
       const id = parseInt(c.req.query('id') || '0')
       const result = await reactions.deleteReaction(id)
-      return c.json(result)
-    }
-
-    if (method === 'DELETE' && action === 'delete_subscription') {
-      const token = c.req.query('token')
-      if (!token) return c.json({ error: 'Token is required' }, 400)
-      const result = await subscriptions.deleteSubscription(token)
       return c.json(result)
     }
 

@@ -10,13 +10,11 @@ export class AdminService {
     const pendingComments = await this.db.prepare("SELECT COUNT(*) as count FROM comments WHERE status = 'pending'").first<{count: number}>()
     const spamComments = await this.db.prepare("SELECT COUNT(*) as count FROM comments WHERE status = 'spam'").first<{count: number}>()
     const approvedComments = await this.db.prepare("SELECT COUNT(*) as count FROM comments WHERE status = 'approved'").first<{count: number}>()
-    const totalSubscriptions = await this.db.prepare('SELECT COUNT(*) as count FROM subscriptions').first<{count: number}>()
 
     return {
       total_comments: totalComments?.count || 0,
       pending_comments: pendingComments?.count || 0,
       spam_comments: spamComments?.count || 0,
-      total_subscriptions: totalSubscriptions?.count || 0,
       status_totals: {
         pending: pendingComments?.count || 0,
         spam: spamComments?.count || 0,
@@ -41,7 +39,6 @@ export class AdminService {
       counts,
       tables: {
         comments: counts.total_comments,
-        subscriptions: counts.total_subscriptions,
         settings: 6,
         votes: 0,
         post_reactions: 0,

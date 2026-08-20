@@ -21,7 +21,6 @@
 const NAV_ITEMS = [
     { key: 'pending',        label: 'Pending',        icon: 'clock' },
     { key: 'all',            label: 'All Comments',   icon: 'message-square' },
-    { key: 'subscriptions',  label: 'Subscriptions',  icon: 'users' },
     { key: 'post-reactions', label: 'Post Reactions', icon: 'smile' },
     { key: 'analytics',      label: 'Analytics',      icon: 'bar-chart-2' },
     { key: 'settings',       label: 'Settings',       icon: 'settings', isParent: true, children: [
@@ -967,123 +966,6 @@ VIEWS['analytics'] = {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SUBSCRIPTIONS
-// ─────────────────────────────────────────────────────────────────────────────
-VIEWS['subscriptions'] = {
-    title: 'Subscriptions',
-    css: `
-        .section-card h2 { color:#4a90e2; }
-        .subscription-item { border-bottom:1px solid #e0e0e0; padding:1rem 0; display:flex; justify-content:space-between; align-items:center; }
-        .subscription-item:last-child { border-bottom:none; }
-        .subscription-info { flex:1; }
-        .subscription-email  { font-weight:600; color:var(--body-text); }
-        .subscription-page   { color:var(--darkgray); font-size:.9rem; }
-        .subscription-date   { color:var(--darkgray); font-size:.85rem; }
-        .subscription-actions { display:flex; gap:.5rem; }
-        @media (max-width:768px) {
-            .subscription-item { flex-direction:column; align-items:flex-start; gap:1rem; }
-            .subscription-actions { width:100%; flex-direction:column; }
-            .subscription-actions button { width:100%; }
-        }`,
-
-    html: () => `
-        <div class="container">
-            <div class="stats" id="stats">
-                <div class="stat-card"><div class="stat-number" id="stat-total-subs">0</div><div class="stat-label">Total Subscriptions</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-active-subs">0</div><div class="stat-label">Active</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-inactive-subs">0</div><div class="stat-label">Unsubscribed</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-pages">0</div><div class="stat-label">Pages with Subscribers</div></div>
-            </div>
-            <div class="section-card">
-                <h2>All Subscriptions</h2>
-                <div id="subscriptions-list"><p class="no-data">Loading...</p></div>
-            </div>
-        </div>`,
-
-    init({ hoistToWindow }) {
-        let allSubscriptions = [];
-
-        async function loadSubscriptions() {
-            const container = document.getElementById('subscriptions-list');
-            if (!container) return;
-            try {
-                const r = await fetch(`${API_URL}?action=subscriptions&limit=10000&_=${Date.now()}`, { credentials: 'include', cache: 'no-store' });
-                const data = await r.json();
-                if (r.ok) {
-                    allSubscriptions = data.subscriptions || [];
-                    displaySubscriptions(allSubscriptions);
-                    updateStats(allSubscriptions);
-                } else {
-                    container.innerHTML = `<div class="message error">Error: ${data.error}</div>`;
-                }
-            } catch (error) {
-                container.innerHTML = `<div class="message error">Network error: ${error.message}</div>`;
-            }
-        }
-
-        function displaySubscriptions(subscriptions) {
-            const container = document.getElementById('subscriptions-list');
-            if (!container) return;
-            if (subscriptions.length === 0) { container.innerHTML = '<p class="no-data">No subscriptions yet</p>'; return; }
-            container.innerHTML = subscriptions.map(sub => `
-                <div class="subscription-item">
-                    <div class="subscription-info">
-                        <div class="subscription-email">${escapeHtml(sub.email)}</div>
-                        <div class="subscription-page">Page: ${escapeHtml(sub.page_url)}</div>
-                        <div class="subscription-date">
-                            Subscribed: ${formatDate(sub.subscribed_at)}
-                            <span class="badge badge-${sub.active ? 'active' : 'inactive'}">${sub.active ? 'Active' : 'Unsubscribed'}</span>
-                        </div>
-                    </div>
-                    <div class="subscription-actions">
-                        ${sub.active
-                            ? `<button class="btn btn-warning btn-small" onclick="toggleSubscription('${sub.token}', 0)">Unsubscribe</button>`
-                            : `<button class="btn btn-success btn-small" onclick="toggleSubscription('${sub.token}', 1)">Reactivate</button>`}
-                        <button class="btn btn-danger btn-small" onclick="deleteSubscription('${sub.token}')">Delete</button>
-                    </div>
-                </div>`).join('');
-        }
-
-        function updateStats(subscriptions) {
-            const active   = subscriptions.filter(s =>  s.active).length;
-            const inactive = subscriptions.filter(s => !s.active).length;
-            const pages    = new Set(subscriptions.map(s => s.page_url)).size;
-            document.getElementById('stat-total-subs').textContent    = subscriptions.length;
-            document.getElementById('stat-active-subs').textContent   = active;
-            document.getElementById('stat-inactive-subs').textContent = inactive;
-            document.getElementById('stat-pages').textContent         = pages;
-        }
-
-        async function toggleSubscription(token, active) {
-            try {
-                await AdminAuth.ensureCsrfToken();
-                const r = await fetch(`${API_URL}?action=toggle_subscription`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-                    body: JSON.stringify({ token, active, csrf_token: AdminAuth.getCsrfToken() }),
-                });
-                if (r.ok) { loadSubscriptions(); }
-                else { alert(`Failed to update subscription: ${(await r.json()).error || 'Unknown error'}`); }
-            } catch (e) { alert('Network error'); }
-        }
-
-        async function deleteSubscription(token) {
-            if (!confirm('Are you sure you want to permanently delete this subscription?')) return;
-            try {
-                await AdminAuth.ensureCsrfToken();
-                const r = await fetch(`${API_URL}?action=delete_subscription&token=${token}&csrf_token=${encodeURIComponent(AdminAuth.getCsrfToken())}`,
-                    { method: 'DELETE', credentials: 'include' });
-                if (r.ok) { loadSubscriptions(); }
-                else { alert(`Failed to delete: ${(await r.json()).error || 'Unknown error'}`); }
-            } catch (e) { alert('Network error'); }
-        }
-
-        hoistToWindow({ toggleSubscription, deleteSubscription });
-        loadSubscriptions();
-    },
-};
-
-
-// ─────────────────────────────────────────────────────────────────────────────
 // POST REACTIONS
 // ─────────────────────────────────────────────────────────────────────────────
 VIEWS['post-reactions'] = {
@@ -1344,8 +1226,6 @@ VIEWS['settings-general'] = {
                 const payload = {
                     csrf_token:           AdminAuth.getCsrfToken(),
                     require_moderation:   document.getElementById('setting-require-moderation').checked   ? 'true' : 'false',
-                    enable_notifications: current.enable_notifications || 'false',
-                    admin_email:          current.admin_email || '',
                     comment_sort_order:   document.getElementById('setting-comment-sort-order').value,
                 };
 
@@ -1519,7 +1399,6 @@ VIEWS['settings-configuration'] = {
                 const settingsPayload = {
                     csrf_token: AdminAuth.getCsrfToken(),
                     require_moderation: currentSettings.require_moderation || 'false',
-                    enable_notifications: currentSettings.enable_notifications || 'false',
                     comment_sort_order: currentSettings.comment_sort_order || 'desc',
                     admin_name: adminName,
                     admin_email: adminEmail,
@@ -1614,7 +1493,6 @@ VIEWS['settings-database'] = {
                         <div style="margin-top:.5rem;">
                             <label class="checkbox-row" style="display:flex;align-items:center;gap:.5rem;margin:.25rem 0;"><input type="checkbox" id="dd-comments" onchange="syncDeleteDataSelectAll()"><span>Comments <span class="muted" id="dd-count-comments">(…)</span></span></label>
                             <label class="checkbox-row" style="display:flex;align-items:center;gap:.5rem;margin:.25rem 0;"><input type="checkbox" id="dd-reactions" onchange="syncDeleteDataSelectAll()"><span>Reactions <span class="muted" id="dd-count-reactions">(…)</span></span></label>
-                            <label class="checkbox-row" style="display:flex;align-items:center;gap:.5rem;margin:.25rem 0;"><input type="checkbox" id="dd-subscriptions" onchange="syncDeleteDataSelectAll()"><span>Subscriptions <span class="muted" id="dd-count-subscriptions">(…)</span></span></label>
                         </div>
                         <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--gray,#dee2e6);">
                             <label style="display:flex;align-items:flex-start;gap:.5rem;"><input type="checkbox" id="dd-confirm"><span>I understand this action is permanent and want to delete the selected data.</span></label>
@@ -1643,7 +1521,6 @@ VIEWS['settings-database'] = {
                     <div class="db-stat-item"><div class="num">${cs.pending ?? 0}</div><div class="lbl">Pending</div></div>
                     <div class="db-stat-item"><div class="num">${cs.spam ?? 0}</div><div class="lbl">Spam</div></div>
                     <div class="db-stat-item"><div class="num">${t.votes ?? 0}</div><div class="lbl">Votes</div></div>
-                    <div class="db-stat-item"><div class="num">${t.subscriptions ?? 0}</div><div class="lbl">Subscriptions</div></div>
                     <div class="db-stat-item"><div class="num">${formatBytes(d.db_size_bytes)}</div><div class="lbl">DB Size</div></div>
                 </div>`;
                 const spamCount = cs.spam ?? 0;
@@ -1682,7 +1559,7 @@ VIEWS['settings-database'] = {
             if (!m) return;
             m.style.display = 'flex';
             document.getElementById('dd-select-all').checked = false;
-            ['comments','reactions','subscriptions','confirm'].forEach(k => { const el = document.getElementById('dd-'+k); if (el) el.checked = false; });
+            ['comments','reactions','confirm'].forEach(k => { const el = document.getElementById('dd-'+k); if (el) el.checked = false; });
             document.getElementById('dd-message').innerHTML = '';
             document.getElementById('dd-delete-btn').disabled = true;
             syncDeleteDataSelectAll();
@@ -1693,7 +1570,6 @@ VIEWS['settings-database'] = {
                     if (d.tables) {
                         const c = document.getElementById('dd-count-comments'); if (c) c.textContent = `(${d.tables.comments ?? 0})`;
                         const r = document.getElementById('dd-count-reactions'); if (r) r.textContent = `(${(d.tables.reactions ?? 0) + (d.tables.post_reactions ?? 0)})`;
-                        const s = document.getElementById('dd-count-subscriptions'); if (s) s.textContent = `(${d.tables.subscriptions ?? 0})`;
                     }
                 }).catch(()=>{});
         }
@@ -1705,7 +1581,7 @@ VIEWS['settings-database'] = {
 
         function toggleDeleteDataSelectAll() {
             const allChecked = document.getElementById('dd-select-all').checked;
-            ['comments','reactions','subscriptions'].forEach(k => {
+            ['comments','reactions'].forEach(k => {
                 const el = document.getElementById('dd-'+k);
                 if (el) el.checked = allChecked;
             });
@@ -1716,8 +1592,7 @@ VIEWS['settings-database'] = {
             const all = document.getElementById('dd-select-all');
             const c = document.getElementById('dd-comments').checked;
             const r = document.getElementById('dd-reactions').checked;
-            const s = document.getElementById('dd-subscriptions').checked;
-            if (all) all.checked = (c && r && s);
+            if (all) all.checked = (c && r);
             updateDeleteDataBtn();
         }
 
@@ -1725,11 +1600,11 @@ VIEWS['settings-database'] = {
             const btn = document.getElementById('dd-delete-btn');
             const conf = document.getElementById('dd-confirm');
             if (!btn || !conf) return;
-            const anyChecked = ['comments','reactions','subscriptions'].some(k => document.getElementById('dd-'+k)?.checked);
+            const anyChecked = ['comments','reactions'].some(k => document.getElementById('dd-'+k)?.checked);
             btn.disabled = !(anyChecked && conf.checked);
             if (conf) {
                 conf.onchange = () => {
-                    const anyCheckedNow = ['comments','reactions','subscriptions'].some(k => document.getElementById('dd-'+k)?.checked);
+                    const anyCheckedNow = ['comments','reactions'].some(k => document.getElementById('dd-'+k)?.checked);
                     btn.disabled = !(anyCheckedNow && conf.checked);
                 };
             }
@@ -1744,7 +1619,6 @@ VIEWS['settings-database'] = {
                 csrf_token: AdminAuth.getCsrfToken(),
                 delete_comments: document.getElementById('dd-comments').checked,
                 delete_reactions: document.getElementById('dd-reactions').checked,
-                delete_subscriptions: document.getElementById('dd-subscriptions').checked
             };
 
             btn.disabled = true;
@@ -1760,7 +1634,6 @@ VIEWS['settings-database'] = {
                     const parts = [];
                     if (d.deleted?.comments !== undefined) parts.push(`${d.deleted.comments} comment(s)`);
                     if (d.deleted?.reactions !== undefined) parts.push(`${d.deleted.reactions} reaction(s)`);
-                    if (d.deleted?.subscriptions !== undefined) parts.push(`${d.deleted.subscriptions} subscription(s)`);
 
                     const resStr = parts.length > 0 ? parts.join(', ') : 'no data';
                     msgEl.innerHTML = `<div class="message success">Successfully deleted ${resStr}. Vacuuming database...</div>`;
@@ -1818,31 +1691,11 @@ VIEWS['settings-notifications'] = {
         .toggle-slider:before { position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px; background-color:white; border-radius:50%; transition:.3s; }
         input:checked+.toggle-slider { background-color:#4a90e2; }
         input:checked+.toggle-slider:before { transform:translateX(20px); }
-        .email-test-row { display:flex; flex-wrap:wrap; gap:.75rem; }
-        .email-test-row input { flex:1 1 200px; }
     `,
     html: () => `
         <div class="container">
             <h2 style="margin-bottom: 1.5rem;">Notification</h2>
             <div class="util-card">
-                <div class="util-card-header"><span class="icon">🔔</span><h2>Notifications</h2></div>
-                <div class="util-card-body">
-                    <div id="settings-message"></div>
-                    <div class="setting-row">
-                        <div class="setting-label"><strong>Email Notifications</strong><span>Send email alerts for new comments</span></div>
-                        <label class="toggle-switch"><input type="checkbox" id="setting-enable-notifications"><span class="toggle-slider"></span></label>
-                    </div>
-                    <div class="setting-row">
-                        <div class="setting-label"><strong>Admin Email</strong><span>Receives new comment notifications</span></div>
-                        <div style="display:flex;gap:.5rem;flex:1 1 250px;">
-                            <input type="email" id="setting-admin-email" class="themed-control" placeholder="admin@example.com" style="flex:1;">
-                            <button class="btn btn-primary btn-sm" onclick="saveSettings()">Save</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="util-card" style="margin-top: 1.5rem;">
                 <div class="util-card-header"><span class="icon">✈️</span><h2>Telegram Notifications</h2></div>
                 <div class="util-card-body">
                     <p>Get notified in Telegram when new comments are submitted. Configure the bot token and chat ID using <code style="background:var(--gray,#f0f0f0);padding:.15rem .4rem;border-radius:3px;font-size:.88rem;">npm run telegram</code>.</p>
@@ -1853,35 +1706,9 @@ VIEWS['settings-notifications'] = {
                     </div>
                 </div>
             </div>
-
-            <div class="util-card" style="margin-top: 1.5rem;">
-                <div class="util-card-header"><span class="icon">✉️</span><h2>Test Email</h2></div>
-                <div class="util-card-body">
-                    <p>Send a test email to verify your server's mail configuration.</p>
-                    <div class="form-group">
-                        <label for="test-email-addr">Send test email to</label>
-                        <div class="email-test-row">
-                            <input type="email" id="test-email-addr" class="themed-control" placeholder="you@example.com">
-                            <button class="btn btn-primary btn-sm" onclick="sendTestEmail()">Send</button>
-                        </div>
-                    </div>
-                    <div id="email-message"></div>
-                </div>
-            </div>
         </div>
     `,
     init({ hoistToWindow }) {
-        async function loadSettings() {
-            try {
-                const r = await fetch(`${API_URL}?action=get_settings`, { credentials: 'include' });
-                const d = await r.json();
-                if (!r.ok) return;
-                const s = d.settings;
-                document.getElementById('setting-enable-notifications').checked = (s.enable_notifications === 'true');
-                document.getElementById('setting-admin-email').value            = s.admin_email || '';
-            } catch (e) { console.error('Settings load failed', e); }
-        }
-
         async function loadTelegramStatus() {
             try {
                 const r = await fetch(`${API_URL}?action=telegram_status`, { credentials: 'include' });
@@ -1920,56 +1747,9 @@ VIEWS['settings-notifications'] = {
             }
         }
 
-        document.getElementById('setting-enable-notifications')?.addEventListener('change', saveSettings);
         document.getElementById('setting-telegram-enabled')?.addEventListener('change', toggleTelegram);
 
-        async function saveSettings() {
-            const msgEl = document.getElementById('settings-message');
-            await AdminAuth.ensureCsrfToken();
-            try {
-                const g = await fetch(`${API_URL}?action=get_settings`, { credentials: 'include' });
-                const current = (await g.json()).settings || {};
-
-                const payload = {
-                    csrf_token:           AdminAuth.getCsrfToken(),
-                    require_moderation:   current.require_moderation || 'false',
-                    enable_notifications: document.getElementById('setting-enable-notifications').checked ? 'true' : 'false',
-                    admin_email:          document.getElementById('setting-admin-email').value.trim(),
-                    comment_sort_order:   current.comment_sort_order || 'desc',
-                };
-
-                const r = await fetch(`${API_URL}?action=save_settings`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', body: JSON.stringify(payload),
-                });
-                const d = await r.json();
-                if (r.ok) {
-                    msgEl.innerHTML = '<div class="message success">Settings saved.</div>';
-                    setTimeout(() => { if (msgEl) msgEl.innerHTML = ''; }, 2500);
-                } else { msgEl.innerHTML = `<div class="message error">${d.error}</div>`; }
-            } catch (e) { msgEl.innerHTML = '<div class="message error">Network error</div>'; }
-        }
-
-        async function sendTestEmail() {
-            const addr = document.getElementById('test-email-addr')?.value.trim();
-            const msgEl = document.getElementById('email-message');
-            if(!addr) { if(msgEl) msgEl.innerHTML = '<div class="message error">Enter an email address.</div>'; return; }
-            await AdminAuth.ensureCsrfToken();
-            if(msgEl) msgEl.innerHTML = '<div class="message info">Sending…</div>';
-            try {
-                const r = await fetch(`${API_URL}?action=test_email`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ csrf_token: AdminAuth.getCsrfToken(), email: addr, page_url: '/' })
-                });
-                const d = await r.json();
-                if(r.ok) { if(msgEl) msgEl.innerHTML = `<div class="message success">${d.message}</div>`; }
-                else { if(msgEl) msgEl.innerHTML = `<div class="message error">${d.error}</div>`; }
-            } catch(e) { if(msgEl) msgEl.innerHTML = '<div class="message error">Network error</div>'; }
-        }
-
-        hoistToWindow({ saveSettings, sendTestEmail, toggleTelegram });
-        loadSettings();
+        hoistToWindow({ toggleTelegram });
         loadTelegramStatus();
     }
 };
@@ -2007,7 +1787,7 @@ VIEWS['settings-import-export'] = {
                 <div class="util-card-header"><span class="icon">📤</span><h2>Export Comments</h2></div>
                 <div class="util-card-body">
                     <div class="export-row">
-                        <div class="export-info"><strong>Full Backup JSON</strong><span>Complete backup: comments, post reactions, comment reactions, subscriptions, IP addresses, and metadata</span></div>
+                        <div class="export-info"><strong>Full Backup JSON</strong><span>Complete backup: comments, post reactions, comment reactions, IP addresses, and metadata</span></div>
                         <a href="/api?action=export_comments_json" class="btn btn-success btn-sm">Download JSON</a>
                     </div>
                     <div style="margin-top:1rem;"><div id="export-message"></div></div>
@@ -2017,7 +1797,7 @@ VIEWS['settings-import-export'] = {
             <div class="util-card" style="margin-top: 1.5rem;">
                 <div class="util-card-header"><span class="icon">📥</span><h2>Import Comments</h2></div>
                 <div class="util-card-body">
-                    <p>Import from a full backup JSON or a legacy JSON array of comments. Full backups restore comments, post reactions, comment reactions, subscriptions, and metadata. Duplicate records are skipped automatically.</p>
+                    <p>Import from a full backup JSON or a legacy JSON array of comments. Full backups restore comments, post reactions, comment reactions, and metadata. Duplicate records are skipped automatically.</p>
                     <div class="file-drop" id="file-drop" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
                         <input type="file" id="import-file" accept=".json" onchange="handleFileSelect(event)">
                         <div class="drop-icon">📂</div>
@@ -2092,7 +1872,6 @@ VIEWS['settings-import-export'] = {
                                     <tr><td>Comments</td><td>${d.comments ?? 0}</td></tr>
                                     <tr><td>Comment reactions</td><td>${d.comment_reactions ?? 0}</td></tr>
                                     <tr><td>Post reactions</td><td>${d.post_reactions ?? 0}</td></tr>
-                                    <tr><td>Subscriptions</td><td>${d.subscriptions ?? 0}</td></tr>
                                 </tbody>
                             </table>
                             <div style="margin-top:.75rem;font-size:.85rem;color:#666;">Note: Duplicate records will be automatically skipped during import.</div>
@@ -2124,8 +1903,7 @@ VIEWS['settings-import-export'] = {
                     if((d.imported_comments ?? 0) > 0) parts.push(`${d.imported_comments} comment${d.imported_comments !== 1 ? 's' : ''}`);
                     if((d.imported_comment_reactions ?? 0) > 0) parts.push(`${d.imported_comment_reactions} comment reaction${d.imported_comment_reactions !== 1 ? 's' : ''}`);
                     if((d.imported_post_reactions ?? 0) > 0) parts.push(`${d.imported_post_reactions} post reaction${d.imported_post_reactions !== 1 ? 's' : ''}`);
-                    if((d.imported_subscriptions ?? 0) > 0) parts.push(`${d.imported_subscriptions} subscription${d.imported_subscriptions !== 1 ? 's' : ''}`);
-                    const skipped = (d.skipped_comments ?? 0) + (d.skipped_comment_reactions ?? 0) + (d.skipped_post_reactions ?? 0) + (d.skipped_subscriptions ?? 0);
+                    const skipped = (d.skipped_comments ?? 0) + (d.skipped_comment_reactions ?? 0) + (d.skipped_post_reactions ?? 0);
                     const dupNote = skipped > 0 ? ` (${skipped} duplicate${skipped !== 1 ? 's' : ''} skipped)` : '';
                     if(msgEl) msgEl.innerHTML = `<div class="message success">Imported ${parts.length ? parts.join(', ') : 'no new items'}${dupNote}.</div>`;
                     const iprev = document.getElementById('import-preview'); if(iprev) iprev.style.display = 'none';

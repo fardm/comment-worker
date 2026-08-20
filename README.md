@@ -15,7 +15,6 @@ I made several modifications to improve compatibility and usability for Quartz w
 - 🛠️ Admin panel for viewing and managing comments
 - 📦 Data import and export support
 - 🛡️ Spam protection and moderation system
-- 📧 Email notifications for new comments (requires configuration)
 
 <br>
 
@@ -108,7 +107,6 @@ After deployment or when making changes, test the key features to ensure they fu
 - **Recent Comments**: Post a new comment and check the "Recent Comments" widget (if embedded on the sidebar). It should show a brief excerpt of your comment.
 - **Vacuum DB**: Go to "Settings -> Database" in the Admin panel and click "Optimize (VACUUM)". You should see a success message that the database size was optimized.
 - **Export JSON**: Go to "Settings -> Import & Export" in the Admin panel and click "Download JSON". Ensure a `.json` file downloads automatically to your computer rather than displaying in the browser tab.
-- **Unsubscribe & Delete Subscription**: Navigate to "Subscriptions" in the Admin panel. Click "Unsubscribe" to toggle the active status of an email, and click "Delete" to ensure the subscription is removed from the database completely.
 - **Import Comments**: In "Settings -> Import & Export", drop a `.json` or `.xml` export file. Click "Preview" to see the data, then "Import" to populate the database with the comments.
 
 ## Telegram Notifications

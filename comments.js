@@ -483,12 +483,6 @@ class CommentSystem {
                 </div>
                 <div class="form-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" name="subscribe" value="1">
-                        <span>${this.escapeHtml(this.t('form.subscribe'))}</span>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label class="checkbox-label">
                         <input type="checkbox" name="remember_me" value="1" ${savedInfo.remember ? 'checked' : ''}>
                         <span>${this.escapeHtml(this.t('form.remember'))}</span>
                     </label>
@@ -532,7 +526,6 @@ class CommentSystem {
             author_email: authorEmail,
             author_url: authorUrl,
             content: formData.get('content'),
-            subscribe: formData.get('subscribe') ? true : false
         };
 
         try {

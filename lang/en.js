@@ -27,7 +27,6 @@ window.COMMENTS_I18N = {
         email: 'Email * (will not be published)',
         website: 'Website',
         content: 'Message *',
-        subscribe: 'Email me follow-up comments on this page.',
         remember: 'Remember my details for next time.',
         submit: 'Submit',
         cancel: 'Cancel',

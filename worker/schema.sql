@@ -44,45 +44,8 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
     ('require_moderation', 'true'),
     ('allow_guest_comments', 'true'),
     ('max_comment_length', '5000'),
-    ('enable_notifications', 'false'),
-    ('admin_email', ''),
     ('telegram_enabled', 'false'),
     ('telegram_chat_id', '');
-
--- Subscriptions table for email notifications
-CREATE TABLE IF NOT EXISTS subscriptions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    page_url TEXT NOT NULL,
-    email TEXT NOT NULL,
-    token TEXT UNIQUE NOT NULL,
-    subscribed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    active INTEGER DEFAULT 1,
-    UNIQUE(page_url, email)
-);
-
-CREATE INDEX IF NOT EXISTS idx_sub_page_url ON subscriptions(page_url);
-CREATE INDEX IF NOT EXISTS idx_sub_email ON subscriptions(email);
-CREATE INDEX IF NOT EXISTS idx_sub_token ON subscriptions(token);
-
--- Email queue for asynchronous email delivery
-CREATE TABLE IF NOT EXISTS email_queue (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    comment_id INTEGER,
-    recipient_email TEXT NOT NULL,
-    recipient_name TEXT,
-    email_type TEXT NOT NULL, -- 'parent_reply', 'subscriber', 'admin'
-    subject TEXT NOT NULL,
-    body TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    sent_at DATETIME,
-    status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'sent', 'failed')),
-    attempts INTEGER DEFAULT 0,
-    last_error TEXT,
-    FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE
-);
-
-CREATE INDEX IF NOT EXISTS idx_email_queue_status ON email_queue(status, created_at);
-CREATE INDEX IF NOT EXISTS idx_email_queue_comment ON email_queue(comment_id);
 
 -- Login attempts tracking for brute force protection
 CREATE TABLE IF NOT EXISTS login_attempts (

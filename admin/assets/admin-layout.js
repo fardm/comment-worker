@@ -20,7 +20,6 @@
     var NAV_ITEMS = [
         ['pending',        'admin.html',                'Pending'],
         ['all',            'admin-all.html',            'All Comments'],
-        ['subscriptions',  'admin-subscriptions.html',  'Subscriptions'],
         ['post-reactions', 'admin-post-reactions.html', 'Post Reactions'],
         ['analytics',      'admin-analytics.html',      'Analytics'],
 

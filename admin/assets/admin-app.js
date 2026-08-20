@@ -1112,7 +1112,8 @@ VIEWS['post-reactions'] = {
         <div class="container">
             <div class="section-card" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
                 <div style="font-weight: 600; font-size: 1.1rem;">
-                    Total Reactions: <span id="stat-total-all" style="color: var(--primary);">0</span>
+                    <span>Total Reactions: <span id="stat-total-all" style="color: var(--primary);">0</span></span>
+                    
                 </div>
                 <div id="stats" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: space-between;">
                     <div class="reaction-badge" id="stat-heart">❤️ 0</div>

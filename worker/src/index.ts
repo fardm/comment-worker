@@ -107,19 +107,22 @@ const handler = async (c: any) => {
           const ctx = c.executionCtx as any
           if (ctx && typeof ctx.waitUntil === 'function') {
             console.log('[Telegram] Sending notification via waitUntil...')
-            ctx.waitUntil(
-              telegram
-                .sendCommentNotification(
+            ctx.waitUntil((async () => {
+              try {
+                const adminUrl = c.env.APP_URL ? `${c.env.APP_URL}/admin/index.html` : undefined;
+                const ok = await telegram.sendCommentNotification(
                   botToken,
                   telegramSettings.telegram_chat_id,
                   body.page_url || body.url || '',
                   body.author_name || 'Anonymous',
                   body.content || '',
-                  `${c.env.APP_URL}/admin/index.html`,
+                  adminUrl,
                 )
-                .then((ok) => console.log(`[Telegram] Notification result: ${ok}`))
-                .catch((e) => console.error('[Telegram] Background notification failed:', e))
-            )
+                console.log(`[Telegram] Notification result: ${ok}`)
+              } catch (e) {
+                console.error('[Telegram] Background notification failed:', e)
+              }
+            })())
           } else {
             console.error('[Telegram] executionCtx.waitUntil not available')
           }

@@ -12,7 +12,6 @@ import { TelegramService } from './telegram'
 type Bindings = {
   DB: D1Database
   ALLOWED_ORIGINS: string
-  APP_URL: string
   ADMIN_PASSWORD_HASH?: string
   TELEGRAM_BOT_TOKEN?: string
 }
@@ -100,14 +99,12 @@ const handler = async (c: any) => {
             console.log('[Telegram] Sending notification via waitUntil...')
             ctx.waitUntil((async () => {
               try {
-                const adminUrl = c.env.APP_URL ? `${c.env.APP_URL}/admin/index.html` : undefined;
                 const ok = await telegram.sendCommentNotification(
                   botToken,
                   telegramSettings.telegram_chat_id,
                   body.page_url || body.url || '',
                   body.author_name || 'Anonymous',
                   body.content || '',
-                  adminUrl,
                 )
                 console.log(`[Telegram] Notification result: ${ok}`)
               } catch (e) {
@@ -331,7 +328,6 @@ const handler = async (c: any) => {
       }
       return c.json({
         ...config,
-        app_url: config.app_url || c.env.APP_URL || '',
         allowed_origins
       })
     }

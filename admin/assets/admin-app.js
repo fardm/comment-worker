@@ -1272,10 +1272,6 @@ VIEWS['settings-configuration'] = {
                 <div class="util-card-header"><span class="icon">⚙️</span><h2>System Configuration</h2></div>
                 <div class="util-card-body">
                     <div class="setting-row">
-                        <div class="setting-label"><strong>Application URL</strong><span>The URL where this comment system is installed (no trailing slash)</span></div>
-                        <input type="text" id="config-app-url" class="themed-control">
-                    </div>
-                    <div class="setting-row">
                         <div class="setting-label"><strong>Allowed Origins</strong><span>Comma-separated list of domains allowed to embed comments (CORS)</span></div>
                         <input type="text" id="config-allowed-origins" class="themed-control" placeholder="https://example.com">
                     </div>
@@ -1343,7 +1339,6 @@ VIEWS['settings-configuration'] = {
                 const r = await fetch(`${API_URL}?action=get_config`, { credentials: 'include' });
                 const d = await r.json();
                 if (r.ok) {
-                    document.getElementById('config-app-url').value = d.app_url || '';
                     document.getElementById('config-allowed-origins').value = Array.isArray(d.allowed_origins) ? d.allowed_origins.join(', ') : '';
                     document.getElementById('config-timezone').value = d.timezone || 'UTC';
                     document.getElementById('config-language').value = d.app_language || 'en';
@@ -1369,7 +1364,6 @@ VIEWS['settings-configuration'] = {
             const msgEl = document.getElementById('settings-message');
 
             // System Config
-            const appUrl = document.getElementById('config-app-url').value.trim();
             const allowedOrigins = document.getElementById('config-allowed-origins').value.split(',').map(s => s.trim()).filter(s => s);
             const timezone = document.getElementById('config-timezone').value;
             const language = document.getElementById('config-language').value;
@@ -1380,10 +1374,6 @@ VIEWS['settings-configuration'] = {
             const adminEmail = document.getElementById('config-admin-email').value.trim();
             const adminUrl = document.getElementById('config-admin-url').value.trim();
 
-            if (!appUrl) {
-                if (msgEl) msgEl.innerHTML = '<div class="message error">Application URL is required</div>';
-                return;
-            }
             if (!allowedOrigins.length) {
                 if (msgEl) msgEl.innerHTML = '<div class="message error">At least one allowed origin is required</div>';
                 return;
@@ -1420,7 +1410,6 @@ VIEWS['settings-configuration'] = {
                     credentials: 'include',
                     body: JSON.stringify({
                         csrf_token: AdminAuth.getCsrfToken(),
-                        app_url: appUrl,
                         allowed_origins: allowedOrigins,
                         timezone: timezone,
                         app_language: language,

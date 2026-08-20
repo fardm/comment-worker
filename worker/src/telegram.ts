@@ -47,14 +47,12 @@ export class TelegramService {
 
   /**
    * Send a Telegram message to the configured chat.
-   * Uses inline keyboard with "Open Admin" button.
    * Never throws — errors are silently logged.
    */
   async sendMessage(
     botToken: string,
     chatId: string,
     text: string,
-    adminUrl?: string,
   ): Promise<boolean> {
     if (!botToken || !chatId) return false;
 
@@ -64,11 +62,6 @@ export class TelegramService {
       parse_mode: 'HTML',
       disable_web_page_preview: true,
     };
-    if (adminUrl) {
-      body.reply_markup = {
-        inline_keyboard: [[{ text: '⚙️ Open Admin', url: adminUrl }]],
-      };
-    }
 
     try {
       const response = await fetch(
@@ -101,7 +94,6 @@ export class TelegramService {
     postTitle: string,
     authorName: string,
     content: string,
-    adminUrl?: string,
   ): Promise<boolean> {
     const message =
       `🔗 ${postTitle}\n` +
@@ -109,7 +101,7 @@ export class TelegramService {
       `\n` +
       `\n` +
       `💬 ${content}`;
-    return this.sendMessage(botToken, chatId, message, adminUrl);
+    return this.sendMessage(botToken, chatId, message);
   }
 
   /**
@@ -118,14 +110,13 @@ export class TelegramService {
   async sendTestNotification(
     botToken: string,
     chatId: string,
-    adminUrl?: string,
   ): Promise<boolean> {
     const message =
       '✅ <b>Telegram integration test</b>\n\n' +
       'Your Telegram notifications are working correctly!\n\n' +
       'You will receive notifications for new comments here.';
 
-    return this.sendMessage(botToken, chatId, message, adminUrl);
+    return this.sendMessage(botToken, chatId, message);
   }
 
   /**

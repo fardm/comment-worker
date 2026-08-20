@@ -58,17 +58,6 @@ function getDbName() {
   return match ? match[1] : 'comments-db';
 }
 
-function getProductionUrl() {
-  const toml = fs.readFileSync(WRANGLER_TOML, 'utf-8');
-  const match = toml.match(/APP_URL\s*=\s*"([^"]+)"/);
-  return match ? match[1] : '';
-}
-
-function getAdminUrl() {
-  const base = getProductionUrl();
-  return base ? `${base}/admin/index.html` : '';
-}
-
 function getSetting(dbName, key) {
   const result = run(`npx wrangler d1 execute "${dbName}" --remote --command="SELECT value FROM settings WHERE key='${key}'" --json`);
   if (result) {
@@ -261,7 +250,7 @@ async function sendTest() {
         chat_id: chatId,
         text: '✅ <b>Telegram integration test</b>\n\nYour Telegram notifications are working correctly!\n\nYou will receive notifications for new comments here.',
         parse_mode: 'HTML',
-        ...(getAdminUrl() ? { reply_markup: JSON.stringify({ inline_keyboard: [[{ text: '⚙️ Open Admin', url: getAdminUrl() }]] }) } : {}),
+
       }),
     });
     if (response.ok) {

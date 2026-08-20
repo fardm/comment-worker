@@ -13,4 +13,3 @@ binding = "ASSETS"
 
 [vars]
 ALLOWED_ORIGINS = "*"
-APP_URL = "https://standalone-comments-server.nova-3bc190.workers.dev"
